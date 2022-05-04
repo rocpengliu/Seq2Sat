@@ -514,10 +514,11 @@ void Options::parseSampleTable(){
         s.prefix = trimStr(spltVec[0]);
         s.path = dirname(s.prefix);
         s.in1 = trimStr(spltVec[1]);
-        if(spltVec.size() == 2){
-            
-        } else if(spltVec.size() == 3){
+        if(spltVec.size() == 3){
+            s.feature = trimStr(spltVec[2]);
+        } else if(spltVec.size() == 4){
             s.in2 = trimStr(spltVec[2]);
+            s.feature = trimStr(spltVec[3]);
         } else {
             error_exit("sample table must be 2 columns with sample name, forward reads or 3 columns with sample name, forward reads, reverse reads");
         }
