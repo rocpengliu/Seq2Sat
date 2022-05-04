@@ -23,7 +23,8 @@ inline void loginfo(const string s){
     time_t tt = time(NULL);
     tm* t= localtime(&tt);
     //cerr<<"["<<t->tm_hour<<":"<<t->tm_min<<":"<<t->tm_sec<<"] "<<s<<endl;
-    fprintf(stderr, "[\033[1;35m%02d:%02d:%02d\033[0m] %s\n", t->tm_hour, t->tm_min, t->tm_sec, s.c_str());
+    //fprintf(stderr, "[\033[1;35m%02d:%02d:%02d\033[0m] %s\n", t->tm_hour, t->tm_min, t->tm_sec, s.c_str());
+    fprintf(stderr, "[%02d:%02d:%02d %s\n", t->tm_hour, t->tm_min, t->tm_sec, s.c_str());
     logmtx.unlock();
 }
 
