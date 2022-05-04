@@ -336,7 +336,6 @@ int main(int argc, char* argv[]){
     command = ss.str();
     bool supportEvaluation = !opt->inputFromSTDIN && opt->in1!="/dev/stdin";
     time_t t1 = time(NULL);
-    opt->readLocFile();
     opt->sampleTable = cmd.get<string>("sampleTable");
     if (opt->sampleTable.empty()) {
         opt->in1 = cmd.get<string>("in1");
@@ -347,6 +346,8 @@ int main(int argc, char* argv[]){
         opt->jsonFile = cmd.get<string>("json");
         opt->htmlFile = cmd.get<string>("html");
         opt->reportTitle = cmd.get<string>("report_title");
+        
+        opt->readLocFile();
         
         Evaluator eva(opt);
         if (supportEvaluation) {
@@ -394,7 +395,7 @@ int main(int argc, char* argv[]){
         }
 
         opt->validate();
-
+        if(opt->debug) cCout(opt->prefix + " " + opt->in1 + " " + opt->in2);
         // using evaluator to check if it's two color system
         if (!cmd.exist("disable_trim_poly_g") && supportEvaluation) {
             bool twoColorSystem = eva.isTwoColorSystem();
@@ -420,12 +421,14 @@ int main(int argc, char* argv[]){
             opt->prefix = it.prefix;
             opt->in1 = it.in1;
             opt->in2 = it.in2;
-            opt->out1 = it.prefix + "_R1.fastq.gz";
-            opt->out2 = it.prefix + "_R2.fastq.gz";
+            //opt->out1 = it.prefix + "_R1.fastq.gz";
+           // opt->out2 = it.prefix + "_R2.fastq.gz";
             opt->jsonFile = it.prefix + ".json";
             opt->htmlFile = it.prefix + ".html";
             opt->reportTitle = it.prefix;
             if(opt->verbose) loginfo("Processing sample: " + basename(opt->prefix));
+            opt->readLocFile();
+            
             Evaluator eva(opt);
             if (supportEvaluation) {
                 eva.evaluateSeqLen();
@@ -473,6 +476,7 @@ int main(int argc, char* argv[]){
 
             opt->validate();
 
+            if(opt->debug) cCout(opt->prefix + " " + opt->in1 + " " + opt->in2);
             // using evaluator to check if it's two color system
             if (!cmd.exist("disable_trim_poly_g") && supportEvaluation) {
                 bool twoColorSystem = eva.isTwoColorSystem();
@@ -483,7 +487,7 @@ int main(int argc, char* argv[]){
 
             Processor p(opt);
             p.process();
-
+            
             time_t t3 = time(NULL);
 
             cerr << endl << "JSON report: " << opt->jsonFile << endl;
@@ -492,8 +496,8 @@ int main(int argc, char* argv[]){
             cerr << "seq2sat v" << SEQ2SAT_VER << ", time used: " << (t3) - t2 << " seconds" << endl;
         }
 
-        HtmlReporterAll hra(opt);
-        hra.report();
+        //HtmlReporterAll hra(opt);
+        //hra.report();
     }
     
     if(opt){

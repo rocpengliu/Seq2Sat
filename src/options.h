@@ -343,6 +343,7 @@ public:
     int numRawReads;
     int numCleanReads;
     std::vector<std::map <std::string, std::vector<std::pair<std::string, Genotype>>>> sortedAllGenotypeMapVec;
+    //void reset(){sortedAllGenotypeMapVec.clear();};
 };
 
 class Options{

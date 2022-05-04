@@ -522,6 +522,7 @@ void Options::parseSampleTable(){
         } else {
             error_exit("sample table must be 2 columns with sample name, forward reads or 3 columns with sample name, forward reads, reverse reads");
         }
+        if(debug) cCout("reading meta: " + s.prefix, 'g');
         this->samples.push_back(s);
     }
     infile.close();

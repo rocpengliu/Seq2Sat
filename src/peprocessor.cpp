@@ -40,9 +40,13 @@ void PairEndProcessor::initOutput() {
     if(mOptions->out1.empty())
         return;
     
-    mLeftWriter = new WriterThread(mOptions, mOptions->out1);
-    if(!mOptions->out2.empty())
+    if (!mOptions->out1.empty()) {
+        mLeftWriter = new WriterThread(mOptions, mOptions->out1);
+    }
+    
+    if(!mOptions->out2.empty()){
         mRightWriter = new WriterThread(mOptions, mOptions->out2);
+    }
 }
 
 void PairEndProcessor::closeOutput() {
@@ -155,7 +159,7 @@ bool PairEndProcessor::process(){
          if(!mOptions->samples.empty()){
              for(auto & it : mOptions->samples){
                  if(it.prefix == mOptions->prefix){
-                     it.sortedAllGenotypeMapVec = sortedAllGenotypeMapVec;
+                     //it.sortedAllGenotypeMapVec = sortedAllGenotypeMapVec;
                      break;
                  }
              }
@@ -245,6 +249,7 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
     string singleOutput;
     int readPassed = 0;
     int mergedCount = 0;
+    //if(mOptions->debug) cCout("starting consuming reads pack");
     for(int p=0;p<pack->count;p++){
         ReadPair* pair = pack->data[p];
         Read* or1 = pair->mLeft;
@@ -343,7 +348,7 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                         if (mOptions->mVarType == ssr) {
                             //cCout("777777777777777777", 'r');
                             config->getSsrScanner()->scanVar(merged);
-                           // cCout("888888888888888", 'r');
+                            //cCout("888888888888888", 'r');
                         } else {
                             config->getSnpScanner()->scanVar(merged);
                         }
@@ -384,6 +389,8 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
             delete r2;
     }
 
+    //if(mOptions->debug) cCout("consuming reads pack end");
+    
     // normal output by left/right writer thread
     if(mRightWriter && mLeftWriter && (!outstr1.empty() || !outstr2.empty())) {
         // write PE
@@ -461,15 +468,7 @@ void PairEndProcessor::consumePack(ThreadConfig* config){
     }
     data = mRepo.packBuffer[mRepo.readPos];
     mRepo.readPos++;
-
-    /*if (mRepo.readPos >= PACK_NUM_LIMIT)
-        mRepo.readPos = 0;*/
     mInputMtx.unlock();
-    //mRepo.readPos++;
-
-    //lock.unlock();
-    //mRepo.repoNotFull.notify_all();
-
     processPairEnd(data, config);
 
 }
@@ -486,7 +485,9 @@ void PairEndProcessor::producerTask(){
     FastqReaderPair reader(mOptions->in1, mOptions->in2, true, mOptions->phred64, mOptions->interleavedInput);
     int count=0;
     bool needToBreak = false;
+    //if(mOptions->debug) cCout("start to read data: " + mOptions->in1 + " and " + mOptions->in2);
     while(true){
+        //if(mOptions->debug) cCout("reading data 1");
         ReadPair* read = reader.read();
         // TODO: put needToBreak here is just a WAR for resolve some unidentified dead lock issue 
         if(!read || needToBreak){

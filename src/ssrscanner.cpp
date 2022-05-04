@@ -1372,16 +1372,13 @@ bool SsrScanner::scanVar(Read* & r1) {
                         tmpGenotype.numReads++;
                         itGenotypeMap->second[r1->mSeq.mStr] = tmpGenotype;
                     }
-
                     if (mOptions->mLocVars.locVarOptions.printRes) {
                         //cCout(ss.str(), 'y');
                     }
                 }
-
             } else {
                 tmpGenotypeMapIT->second.numReads++;
             }
-
         }
     }
     ss.str();
