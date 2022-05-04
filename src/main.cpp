@@ -426,7 +426,7 @@ int main(int argc, char* argv[]){
             opt->jsonFile = it.prefix + ".json";
             opt->htmlFile = it.prefix + ".html";
             opt->reportTitle = it.prefix;
-            if(opt->verbose) loginfo("Processing sample: " + basename(opt->prefix));
+            if(opt->verbose) cCout("Processing sample: " + basename(opt->prefix));
             opt->readLocFile();
             
             Evaluator eva(opt);
