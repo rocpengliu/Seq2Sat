@@ -437,10 +437,8 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
     printHeader(ofs);
 
     ofs << "<h1 style='text-align:left;'><a href='https://github.com/seq2sat' target='_blank' style='color:#009900;text-decoration:none;'>Seq2Sat Report</a </h1>"<<endl;
-    //string intro = "Created by <a href='https://github.com/OpenGene/fastv' style='color:#1F77B4'>fastv</a> v" + string(FASTV_VER)+ ", " + " an ultra-fast tool for fast identification of SARS-CoV-2 and other microbes from sequencing data";
     ofs << "<div style='font-size:12px;font-weight:normal;text-align:left;color:#666666;padding:5px;'>" << "Sample: " << basename(mOptions->prefix) << "</div>" << endl;
 
-    
     ofs << "<div class='section_div'>\n";
     ofs << "<div class='section_title' onclick=showOrHide('genotype')><a name='genotype'>All genotypes <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
     ofs << "<div id='genotype'  style='display:none'>\n";
@@ -886,7 +884,7 @@ void HtmlReporter::printCSS(ofstream& ofs){
     //ofs << "td {border:1px solid #dddddd;padding:5px;font-size:12px;}" << endl;
     ofs << "td {border:1px; solid #dddddd;padding:5px;font-size:12px; width:1px; white-space:nowrap; border:1px solid gray;}" << endl;
     //ofs << "table {border:1px solid #999999;padding:2x;border-collapse:collapse; width:800px;}" << endl;
-    ofs << "table {border:1px solid #999999;padding:2x;border-collapse:collapse; table-layout:auto; border:1px solid gray;}" << endl;
+    ofs << "table {border:1px solid #999999;padding:2px;border-collapse:collapse; table-layout:auto; border:1px solid gray;}" << endl;
     ofs << ".col1 {width:320px; font-weight:bold;}" << endl;
     ofs << ".adapter_col {width:500px; font-size:10px;}" << endl;
     ofs << "img {padding:30px;}" << endl;

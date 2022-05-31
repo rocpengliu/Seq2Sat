@@ -901,7 +901,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
     if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
     if (mOptions->verbose) loginfo("Starting to write genotype table!");
 
-    *fout << "#Locus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tGenotype\tLocusSize\tNumReads\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
+    *fout << "#Locus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tGenotype\tNumReads\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
 
     for (const auto & it : sortedAllGenotypeMapVec.at(0)) {
         auto locVarIt = mOptions->mLocVars.refLocMap[it.first];

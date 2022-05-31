@@ -68,11 +68,8 @@ void PairEndProcessor::initConfig(ThreadConfig* config) {
 
 bool PairEndProcessor::process(){
     initOutput();
-
-    ////cCout("0000000000000000000000000000");
     initPackRepository();
     std::thread producer(std::bind(&PairEndProcessor::producerTask, this));
-//cCout("2222222222222222222222222222");
     //TODO: get the correct cycles
     int cycle = 151;
     ThreadConfig** configs = new ThreadConfig*[mOptions->thread];
@@ -80,14 +77,12 @@ bool PairEndProcessor::process(){
         configs[t] = new ThreadConfig(mOptions, t, true);
         initConfig(configs[t]);
     }
-    //cCout("3333333333333333333333333");
 
     std::thread** threads = new thread*[mOptions->thread];
     for(int t=0; t<mOptions->thread; t++){
         threads[t] = new std::thread(std::bind(&PairEndProcessor::consumerTask, this, configs[t]));
     }
 
-    //cCout("4444444444444444444444");
     std::thread* leftWriterThread = NULL;
     std::thread* rightWriterThread = NULL;
     if(mLeftWriter)
@@ -96,7 +91,6 @@ bool PairEndProcessor::process(){
         rightWriterThread = new std::thread(std::bind(&PairEndProcessor::writeTask, this, mRightWriter));
 
     producer.join();
-    //cCout("55555555555555555555555555");
     for(int t=0; t<mOptions->thread; t++){
         threads[t]->join();
     }
@@ -109,7 +103,6 @@ bool PairEndProcessor::process(){
     if(mOptions->verbose)
         loginfo("start to generate reports\n");
 
-    //cCout("66666666666666666");
     // merge stats and filter results
     vector<Stats*> preStats1;
     vector<Stats*> postStats1;
@@ -118,30 +111,24 @@ bool PairEndProcessor::process(){
     vector<FilterResult*> filterResults;
     std::vector<std::map<std::string, std::map < std::string, Genotype>>> totalGenotypeSsrMapVec;
     std::vector<std::map<std::string, std::map < std::string, LocSnp>>> totalGenotypeSnpMapVec;
-    //cCout("aaaaaaaaaaaa", 'r');
     
     if (mOptions->mVarType == ssr) {
         totalGenotypeSsrMapVec.reserve(mOptions->thread);
     } else if (mOptions->mVarType == snp) {
         totalGenotypeSnpMapVec.reserve(mOptions->thread);
     }
-    //cCout("aaaaaaaaaaaa111111111111", 'r');
     for(int t=0; t<mOptions->thread; t++){
-       // cCout("aaaaaaaaaaaa222222222", 'r');
         preStats1.push_back(configs[t]->getPreStats1());
         postStats1.push_back(configs[t]->getPostStats1());
         preStats2.push_back(configs[t]->getPreStats2());
         postStats2.push_back(configs[t]->getPostStats2());
         filterResults.push_back(configs[t]->getFilterResult());
         if (mOptions->mVarType == ssr) {
-            // cCout("aaaaaaaaaaaa333333333333", 'r');
             totalGenotypeSsrMapVec.push_back(configs[t]->getSsrScanner()->getGenotypeMap());
-            // cCout("aaaaaaaaaaaa444444444444444", 'r');
         } else if(mOptions->mVarType == snp){
             totalGenotypeSnpMapVec.push_back(configs[t]->getSnpScanner()->getSubGenotypeMap());
         }
     }
-     //cCout("aaaaaaaaaaaa5555555555555", 'r');
     Stats* finalPreStats1 = Stats::merge(preStats1);
     Stats* finalPostStats1 = Stats::merge(postStats1);
     Stats* finalPreStats2 = Stats::merge(preStats2);
