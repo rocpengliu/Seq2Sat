@@ -903,7 +903,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
     *fout << "#Locus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tGenotype\tNumReads\tPutativeGenotype\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
 
-    for (const auto & it : sortedAllGenotypeMapVec.at(0)) {
+    for ( auto & it : sortedAllGenotypeMapVec.at(0)) {
         auto locVarIt = mOptions->mLocVars.refLocMap[it.first];
 
         std::map<int, int> genoReadsMap;
