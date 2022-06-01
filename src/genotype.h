@@ -44,6 +44,7 @@ public:
     std::map<int, std::string> snpsMaprf;
     std::map<std::string, std::set<int>> refSnpsSetffMap;
     std::map<std::string, std::set<int>> refSnpsSetrfMap;
+    int totalReads;
 };
 
 class Variance {

@@ -24,6 +24,7 @@ LocVar::LocVar() {
     this->refSnpsSetffMap.clear();
     this->refSnpsSetrfMap.clear();
     this->mraBase = "";
+    this->totalReads = 0;
 }
 
 LocVar::LocVar(std::string & read, std::pair<size_t, int> & mraPosLenReadF, std::string & ssr){

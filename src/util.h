@@ -13,6 +13,7 @@
 #include <array>
 #include <ctype.h>
 #include <stdio.h>
+#include <map>
 #include "common.h"
 
 using namespace std;
@@ -573,6 +574,14 @@ inline string trimStr(const string& str) {
         return str.substr(pos, pos2 - pos + 1);
     }
     return str.substr(pos);
+}
+
+template<typename K, typename V>
+std::pair<K,V> getMaxKeyValue(const std::map<K, V> & map){
+    return *std::max_element(map.begin(), map.end(),
+            [](std::pair<K, V> const & x, std::pair<K, V> const & y){
+                return x.second < y.second;
+            });
 }
 
 #endif /* UTIL_H */

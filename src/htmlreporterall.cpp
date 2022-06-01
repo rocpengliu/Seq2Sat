@@ -297,7 +297,8 @@ void HtmlReporterAll::outputRow(ofstream& ofs, std::string & marker, std::vector
                 "<td>" + it.second.baseLocVar.repuitAll.mStr + "</td>" +
                 "<td>" + it.second.baseLocVar.mraBase + "</td>" +
                 "<td>" + std::to_string(it.second.baseLocVar.mra.mStr.length()) + "</td>" +
-                "<td>" + std::to_string(it.second.baseLocVar.effectiveLen) + "</td>" +
+                "<td bgcolor=" + (it.second.baseLocVar.totalReads > 0 ? "'green'>" : "'transparent'>") +
+                std::to_string(it.second.baseLocVar.effectiveLen) + "</td>" +
                 "<td>" + std::to_string(it.second.numReads) + "</td>" +
                 "<td align='right'>" + highligher(it.second.baseLocVar.ff.mStr, it.second.baseLocVar.snpsMapff) + "</td>" +
                 "<td align='center'>" + it.second.baseLocVar.mraName + "</td>" +

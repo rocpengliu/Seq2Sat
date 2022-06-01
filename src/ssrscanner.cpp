@@ -815,7 +815,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
     int targetLength;
     const char* readSeq;
     int readLength;
-    for (auto & it : allGenotypeMap) {
+    for (auto & it : allGenotypeMap) {//marker, seq, genotypes;
 
         auto locVarIt = mOptions->mLocVars.refLocMap.find(it.first)->second;
         int maxReads = 0;
@@ -893,7 +893,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
         tmpMraVec.shrink_to_fit();
     }
     allGenotypeMap.clear();
-
+    
     std::string foutName = mOptions->prefix + "_ssr_genotypes.txt";
     std::ofstream * fout = new std::ofstream();
     fout->open(foutName.c_str(), std::ofstream::out);
@@ -901,17 +901,80 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
     if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
     if (mOptions->verbose) loginfo("Starting to write genotype table!");
 
-    *fout << "#Locus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tGenotype\tNumReads\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
+    *fout << "#Locus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tGenotype\tNumReads\tPutativeGenotype\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
 
     for (const auto & it : sortedAllGenotypeMapVec.at(0)) {
         auto locVarIt = mOptions->mLocVars.refLocMap[it.first];
+
+        std::map<int, int> genoReadsMap;
+        std::map<int, int> genoReadsMap2;
+        std::map<int, int> genoReadsMapT;
+
+        for (const auto & it2 : it.second) {
+            genoReadsMap[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
+        }
+
+        if (genoReadsMap.size() == 1) {
+            genoReadsMapT[genoReadsMap.begin()->first] = genoReadsMap.begin()->second;
+        } else if (genoReadsMap.size() > 1) {
+            auto maxGenoReads = getMaxKeyValue(genoReadsMap);
+            genoReadsMapT[maxGenoReads.first] = maxGenoReads.second;
+
+            int occ = 0;
+            for (const auto & it2 : genoReadsMap) {
+                if (it2.second == maxGenoReads.second) {
+                    occ++;
+                }
+            }
+
+            if (occ == 1) {
+                for (const auto & it2 : genoReadsMap) {
+                    if (it2.first > maxGenoReads.first) {
+                        genoReadsMap2[it2.first] = it2.second;
+                    }
+                }
+
+                auto maxGenoReads2 = getMaxKeyValue(genoReadsMap2);
+                int repul = locVarIt.repuit.mStr.length() + locVarIt.repuit2.mStr.length();
+                if (maxGenoReads2.first - maxGenoReads.first == repul) {
+                    if ((double) maxGenoReads.second / maxGenoReads2.second >= mOptions->mLocVars.locVarOptions.hlRatio1) {
+                        genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                    }
+                } else if (maxGenoReads2.first - maxGenoReads.first == repul * 2) {
+                    if ((double) maxGenoReads.second / maxGenoReads2.second >= mOptions->mLocVars.locVarOptions.hlRatio2) {
+                        genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                    }
+                } else {
+                    genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                }
+
+                genoReadsMap2.clear();
+
+            } else if (occ > 1) {
+                for (const auto & it2 : genoReadsMap) {
+                    if (it2.second == maxGenoReads.second && it2.first != maxGenoReads.first) {
+                        genoReadsMapT[it2.first] = maxGenoReads.second;
+                        break;
+                    }
+                }
+            }
+        }
+
+        genoReadsMap.clear();
         
         for (auto & it2 : it.second) {
+
+            for (const auto & it3 : genoReadsMapT) {
+                if (it3.first == it2.second.baseLocVar.effectiveLen) {
+                    it2.second.baseLocVar.totalReads = it3.first;
+                }
+            }
             
             *fout << it.first << "\t" << it2.second.baseLocVar.repuitAll.mStr << "\t" <<
                     it2.second.baseLocVar.mraBase << "\t" <<
                     it2.second.baseLocVar.mraName << "\t" << it2.second.baseLocVar.mra.mStr.length() << "\t" <<
                     it2.second.baseLocVar.effectiveLen << "\t" << it2.second.numReads << "\t" <<
+                    (it2.second.baseLocVar.totalReads > 0 ? "Y" : "N") << "\t" <<
                     it2.second.baseLocVar.ff.mStr << "\t" << it2.second.baseLocVar.mra.mStr << "\t"
                     << it2.second.baseLocVar.rf.mStr << "\t";
             if (!locVarIt.refSnpsSetffMap[basename(mOptions->prefix)].empty()) {
@@ -940,7 +1003,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
         delete fout;
         fout = NULL;
     }
-
+       
     foutName = mOptions->prefix + "_genotypes_mra.txt";
     fout = new std::ofstream();
     fout->open(foutName.c_str(), std::ofstream::out);
@@ -948,14 +1011,78 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
     if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
     if (mOptions->verbose) loginfo("Starting to write genotype table!");
 
-    *fout << "#Locus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tGenotype\tLocusSize\tNumReads\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
-    for (const auto & it : sortedAllGenotypeMapVec.at(1)) {
+    *fout << "#Locus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tGenotype\tNumReads\tPutativeGenotype\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
+    for ( auto & it : sortedAllGenotypeMapVec.at(1)) {
         auto locVarIt = mOptions->mLocVars.refLocMap[it.first];
+
+        std::map<int, int> genoReadsMap;
+        std::map<int, int> genoReadsMap2;
+        std::map<int, int> genoReadsMapT;
+    
+        for(const auto & it2 : it.second){
+            genoReadsMap[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
+        }
+        
+        if(genoReadsMap.size() == 1){
+            genoReadsMapT[genoReadsMap.begin()->first] = genoReadsMap.begin()->second;
+        } else if (genoReadsMap.size() > 1){
+            auto maxGenoReads = getMaxKeyValue(genoReadsMap);
+            genoReadsMapT[maxGenoReads.first] = maxGenoReads.second;
+
+            int occ = 0;
+            for (const auto & it2 : genoReadsMap) {
+                if (it2.second == maxGenoReads.second) {
+                    occ++;
+                }
+            }
+
+            if (occ == 1) {
+                for (const auto & it2 : genoReadsMap) {
+                    if (it2.first > maxGenoReads.first) {
+                        genoReadsMap2[it2.first] = it2.second;
+                    }
+                }
+                
+                auto maxGenoReads2 = getMaxKeyValue(genoReadsMap2);
+                int repul = locVarIt.repuit.mStr.length() + locVarIt.repuit2.mStr.length();
+                if(maxGenoReads2.first - maxGenoReads.first == repul){
+                    if((double) maxGenoReads.second / maxGenoReads2.second >= mOptions->mLocVars.locVarOptions.hlRatio1){
+                        genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                    }
+                } else if (maxGenoReads2.first - maxGenoReads.first == repul * 2) {
+                    if ((double) maxGenoReads.second / maxGenoReads2.second >= mOptions->mLocVars.locVarOptions.hlRatio2) {
+                        genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                    }
+                } else {
+                    genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                }
+                
+                genoReadsMap2.clear();
+                
+            } else if (occ > 1) {
+                for (const auto & it2 : genoReadsMap) {
+                    if (it2.second == maxGenoReads.second && it2.first != maxGenoReads.first) {
+                        genoReadsMapT[it2.first] = maxGenoReads.second;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        genoReadsMap.clear();
+        
+        
         for ( auto & it2 : it.second) {
+            for(const auto & it3 : genoReadsMapT){
+                if(it3.first == it2.second.baseLocVar.effectiveLen){
+                    it2.second.baseLocVar.totalReads = it3.first;
+                }
+            }
             *fout << it.first << "\t" << it2.second.baseLocVar.repuitAll.mStr << "\t" <<
                     it2.second.baseLocVar.mraBase << "\t" <<
                     it2.second.baseLocVar.mraName << "\t" << it2.second.baseLocVar.mra.mStr.length() << "\t" <<
                     it2.second.baseLocVar.effectiveLen << "\t" << it2.second.numReads << "\t" <<
+                    (it2.second.baseLocVar.totalReads > 0 ? "Y" : "N") << "\t" <<
                     it2.second.baseLocVar.ff.mStr << "\t" << it2.second.baseLocVar.mra.mStr << "\t"
                     << it2.second.baseLocVar.rf.mStr << "\t";
             if (!locVarIt.refSnpsSetffMap[basename(mOptions->prefix)].empty()) {
@@ -976,6 +1103,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
             }
             *fout << "\n";
         }
+        genoReadsMapT.clear();
     }
 
     fout->flush();

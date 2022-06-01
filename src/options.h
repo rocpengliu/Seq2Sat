@@ -241,6 +241,8 @@ public:
         maxDeletionRPrimer = 4;
         maxInsertionRPrimer = 4;
         maxMismatchesRPrimer = 4;
+        hlRatio1 = 1.5;
+        hlRatio2 = 1.2;
     };
 public:
     int maxMismatchesPSeq;
@@ -252,6 +254,8 @@ public:
     int numBestSeqs;
     int coreRep;
     int minNSSRUnit;
+    double hlRatio1; //if two locus size is 1 ssr unit;
+    double hlRatio2; //if two locus size is 2 ssr unit;
     std::string mode;
     bool findAlignment;
     bool findStartLocation;
