@@ -88,6 +88,7 @@ private:
     long* mInsertSizeHist;
     WriterThread* mLeftWriter;
     WriterThread* mRightWriter;
+    WriterThread* mFailedWriter;
     Duplicate* mDuplicate;
     std::mutex logMtx;
 };

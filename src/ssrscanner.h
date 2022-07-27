@@ -27,7 +27,7 @@ public:
     SsrScanner(Options* opt);
     ~SsrScanner();
     
-    bool scanVar(Read* & r1);
+    std::string scanVar(Read* & r1);
     bool scanVar(Read* & r1, Read* & r2);
     
     //std::map<std::string, std::vector<std::pair<std::string, Genotype>>> report();
@@ -106,6 +106,7 @@ private:
     std::string readWithoutFFRF;
     std::string locMra;
     std::string enhancer;
+    std::string returnedlocus;
 };
 
 #endif /* SSRSCANNER_H */

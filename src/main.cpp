@@ -33,15 +33,17 @@ int main(int argc, char* argv[]){
     cmd.add<string>("in1", 'i', "read1 input file name", false, "");
     cmd.add<string>("in2", 'I', "read2 input file name", false, "");
     cmd.add<string>("prefix", 'X', "prefix name for output files, eg: sample01", false, "");
+    cmd.add("outFReads", 0, "If specified, off-target reads will be outputed in a file");
     cmd.add<string>("out1", 'o', "file name to store read1 with on-target sequences", false, "");
     cmd.add<string>("out2", 'O', "file name to store read2 with on-target sequences", false, "");
     
     cmd.add<string>("loc", 0, "loci file containing loci names, 5'primer sequence, reverse complement of 3'primer sequence, 5'flank region, 3'flank region, repeat unit and reference microsatellite repeat array, separated by '\t", false, "");
     cmd.add<int>("maxMismatchesPSeq", 0, "maximum mismatches for primer sequences 2", false, 2);
     cmd.add<int>("minSeqs", 0, "minimum number of reads for a genotype, default: 10", false, 10);
+    cmd.add<int>("minWarningSeqs", 0, "minimum number of reads for warning a genotype, default: 50", false, 50);
     cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%)", false, 10);
-    cmd.add<double>("hlRatio1", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 1.5", false, 1.2);
-    cmd.add<double>("hlRatio2", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 1.2", false, 1.5);
+    cmd.add<double>("hlRatio1", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.3", false, 0.3);
+    cmd.add<double>("hlRatio2", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 0.1", false, 0.1);
     cmd.add<string>("mode", 0, "specify the sequence alignment mode: NW (default) | HW | SHW", false, "NW");
     cmd.add<int>("maxScore", 0, "specify the maximum score of sequence alignment with sore > maxScore will be discarded, default value is -1, and no sequence will be discarded.",false, -1);
     cmd.add<int>("numBestSeqs", 0, "Score will be calculated only for N best sequences (best = with smallest score). If N = 0 then all sequences will be calculated.", 0);
@@ -162,6 +164,7 @@ int main(int argc, char* argv[]){
     opt->var = cmd.get<string>("var");
     opt->mLocVars.locVarOptions.maxMismatchesPSeq = cmd.get<int>("maxMismatchesPSeq");
     opt->mLocVars.locVarOptions.minSeqs = cmd.get<int>("minSeqs");
+    opt->mLocVars.locVarOptions.minWarningSeqs = cmd.get<int>("minWarningSeqs");
     opt->mLocVars.locVarOptions.minSeqsPer = cmd.get<int>("minSeqsPercentage");
     opt->mLocVars.locVarOptions.hlRatio1 = cmd.get<double>("hlRatio1");
     opt->mLocVars.locVarOptions.hlRatio2 = cmd.get<double>("hlRatio2");
@@ -348,6 +351,7 @@ int main(int argc, char* argv[]){
         opt->out1 = cmd.get<string>("out1");
         opt->out2 = cmd.get<string>("out2");
         opt->prefix = cmd.get<string>("prefix");
+        opt->outFRFile = opt->prefix + "_failed_reads.fastq.gz";
         opt->jsonFile = cmd.get<string>("json");
         opt->htmlFile = cmd.get<string>("html");
         opt->reportTitle = cmd.get<string>("report_title");
@@ -426,6 +430,7 @@ int main(int argc, char* argv[]){
             opt->prefix = it.prefix;
             opt->in1 = it.in1;
             opt->in2 = it.in2;
+            opt->outFRFile = opt->prefix + "_failed_reads.fastq.gz";
             //opt->out1 = it.prefix + "_R1.fastq.gz";
            // opt->out2 = it.prefix + "_R2.fastq.gz";
             opt->jsonFile = it.prefix + ".json";
@@ -489,7 +494,7 @@ int main(int argc, char* argv[]){
                     opt->polyGTrim.enabled = true;
                 }
             }
-
+        
             Processor p(opt);
             p.process();
             

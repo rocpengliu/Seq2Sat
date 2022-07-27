@@ -16,6 +16,7 @@ PairEndProcessor::PairEndProcessor(Options* opt){
     memset(mInsertSizeHist, 0, sizeof(long)*isizeBufLen);
     mLeftWriter =  NULL;
     mRightWriter = NULL;
+    mFailedWriter = NULL;
 
     mDuplicate = NULL;
     if(mOptions->duplicate.enabled) {
@@ -37,8 +38,8 @@ PairEndProcessor::~PairEndProcessor() {
 }
 
 void PairEndProcessor::initOutput() {
-    if(mOptions->out1.empty())
-        return;
+//    if(mOptions->out1.empty())
+//        return;
     
     if (!mOptions->out1.empty()) {
         mLeftWriter = new WriterThread(mOptions, mOptions->out1);
@@ -46,6 +47,10 @@ void PairEndProcessor::initOutput() {
     
     if(!mOptions->out2.empty()){
         mRightWriter = new WriterThread(mOptions, mOptions->out2);
+    }
+    
+    if(!mOptions->outFRFile.empty()){
+        mFailedWriter = new WriterThread(mOptions, mOptions->outFRFile);
     }
 }
 
@@ -57,6 +62,10 @@ void PairEndProcessor::closeOutput() {
     if(mRightWriter) {
         delete mRightWriter;
         mRightWriter = NULL;
+    }
+    if(mFailedWriter){
+        delete mFailedWriter;
+        mFailedWriter = NULL;
     }
 }
 
@@ -85,11 +94,15 @@ bool PairEndProcessor::process(){
 
     std::thread* leftWriterThread = NULL;
     std::thread* rightWriterThread = NULL;
+    std::thread* failedWriterThread = NULL;
     if(mLeftWriter)
         leftWriterThread = new std::thread(std::bind(&PairEndProcessor::writeTask, this, mLeftWriter));
     if(mRightWriter)
         rightWriterThread = new std::thread(std::bind(&PairEndProcessor::writeTask, this, mRightWriter));
-
+    if(mFailedWriter){
+        failedWriterThread = new std::thread(std::bind(&PairEndProcessor::writeTask, this, mFailedWriter));
+    }
+    
     producer.join();
     for(int t=0; t<mOptions->thread; t++){
         threads[t]->join();
@@ -99,6 +112,8 @@ bool PairEndProcessor::process(){
         leftWriterThread->join();
     if(rightWriterThread)
         rightWriterThread->join();
+    if(failedWriterThread)
+        failedWriterThread->join();
 
     if(mOptions->verbose)
         loginfo("start to generate reports\n");
@@ -135,7 +150,7 @@ bool PairEndProcessor::process(){
     Stats* finalPostStats2 = Stats::merge(postStats2);
     FilterResult* finalFilterResult = FilterResult::merge(filterResults);
 
-    std::map<std::string, std::map< std::string, Genotype>> allGenotypeMap;
+    std::map<std::string, std::map< std::string, Genotype>> allGenotypeMap;//marker, seq, geno
     std::vector<std::map <std::string, std::vector<std::pair<std::string, Genotype>>>> sortedAllGenotypeMapVec;
     std::map<std::string, std::map<std::string, LocSnp>> allSnpsMap;
     std::vector<std::map<std::string, std::vector<std::pair < std::string, LocSnp>>>> sortedAllSnpsMapVec;
@@ -212,6 +227,8 @@ bool PairEndProcessor::process(){
         delete leftWriterThread;
     if(rightWriterThread)
         delete rightWriterThread;
+    if(failedWriterThread)
+        delete failedWriterThread;
 
     closeOutput();
 
@@ -234,6 +251,8 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
     string outstr1;
     string outstr2;
     string singleOutput;
+    string locus = "";
+    string failedOutput;
     int readPassed = 0;
     int mergedCount = 0;
     //if(mOptions->debug) cCout("starting consuming reads pack");
@@ -331,13 +350,21 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                     Read* merged = OverlapAnalysis::merge(r1, r2, ov);
                     int result = mFilter->passFilter(merged);
                     if (result == PASS_FILTER) {
+                        
+                        locus.clear();
 
                         if (mOptions->mVarType == ssr) {
                             //cCout("777777777777777777", 'r');
-                            config->getSsrScanner()->scanVar(merged);
+                            locus = config->getSsrScanner()->scanVar(merged);
                             //cCout("888888888888888", 'r');
                         } else {
                             config->getSnpScanner()->scanVar(merged);
+                        }
+
+                        if (!locus.empty()) {
+                            //cCout(locus, 'r');
+                            failedOutput += merged->toStringWithTag(locus);
+                            //cCout(failedOutput, 'g');
                         }
                         analysisEachRead = false;
                     }
@@ -393,6 +420,12 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
         char* ldata = new char[singleOutput.size()];
         memcpy(ldata, singleOutput.c_str(), singleOutput.size());
         mLeftWriter->input(ldata, singleOutput.size());
+    } 
+    
+    if(mFailedWriter && !failedOutput.empty()){
+        char* fdata = new char[failedOutput.size()];
+        memcpy(fdata, failedOutput.c_str(), failedOutput.size());
+        mFailedWriter->input(fdata, failedOutput.size());
     }
 
     mOutputMtx.unlock();
@@ -519,7 +552,7 @@ void PairEndProcessor::producerTask(){
             // if the writer threads are far behind this producer, sleep and wait
             // check this only when necessary
             if(readNum % (PACK_SIZE * PACK_IN_MEM_LIMIT) == 0 && mLeftWriter) {
-                while( (mLeftWriter && mLeftWriter->bufferLength() > PACK_IN_MEM_LIMIT) || (mRightWriter && mRightWriter->bufferLength() > PACK_IN_MEM_LIMIT) ){
+                while( (mLeftWriter && mLeftWriter->bufferLength() > PACK_IN_MEM_LIMIT) || (mRightWriter && mRightWriter->bufferLength() > PACK_IN_MEM_LIMIT) || (mFailedWriter && mFailedWriter->bufferLength() > PACK_IN_MEM_LIMIT)){
                     slept++;
                     usleep(1000);
                 }
@@ -579,6 +612,8 @@ void PairEndProcessor::consumerTask(ThreadConfig* config){
             mLeftWriter->setInputCompleted();
         if(mRightWriter)
             mRightWriter->setInputCompleted();
+        if(mFailedWriter)
+            mFailedWriter->setInputCompleted();
     }
     
     if(mOptions->verbose) {

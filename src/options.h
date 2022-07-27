@@ -224,6 +224,7 @@ public:
         maxMismatchesPSeq = 2;
         minSeqs = 10;
         minSeqsPer = 5;
+        minWarningSeqs = 50;
         minMatchesFR = 6;
         maxScore = -1;
         maxScorePrimer = -1;
@@ -241,12 +242,13 @@ public:
         maxDeletionRPrimer = 4;
         maxInsertionRPrimer = 4;
         maxMismatchesRPrimer = 4;
-        hlRatio1 = 1.5;
-        hlRatio2 = 1.2;
+        hlRatio1 = 0.3;
+        hlRatio2 = 0.1;
     };
 public:
     int maxMismatchesPSeq;
     int minSeqs;
+    int minWarningSeqs;
     int minSeqsPer;//against largest peak; 10/%
     int minMatchesFR;//minimum matches bps for both flanking regions
     int maxScore;
@@ -373,6 +375,10 @@ public:
     string out1;
     // file name of read2 output
     string out2;
+    //output failed reads
+    bool outFR;
+    //file name of failed reads;
+    string outFRFile;
     // genome FASTA file
     string genomeFile;
     // kmer FASTA file

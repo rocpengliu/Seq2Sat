@@ -30,7 +30,7 @@ public:
 
     static void outputRow(ofstream& ofs, string key, long value);
     static void outputRow(ofstream& ofs, string key, string value);
-    static void outputRow(ofstream& ofs, std::string & marker, std::vector<std::pair<std::string, Genotype>> & outGenotype);
+    static void outputRow(ofstream& ofs, std::string & marker, std::vector<std::pair<std::string, Genotype>> & outGenotype, Options*& mOptions);
     static void outputRow(ofstream& ofs, std::string & marker, std::map<std::string, LocSnp> & snpsMap);
     static string formatNumber(long number);
     static string getPercents(long numerator, long denominator);

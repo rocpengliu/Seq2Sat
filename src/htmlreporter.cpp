@@ -33,7 +33,7 @@ void HtmlReporter::outputRow(ofstream& ofs, string key, string v) {
     ofs << "<tr><td class='col1'>" + key + "</td><td class='col2'>" + v + "</td></tr>\n";
 }
 
-void HtmlReporter::outputRow(ofstream& ofs, std::string & marker, std::vector<std::pair<std::string, Genotype>> & outGenotype) {
+void HtmlReporter::outputRow(ofstream& ofs, std::string & marker, std::vector<std::pair<std::string, Genotype>> & outGenotype, Options*& mOptions) {
     for (auto & it : outGenotype) {
         ofs << "<tr>";
         ofs << "<td>" + marker + "</td>" +
@@ -42,7 +42,9 @@ void HtmlReporter::outputRow(ofstream& ofs, std::string & marker, std::vector<st
                 "<td>" + std::to_string(it.second.baseLocVar.mra.mStr.length()) + "</td>" +
                 "<td bgcolor=" + (it.second.baseLocVar.totalReads > 0 ? "'green'>" : "'transparent'>") +
                 std::to_string(it.second.baseLocVar.effectiveLen) + "</td>" +
-                "<td>" + std::to_string(it.second.numReads) + "</td>" +
+                "<td><font color='" + (it.second.numReads < mOptions->mLocVars.locVarOptions.minWarningSeqs ? "red" : "black") + "'>" +
+                std::to_string(it.second.numReads) + "</font></td>" +
+                //"<td>" + std::to_string(it.second.numReads) + "</td>" +
                 "<td align='right'>" + highligher(it.second.baseLocVar.ff.mStr, it.second.baseLocVar.snpsMapff) + "</td>" +
                 "<td align='center'>" + it.second.baseLocVar.mraName + "</td>" +
                 "<td align='left'>" + highligher(it.second.baseLocVar.rf.mStr, it.second.baseLocVar.snpsMaprf) + "</td>";
@@ -525,14 +527,14 @@ void HtmlReporter::reportEachSnpGenotype(ofstream& ofs, std::string marker, std:
     ofs << "<div class='subsection_title' onclick=showOrHide('" + divName + "')><a name='" + subsection + "'>" + subsection + "<font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
     //ofs << "<div class='subsection_title'><a title='click to hide/show' onclick=showOrHide('" + divName + "')>" + subsection + "</a></div>\n";
     ofs << "<div id='" + divName + "'>\n";
-    ofs << "<div class='sub_section_tips'>Value of each genotype will be shown on mouse over.</div>\n";
+    ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
     
     ofs << "<div class='figure' id='plot_" + divName + "'></div>\n";
 
     ofs << "<div class='sub_section_tips'>SNPs are highlighted with red background while SNPs in reference are highlighted with orange background</div>\n";
     ofs << "<pre overflow: scroll>\n";
     ofs << "<table class='summary_table' style='width:100%'>\n";
-    ofs <<  "<tr style='background:#cccccc'> <td>Marker</td><td>Genotype</td><td>N. of Reads</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
+    ofs <<  "<tr style='background:#cccccc'> <td>Marker</td><td>Allele Size</td><td>N. of Reads</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
     auto it = mOptions->mLocSnps.refLocMap.find(marker);
     if(it != mOptions->mLocSnps.refLocMap.end()) {
         ofs << "<tr style='color:blue'>";
@@ -732,21 +734,19 @@ void HtmlReporter::reportEachGenotype(ofstream& ofs, std::string marker,
     ofs << "<div class='subsection_title' onclick=showOrHide('" + divName + "')><a name='" + subsection + "'>" + subsection + "<font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
     //ofs << "<div class='subsection_title'><a title='click to hide/show' onclick=showOrHide('" + divName + "')>" + subsection + "</a></div>\n";
     ofs << "<div id='" + divName + "'>\n";
-    ofs << "<div class='sub_section_tips'>Value of each genotype will be shown on mouse over.</div>\n";
+    ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
     
     ofs << "<div class='left'>\n";
     ofs << "<div class='figure' id='plot_" + divName + "'></div>\n";
     ofs << "</div>\n";
-    ofs << "<div class='right'>\n";
-    ofs << "<div class='figure' id='plot_mra" + divName + "'></div>\n";
-    ofs << "</div>";
-    
-    
+//    ofs << "<div class='right'>\n";
+//    ofs << "<div class='figure' id='plot_mra" + divName + "'></div>\n";
+//    ofs << "</div>";
     //ofs << "<div class='figure' id='plot_" + divName + "'></div>\n";
 
-    ofs << "<div class='sub_section_tips'>SNPs are highlighted with red background.</div>\n";
+    ofs << "<div class='sub_section_tips'>SNPs are highlighted with red background. N. of Reads are in red are the warnings</div>\n";
     ofs << "<table class='summary_table'>\n";
-    ofs <<  "<tr style='background:#cccccc'> <td>Marker</td><td>Repeat unit</td><td>MRA base</td><td>MRA size</td><td>Genotype</td><td>N. of Reads</td><td align = 'right'>Forward flanking region</td><td align='center'>MRA</td><td align='left'>Reverse flanking region</td></tr>\n";
+    ofs <<  "<tr style='background:#cccccc'> <td>Marker</td><td>Repeat unit</td><td>MRA base</td><td>MRA size</td><td>Allele size</td><td>N. of Reads</td><td align = 'right'>Forward flanking region</td><td align='center'>MRA</td><td align='left'>Reverse flanking region</td></tr>\n";
     auto it = mOptions->mLocVars.refLocMap.find(marker);
     if(it != mOptions->mLocVars.refLocMap.end()) {
         ofs << "<tr style='color:blue'>";
@@ -760,7 +760,7 @@ void HtmlReporter::reportEachGenotype(ofstream& ofs, std::string marker,
                 "<td align='center'>" + it->second.mraName + "</td>" <<
                 "<td align='left'>" + highligher(it->second.rf.mStr, it->second.refSnpsSetrfMap[basename(mOptions->prefix)]) + "</td>";
         ofs << "</tr>";
-        outputRow(ofs, marker, outGenotypeMra);
+        outputRow(ofs, marker, outGenotypeMra, mOptions);
     }
     
     ofs << "</table>\n";

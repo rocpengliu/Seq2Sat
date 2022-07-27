@@ -11,6 +11,8 @@ Options::Options(){
     in2 = "";
     out1 = "";
     out2 = "";
+    outFR = false;
+    outFRFile = "";
     reportTitle = "seq2sat report";
     thread = 1;
     compression = 2;
@@ -155,6 +157,12 @@ bool Options::validate() {
         }
     }
 
+    if(outFR){
+        if(outFRFile.empty()){
+            error_exit(prefix + " is empty; please specify the prefix");
+        }
+    }
+    
     if(compression < 1 || compression > 9)
         error_exit("compression level (--compression) should be between 1 ~ 9, 1 for fastest, 9 for smallest");
 
