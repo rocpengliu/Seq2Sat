@@ -365,6 +365,7 @@ public:
     bool shallDetectAdapter(bool isR2 = false);
     void loadFastaAdapters();
     void readLocFile();
+    void readSexLoc();
     void parseSampleTable();
 public:
     // file name of read1 input
@@ -448,11 +449,13 @@ public:
     MultiLocVars mLocVars;
     MultiLocSnps mLocSnps;
     string prefix;
-    std::string locFile;
+    std::string locFile;//loci name, forward primer, reverse primer (RC), forward flanking region, reverse flanking region, ssr repeat unit, number of repeat, mra; must be separated by tab;
+    std::string sexFile;//sex id name, forward primer, reverse primer (reverse complement), x ref, y ref; must separated by tab;
     
     //merge overlapped PE read;
     bool mergerOverlappedPE;
     std::vector<Sample> samples;
+    Sex mSex;
 };
 
 #endif

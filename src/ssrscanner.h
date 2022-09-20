@@ -33,9 +33,11 @@ public:
     //std::map<std::string, std::vector<std::pair<std::string, Genotype>>> report();
     static std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> report(Options * & mOptions, std::map<std::string, std::map<std::string, Genotype>> & allGenotypeMap);
     static std::map<std::string, std::map<std::string, Genotype>> merge(std::vector<std::map<std::string, std::map<std::string, Genotype>>> & totalGenotypeSsrMapVec);
+    void static merge(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions);
     inline std::map<std::string, std::map< std::string, Genotype>> getGenotypeMap() {return tmpAllGenotypeMap;};
     static std::map<int, std::string> doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength);
     //inline std::map<std::string, std::vector<std::pair<std::string, Genotype>>> getSortedGenotypeMap() {return sortedAllGenotypeMap;};
+    inline std::map<std::string, std::map<std::string, int>> getSexLoc(){return tmpSexMap;};
     
 private:
     
@@ -95,10 +97,12 @@ private:
     const char* readSeq;
     int readLength;
     priority_queue<int> bestScores;
-    LocVar locVarIt;
+    LocVar* locVarIt;
     std::string readName;
     std::stringstream ss;
     std::map<std::string, std::map<std::string, Genotype>> tmpAllGenotypeMap;
+    //Sex tmpSex;
+    std::map<std::string, std::map<std::string, int>> tmpSexMap;
     //std::map<std::string, std::vector<std::pair<std::string, Genotype>>> sortedAllGenotypeMap;
     int ffEndPos;
     int rfStartPos;
@@ -107,6 +111,7 @@ private:
     std::string locMra;
     std::string enhancer;
     std::string returnedlocus;
+    bool checkLoci;
 };
 
 #endif /* SSRSCANNER_H */

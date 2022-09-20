@@ -72,6 +72,8 @@
         <in>seprocessor.h</in>
         <in>sequence.cpp</in>
         <in>sequence.h</in>
+        <in>sexscanner.cpp</in>
+        <in>sexscanner.h</in>
         <in>snpscanner.cpp</in>
         <in>snpscanner.h</in>
         <in>ssrscanner.cpp</in>

@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include <set>
+#include <tuple>
 
 #include "sequence.h"
 #include "util.h"
@@ -103,6 +104,36 @@ public:
     int numReads;
     void print();
     std::string getGenotype();
+};
+
+class Sex{
+public:
+    Sex();
+public:
+    std::string sexMarker;
+    Sequence primerF;
+    Sequence primerR;
+    Sequence refX;
+    Sequence refY;
+    int readsX;
+    int readsY;
+    int minTotalReadsX;
+    int minTotalReadsY;
+    int minReadsX;//each variant of x;
+    int minReadsY;//each variant of y;
+    int mismatchesPF;
+    int mismatchesPR;
+    unsigned int mismatchesRX;
+    unsigned int mismatchesRY;
+    bool lengthEqual;
+    double YXRatio;
+    double YXRationCuttoff;
+    std::string sexMF;//Male, Female, Inconclusive
+    void print();
+    std::vector<std::tuple<std::string, int, std::map<int, std::string>>> seqVecX;
+    std::vector<std::tuple<std::string, int, std::map<int, std::string>>> seqVecY;
+    std::set<int> snpsRefX;
+    std::set<int> snpsRefY;
 };
 
 #endif /* GENOTYPE_H */

@@ -431,6 +431,108 @@ void HtmlReporter::reportDuplication(ofstream& ofs) {
 //    ofs << "</div>\n"; // section_div
 //}
 
+void HtmlReporter::reportSex(ofstream & ofs) {
+
+    std::vector<std::string> x_vec{"X", "Y"};
+    std::vector<int> y_vec{mOptions->mSex.readsX, mOptions->mSex.readsY};
+    std::vector<double> bar_width_vec{0.5, 0.5};
+
+    std::string subsection = "Sex loci: " + mOptions->mSex.sexMarker;
+    std::string divName = replace(subsection, " ", "_");
+    divName = replace(divName, ":", "_");
+    //std::string title = mOptions->mSex.sexMarker;
+    std::string title = "Sex: " + mOptions->mSex.sexMF;
+
+    ofs << "<div class='subsection_title' onclick=showOrHide('" + divName + "')><a name='" + subsection + "'>" + subsection + "<font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
+    ofs << "<div id='" + divName + "'>\n";
+    ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
+
+    ofs << "<div class='figure' id='plot_" + divName + "'></div>\n";
+
+    ofs << "<div class='sub_section_tips'>SNPs are highlighted with red background</div>\n";
+    ofs << "<pre overflow: scroll>\n";
+    ofs << "<table class='summary_table' style='width:100%'>\n";
+    ofs << "<tr style='background:#cccccc'> <td>Sex allele</td><td>N. of Reads</td><td>Percentage(%)</td><td>Allele Size</td><td align='center'>Sequence</td></tr>\n";
+
+    if (!mOptions->mSex.sexMarker.empty()) {
+        std::string tmpRefStr = mOptions->mSex.primerF.mStr + mOptions->mSex.refX.mStr + mOptions->mSex.primerR.mStr;
+        ofs << "<tr style='color:blue'>";
+        ofs << "<td>Ref. X</td>" <<
+                "<td>N.A.</td>" <<
+                "<td>N.A.</td>" <<
+                "<td>" + std::to_string(mOptions->mSex.primerF.length() + mOptions->mSex.refX.length() + mOptions->mSex.primerR.length()) + "</td>" <<
+                "<td align='center'>" + highligher(tmpRefStr, mOptions->mSex.snpsRefX)+ "</td>";
+        ofs << "</tr>";
+        //outputRow(ofs, marker, snpsMap);
+        
+        if(!mOptions->mSex.seqVecX.empty()){
+            for(auto & it : mOptions->mSex.seqVecX) {
+                ofs << "<tr>";
+                ofs << "<td>X</td>" <<
+                        "<td>" + std::to_string(get<1>(it)) + "</td>" <<
+                        "<td>" + std::to_string((double)get<1>(it) * 100.00 / (double) mOptions->mSex.readsX) + "</td>" <<
+                        "<td>" + std::to_string(get<0>(it).length()) + "</td>" <<
+                        "<td align='center'>" + highligher(get<0>(it), get<2>(it))+ "</td>";
+                ofs << "</tr>";
+            }
+        }
+
+        if (!mOptions->mSex.seqVecY.empty()) {
+    
+            tmpRefStr = mOptions->mSex.primerF.mStr + mOptions->mSex.refY.mStr + mOptions->mSex.primerR.mStr;
+            
+            ofs << "<tr style='color:blue'>";
+            ofs << "<td>Ref. Y</td>" <<
+                    "<td>N.A.</td>" <<
+                    "<td>N.A.</td>" <<
+                    "<td>" + std::to_string(mOptions->mSex.primerF.length() + mOptions->mSex.refY.length() + mOptions->mSex.primerR.length()) + "</td>" <<
+                    "<td align='center'>" + highligher(tmpRefStr, mOptions->mSex.snpsRefY) + "</td>";
+            ofs << "</tr>";
+        
+            for (auto & it : mOptions->mSex.seqVecY) {
+                ofs << "<tr>";
+                ofs << "<td>Y</td>" <<
+                        "<td>" + std::to_string(get<1>(it)) + "</td>" <<
+                        "<td>" + std::to_string((double)get<1>(it) * 100.00 / (double) mOptions->mSex.readsY) + "</td>" <<
+                        "<td>" + std::to_string(get<0>(it).length()) + "</td>" <<
+                        "<td align='center'>" + highligher(get<0>(it), get<2>(it)) + "</td>";
+                ofs << "</tr>";
+            }
+        }
+    }
+
+    ofs << "</table>\n";
+    ofs << "</pre>\n";
+    ofs << "</div>\n";
+
+    ofs << "\n<script type=\"text/javascript\">" << endl;
+
+    string json_str = "var data=[";
+    json_str += "{";
+    json_str += "x:[" + Stats::list2string(x_vec, x_vec.size()) + "],";
+    json_str += "y:[" + Stats::list2string(y_vec, y_vec.size()) + "],";
+    json_str += "text: [" + Stats::list2string(x_vec, x_vec.size()) + "],";
+    json_str += "width: [" + Stats::list2string(bar_width_vec, bar_width_vec.size()) + "],";
+    json_str += "type:'bar', textposition: 'auto'";
+    json_str += "}";
+    json_str += "];\n";
+    json_str += "var layout={title:'" + title + "',";
+    json_str += "xaxis:{tickmode: 'array', tickvals:[" + Stats::list2string(x_vec, x_vec.size()) + "],  title:'" + "Sex Alleles" + "', automargin: true},";
+    json_str += "yaxis:{title:'Number of reads', automargin: true}, ";
+    json_str += "barmode: 'stack'};\n";
+    json_str += "Plotly.newPlot('plot_" + divName + "', data, layout);\n";
+    ofs << json_str;
+    ofs << "</script>" << endl;
+
+
+    x_vec.clear();
+    x_vec.shrink_to_fit();
+    y_vec.clear();
+    y_vec.shrink_to_fit();
+    bar_width_vec.clear();
+    bar_width_vec.shrink_to_fit();
+}
+
 void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> & sortedAllGenotypeMapVec,
         std::map<std::string, std::map<std::string, LocSnp>> & allSnpsMap,
         FilterResult* result, Stats* preStats1, Stats* postStats1, Stats* preStats2, Stats* postStats2) {
@@ -442,6 +544,21 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
     ofs << "<h1 style='text-align:left;'><a href='https://github.com/seq2sat' target='_blank' style='color:#009900;text-decoration:none;'>Seq2Sat Report</a </h1>"<<endl;
     ofs << "<div style='font-size:12px;font-weight:normal;text-align:left;color:#666666;padding:5px;'>" << "Sample: " << basename(mOptions->prefix) << "</div>" << endl;
 
+    ofs << "<div class='section_div'>\n";
+    ofs << "<div class='section_title' onclick=showOrHide('sex')><a name='sex'>Sex loci <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
+    ofs << "<div id='sex'  style='display:none'>\n";
+    
+    if(mOptions->mVarType == ssr){
+        if(!mOptions->mSex.sexMarker.empty()){
+            reportSex(ofs);
+        }
+    } else {
+        //reportAllSnps(ofs, allSnpsMap);
+    }
+
+    ofs << "</div>\n";
+    ofs << "</div>\n";
+    
     ofs << "<div class='section_div'>\n";
     ofs << "<div class='section_title' onclick=showOrHide('genotype')><a name='genotype'>All genotypes <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
     ofs << "<div id='genotype'  style='display:none'>\n";

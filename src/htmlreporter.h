@@ -58,6 +58,7 @@ private:
                             std::vector<std::pair<std::string, Genotype>> & outGenotypeMra);
     void reportEachSnpGenotype(ofstream& ofs, std::string marker, std::map<std::string, LocSnp> & snpsMap,
             std::vector<std::string> & x_vec, std::vector<int> & y_vec, std::vector<double> & bar_width_vec);
+    void reportSex(ofstream & ofs);
 //    void printDetectionResult(ofstream& ofs, Kmer* kmer);
 //    void printGenomeCoverage(ofstream& ofs, Genomes* g);
 //    void reportKmerHits(ofstream& ofs, Kmer* kmer);

@@ -32,7 +32,8 @@ public:
     bool scanVar(Read* & r1, Read* & r2);
     inline std::map<std::string, std::map<std::string, LocSnp>> getSubGenotypeMap(){return subGenotypeMap;};
     static std::map<std::string, std::map<std::string, LocSnp>> merge(Options * & mOptions, std::vector<std::map<std::string, std::map < std::string, LocSnp>>> & totalGenotypeSnpMapVec);
-
+    inline Sex getSexLoc(){return *tmpSex;};
+    
 private:
     std::map<int, std::pair<Sequence, Sequence>> doAlignment(const char* & qData, int qLength, const char* & tData, int tLength);
     void doScanVariance(EdlibAlignResult & result, Variance & variance, const char* & qData, const char* & tData, const int position);
@@ -54,6 +55,7 @@ private:
     int readLength;
     std::string readName;
     std::stringstream ss;
+    Sex* tmpSex;
 };
 
 #endif /* SNPSCANNER_H */

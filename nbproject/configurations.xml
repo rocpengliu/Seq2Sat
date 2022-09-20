@@ -28,6 +28,7 @@
         <in>read.cpp</in>
         <in>seprocessor.cpp</in>
         <in>sequence.cpp</in>
+        <in>sexscanner.cpp</in>
         <in>snpscanner.cpp</in>
         <in>ssrscanner.cpp</in>
         <in>stats.cpp</in>
@@ -69,7 +70,11 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath>seq2sat</executablePath>
+          <cTool>
+            <standard>10</standard>
+          </cTool>
           <ccTool>
+            <standard>8</standard>
             <incDir>
               <pElem>inc</pElem>
               <pElem>.</pElem>
@@ -178,6 +183,10 @@
         </ccTool>
       </item>
       <item path="src/sequence.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
+      <item path="src/sexscanner.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
         </ccTool>
       </item>

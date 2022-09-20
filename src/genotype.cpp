@@ -181,3 +181,33 @@ std::string LocSnp::getGenotype(){
     }
     return msg;
 }
+
+Sex::Sex(){
+    this->sexMarker = "";
+    this->primerF = Sequence("");
+    this->primerR = Sequence("");
+    this->refX = Sequence("");
+    this->refY = Sequence("");
+    this->readsX = 0;
+    this->readsY = 0;
+    this->minTotalReadsX = 100;
+    this->minTotalReadsY = 100;
+    this->minReadsX = 50;
+    this->minReadsY = 50;
+    this->mismatchesPF = 1;
+    this->mismatchesPR = 1;
+    this->mismatchesRX = 2;
+    this->mismatchesRY = 2;
+    this->lengthEqual = false;
+    this->YXRatio = 0;
+    this->YXRationCuttoff = 0.3;
+    this->sexMF = "Inconclusive";
+    this->seqVecX.clear();
+    this->seqVecY.clear();
+}
+
+void Sex::print(){
+    std::cout << "name: " << sexMarker << "; primerF: " << primerF.mStr << "; primerR: " << primerR.mStr << 
+            ";\n refx: " << refX.mStr << "; refy: " << refY.mStr << 
+            ";\n readsx: " << readsX << "; readsy: " << readsY << "\n"; 
+}

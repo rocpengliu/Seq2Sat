@@ -125,7 +125,11 @@ bool PairEndProcessor::process(){
     vector<Stats*> postStats2;
     vector<FilterResult*> filterResults;
     std::vector<std::map<std::string, std::map < std::string, Genotype>>> totalGenotypeSsrMapVec;
+    totalGenotypeSsrMapVec.reserve(mOptions->thread);
     std::vector<std::map<std::string, std::map < std::string, LocSnp>>> totalGenotypeSnpMapVec;
+    totalGenotypeSnpMapVec.reserve(mOptions->thread);
+    std::vector<std::map<std::string, std::map<std::string, int>>> totalSexLocVec;
+    totalSexLocVec.reserve(mOptions->thread);
     
     if (mOptions->mVarType == ssr) {
         totalGenotypeSsrMapVec.reserve(mOptions->thread);
@@ -140,8 +144,10 @@ bool PairEndProcessor::process(){
         filterResults.push_back(configs[t]->getFilterResult());
         if (mOptions->mVarType == ssr) {
             totalGenotypeSsrMapVec.push_back(configs[t]->getSsrScanner()->getGenotypeMap());
+            totalSexLocVec.emplace_back(configs[t]->getSsrScanner()->getSexLoc());
         } else if(mOptions->mVarType == snp){
             totalGenotypeSnpMapVec.push_back(configs[t]->getSnpScanner()->getSubGenotypeMap());
+            //totalSexLocVec.emplace_back(configs[t]->getSnpScanner()->getSexLoc());
         }
     }
     Stats* finalPreStats1 = Stats::merge(preStats1);
@@ -157,6 +163,9 @@ bool PairEndProcessor::process(){
 
     if (mOptions->mVarType == ssr) {
          allGenotypeMap = SsrScanner::merge(totalGenotypeSsrMapVec);
+         if(!mOptions->mSex.sexMarker.empty()){
+             SsrScanner::merge(totalSexLocVec, mOptions);
+         }
          sortedAllGenotypeMapVec = SsrScanner::report(mOptions, allGenotypeMap);
          if(!mOptions->samples.empty()){
              for(auto & it : mOptions->samples){
@@ -354,17 +363,13 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                         locus.clear();
 
                         if (mOptions->mVarType == ssr) {
-                            //cCout("777777777777777777", 'r');
                             locus = config->getSsrScanner()->scanVar(merged);
-                            //cCout("888888888888888", 'r');
                         } else {
                             config->getSnpScanner()->scanVar(merged);
                         }
 
                         if (!locus.empty()) {
-                            //cCout(locus, 'r');
                             failedOutput += merged->toStringWithTag(locus);
-                            //cCout(failedOutput, 'g');
                         }
                         analysisEachRead = false;
                     }

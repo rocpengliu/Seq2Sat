@@ -34,6 +34,7 @@ Options::Options(){
     debug = false;
     var = "";
     locFile = "";
+    sexFile = "";
     sampleTable = "";
     samples.clear();
 }
@@ -487,6 +488,53 @@ void Options::readLocFile(){
     if (verbose) {
         loginfo("Read loci of: " + std::to_string(mVarType == ssr ? mLocVars.refLocMap.size() : mLocSnps.refLocMap.size()));
     }
+}
+
+void Options::readSexLoc(){
+    if (sexFile.empty()) {
+        return;
+    } else {
+        check_file_valid(sexFile);
+    }
+    
+    if(verbose){
+        loginfo("Reading sex file: " + sexFile);
+    }
+    
+    std::ifstream fileIn;
+    fileIn.open(sexFile.c_str());
+    if(!fileIn.is_open()){
+        error_exit("Can not open sex loci File: " + sexFile);
+    };
+    
+    const int maxLine = 10000;
+    char line[maxLine];
+    int readed = 0;
+    std::vector<std::string> splitVec;
+    std::string lineStr;
+    splitVec.reserve(5);
+        while (fileIn.getline(line, maxLine)) {
+        readed = strlen(line);
+        if (line[readed - 1] == '\n' || line[readed - 1] == '\r') {
+            line[readed - 1] = '\0';
+            if (line[readed - 2] == '\r') {
+                line[readed - 2] = '\0';
+            }
+        }
+        lineStr = std::string(line);
+        splitStr(lineStr, splitVec);
+        if (splitVec.size() == 5) {
+            mSex.sexMarker = splitVec[0];
+            mSex.primerF = Sequence(splitVec[1]);
+            mSex.primerR = Sequence(splitVec[2]);
+            mSex.refX = Sequence(splitVec[3]);
+            mSex.refY = Sequence(splitVec[4]);
+            mSex.lengthEqual = mSex.refX.length() == mSex.refY.length() ? true : false;
+        }
+        splitVec.clear();
+    } 
+    
+    fileIn.close();
 }
 
 void Options::parseSampleTable(){
