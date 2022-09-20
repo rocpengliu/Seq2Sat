@@ -190,10 +190,10 @@ Sex::Sex(){
     this->refY = Sequence("");
     this->readsX = 0;
     this->readsY = 0;
-    this->minTotalReadsX = 100;
-    this->minTotalReadsY = 100;
-    this->minReadsX = 50;
-    this->minReadsY = 50;
+    this->minTotalReadsX = 50;
+    this->minTotalReadsY = 50;
+    this->minReadsX = 10;
+    this->minReadsY = 10;
     this->mismatchesPF = 1;
     this->mismatchesPR = 1;
     this->mismatchesRX = 2;

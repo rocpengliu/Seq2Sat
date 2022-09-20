@@ -58,10 +58,10 @@ int main(int argc, char* argv[]){
     cmd.add<unsigned int>("maxMismatchesSexPSeq", 0, "maximum number of mismatches for sex primers, default: 2", false, 2);
     cmd.add<unsigned int>("maxMismatchesSexRefSeq", 0, "maximum number of mismatches for sex reference sequences, default: 2", false, 2);
     cmd.add<double>("yxRatio", 0, "minimum ratio of numbers of reads y/w to x/z, default: 0.3", false, 0.3);
-    cmd.add<int>("minTotalReadsX", 0, "minimum number of reads assigned to X; default: 100", false, 100);
-    cmd.add<int>("minTotalReadsY", 0, "minimum number of reads assigned to Y; default: 100", false, 100);
-    cmd.add<int>("minReadsX", 0, "minimum number of reads assigned to each variant of X; default: 50", false, 50);
-    cmd.add<int>("minReadsY", 0, "minimum number of reads assigned to each variant of Y; default: 50", false, 50);
+    cmd.add<int>("minTotalReadsX", 0, "minimum number of reads assigned to X; default: 50", false, 50);
+    cmd.add<int>("minTotalReadsY", 0, "minimum number of reads assigned to Y; default: 50", false, 50);
+    cmd.add<int>("minReadsX", 0, "minimum number of reads assigned to each variant of X; default: 10", false, 10);
+    cmd.add<int>("minReadsY", 0, "minimum number of reads assigned to each variant of Y; default: 10", false, 10);
     
     cmd.add("debug", 0, "If specified, print debug");
     
