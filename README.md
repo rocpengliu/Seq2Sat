@@ -3,26 +3,26 @@
 
 ## Description 
 
-**Seq2Sat** is a novel, multifunctional, ultra-fast and all-in-one software to score microsatellite/SSR and SNPs from both target sequencing and GBS/RAD-Seq.
+**Seq2Sat** is a novel, multifunctional, ultra-fast and all-in-one software to score microsatellite/SSR from target sequencing.
 
 ## Key features of Seq2Sat
 
 * **Multifunctional**: Seq2Sat can conduct genotyping for both microsatellite/SSR and SNPs from both target sequencing and GBS/RAD-seq.
 
 
-* **Ultra-fast**: ~ 1 sample/second.
+* **Ultra-fast**: ~ 5 second/sample using single thread.
 
-* **Extremely low memory cost**: .
+* **Extremely low memory cost**: negligible ~ 0.1 MB RAM.
 
-* **All-in-one**: Seq2Sat directly takes raw RNA-seq reads as input and output genotype table without any intermediate file writing and loading, making I/O very efficient.
+* **All-in-one**: Seq2Sat directly takes raw target sequencing reads as input and output genotype table without any intermediate file writing and loading, making I/O very efficient.
 
 * **Easy to use**: requires minimal programing skills.
 
 
 ## Getting started
 ### Step 1. Install the software
-Seq2Fun (version 2.0.0) is written in C/C++11 and can be installed on Linux or Mac OS X (with Xcode and Xcode Command Line Tools installed). 
-We have tested Seq2Fun on Ubuntu (16.04 LTS and above) and macOS Catalina.
+Seq2Sat  is written in C/C++11 and can be installed on Linux or Mac OS X (with Xcode and Xcode Command Line Tools installed). 
+We have tested Seq2Sat on Ubuntu (16.04 LTS and above) and macOS Catalina.
 
 ```
 git clone 
@@ -179,4 +179,5 @@ Use seq2fun or seq2fun --help to show the full usage options
 To inform us of any bugs or requests, please open a new issue or send an email to peng.liu@ec.gc.ca or rocpengliu@gmail.com
 
 ## Seq2Sate History & Updates
+07/27/2022 - added functions to generate html report
 05/03/2022 - first realse
