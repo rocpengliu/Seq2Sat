@@ -49,11 +49,20 @@ int main(int argc, char* argv[]){
     cmd.add<int>("numBestSeqs", 0, "Score will be calculated only for N best sequences (best = with smallest score). If N = 0 then all sequences will be calculated.", 0);
     cmd.add("notFindAlignment", 0, "If specified, alignment path will be not found and printed. This may significantly speed up the calculation");
     cmd.add("findStartLocation", 0, "If specified, start locations will be found and printed. Each start location corresponds to one end location. This may somewhat slow down the calculation, but is still faster then finding alignment path and does not consume any extra memory.");
-
     cmd.add<string>("format", 0, "NICE|CIG_STD|CIG_EXT  Format that will be used to print alignment path, can be used only with -p. NICE will give visually attractive format, CIG_STD will give standard cigar format and CIG_EXT will give extended cigar format. [default: NICE]", false, "NICE");
     cmd.add<int>("core", 0, "Core part of calculation will be repeated N times. This is useful only for performance measurement, when single execution is too short to measure.", false, 1);
     cmd.add("silentAlignment", 0, "If specified, there will be no score or alignment output");
     cmd.add("printResults", 0, "If specified, alignment results will be printed but with only 1 thread");
+    
+    cmd.add<string>("sex", 0, "sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by '\t", false, "");
+    cmd.add<unsigned int>("maxMismatchesSexPSeq", 0, "maximum number of mismatches for sex primers, default: 2", false, 2);
+    cmd.add<unsigned int>("maxMismatchesSexRefSeq", 0, "maximum number of mismatches for sex reference sequences, default: 2", false, 2);
+    cmd.add<double>("yxRatio", 0, "minimum ratio of numbers of reads y/w to x/z, default: 0.3", false, 0.3);
+    cmd.add<int>("minTotalReadsX", 0, "minimum number of reads assigned to X; default: 100", false, 100);
+    cmd.add<int>("minTotalReadsY", 0, "minimum number of reads assigned to Y; default: 100", false, 100);
+    cmd.add<int>("minReadsX", 0, "minimum number of reads assigned to each variant of X; default: 50", false, 50);
+    cmd.add<int>("minReadsY", 0, "minimum number of reads assigned to each variant of Y; default: 50", false, 50);
+    
     cmd.add("debug", 0, "If specified, print debug");
     
     cmd.add("dont_merge_overlapped_PE", 0, "don't merge the overlapped PE reads; this is off by default");
@@ -179,6 +188,15 @@ int main(int argc, char* argv[]){
     opt->mLocVars.locVarOptions.printRes = cmd.exist("printResults");
     opt->mLocVars.locVarOptions.format = cmd.get<string>("format");
     opt->locFile = cmd.get<string>("loc");
+    
+    opt->sexFile = cmd.get<string>("sex");
+    opt->mSex.mismatchesPF = opt->mSex.mismatchesPR = cmd.get<unsigned int>("maxMismatchesSexPSeq");
+    opt->mSex.mismatchesRX = opt->mSex.mismatchesRY = cmd.get<unsigned int>("maxMismatchesSexRefSeq");
+    opt->mSex.YXRationCuttoff = cmd.get<double>("yxRatio");
+    opt->mSex.minTotalReadsX = cmd.get<int>("minTotalReadsX");
+    opt->mSex.minTotalReadsY = cmd.get<int>("minTotalReadsY");
+    opt->mSex.minReadsX = cmd.get<int>("minReadsX");
+    opt->mSex.minReadsY = cmd.get<int>("minReadsY");
     
     opt->mergerOverlappedPE = cmd.exist("dont_merge_overlapped_PE") ? false : true;
     
@@ -357,6 +375,7 @@ int main(int argc, char* argv[]){
         opt->reportTitle = cmd.get<string>("report_title");
         
         opt->readLocFile();
+        opt->readSexLoc();
         
         Evaluator eva(opt);
         if (supportEvaluation) {
@@ -438,6 +457,7 @@ int main(int argc, char* argv[]){
             opt->reportTitle = it.prefix;
             if(opt->verbose) cCout("Processing sample: " + basename(opt->prefix));
             opt->readLocFile();
+            opt->readSexLoc();
             
             Evaluator eva(opt);
             if (supportEvaluation) {
