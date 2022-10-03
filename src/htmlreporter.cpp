@@ -441,7 +441,7 @@ void HtmlReporter::reportSex(ofstream & ofs) {
     std::string divName = replace(subsection, " ", "_");
     divName = replace(divName, ":", "_");
     //std::string title = mOptions->mSex.sexMarker;
-    std::string title = "Sex: " + mOptions->mSex.sexMF;
+    std::string title = "Sex: " + mOptions->mSex.sexMF + (mOptions->mSex.sexMF == "Male" ? "<br>Y/X = " + std::to_string(mOptions->mSex.YXRatio) : "");
 
     ofs << "<div class='subsection_title' onclick=showOrHide('" + divName + "')><a name='" + subsection + "'>" + subsection + "<font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
     ofs << "<div id='" + divName + "'>\n";

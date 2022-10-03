@@ -11,6 +11,7 @@
 #include <utility>
 #include <sstream>
 #include <algorithm>
+#include <cmath>
 
 #include "options.h"
 #include "read.h"

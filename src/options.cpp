@@ -429,9 +429,9 @@ void Options::readLocFile(){
                 } else if (tmpLocVar.repuit.mStr.length() == 6 || tmpLocVar.repuit.mStr.length() == 7) {
                     tmpLocVar.edCutoff = 3;
                 } else if (tmpLocVar.repuit.mStr.length() == 8 || tmpLocVar.repuit.mStr.length() == 9) {
-                    tmpLocVar.edCutoff = 3;
-                } else {
                     tmpLocVar.edCutoff = 4;
+                } else {
+                    tmpLocVar.edCutoff = 5;
                 }
 
                 tmpLocVar.mra = splitVec[7];

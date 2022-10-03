@@ -771,6 +771,9 @@ void SsrScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
             seqMapY[it2.first] += it2.second;
         }
     }
+    
+    totalSexLocVec.clear();
+    totalSexLocVec.shrink_to_fit();
 
     const char* target;
     int targetLength;
@@ -779,7 +782,7 @@ void SsrScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
     std::string tmpStr;
     
     if(!seqMapX.empty()){
-        tmpStr = mOptions->mSex.primerF.mStr + mOptions->mSex.refX.mStr + mOptions->mSex.primerR.mStr;
+        tmpStr = mOptions->mSex.getFullRefX();
         target = tmpStr.c_str();
         targetLength = tmpStr.length();
         for(auto & it : seqMapX){
@@ -803,7 +806,7 @@ void SsrScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
     }
     
     if(!seqMapY.empty()) {
-        tmpStr = mOptions->mSex.primerF.mStr + mOptions->mSex.refY.mStr + mOptions->mSex.primerR.mStr;
+        tmpStr = mOptions->mSex.getFullRefY();
         target = tmpStr.c_str();
         targetLength = tmpStr.length();
         for(auto & it : seqMapY){
@@ -1132,7 +1135,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
     if (!mOptions->mSex.sexMarker.empty()) {
         
         if(mOptions->mSex.readsX != 0){
-            mOptions->mSex.YXRatio = (double) mOptions->mSex.readsY / (double) mOptions->mSex.readsX;
+            mOptions->mSex.YXRatio = std::round(((double) mOptions->mSex.readsY / (double) mOptions->mSex.readsX) * 100.0) / 100.0;
             if(mOptions->mSex.YXRationCuttoff < mOptions->mSex.YXRatio){
                 if(mOptions->mSex.minTotalReadsX < mOptions->mSex.readsX){
                     if(mOptions->mSex.minTotalReadsY < mOptions->mSex.readsY){
@@ -1157,7 +1160,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
             mOptions->mSex.sexMF = "Inconclusive";
         }
         
-        std::cout << "sexLoc: " << mOptions->mSex.readsY << " : " << mOptions->mSex.readsX << " -> " << mOptions->mSex.YXRatio << "\n";
+        //std::cout << "sexLoc: " << mOptions->mSex.readsY << " : " << mOptions->mSex.readsX << " -> " << mOptions->mSex.YXRatio << "\n";
         
         std::string foutName = mOptions->prefix + "_sex_loc_id.txt";
         std::ofstream* fout = new std::ofstream();
@@ -1166,10 +1169,64 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
         if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
         if (mOptions->verbose) loginfo("Starting to write sex identification loc file!");
         
-        *fout << "#SexLoc\tNumReadsX\tNumReadsY\tRatio\tPutativeSex\tAlleleX\tAlleleY\n";
+        *fout << "#SexLoc\tNumReadsX\tNumReadsY\tRatio\tPutativeSex\tAlleleX\tSnpsX\tAlleleY\tSnpsY\tNote\n";
         
         *fout << mOptions->mSex.sexMarker << "\t" << mOptions->mSex.readsX << "\t" << mOptions->mSex.readsY << "\t" << mOptions->mSex.YXRatio << "\t" << 
-                mOptions->mSex.sexMF << "\t" << mOptions->mSex.refX.mStr << "\t" << mOptions->mSex.refY.mStr << "\n";
+                mOptions->mSex.sexMF << "\t" << mOptions->mSex.getFullRefX() << "\t";
+        if(mOptions->mSex.snpsRefX.empty()){
+            *fout << "NA\t";
+        } else {
+            for(const auto & its : mOptions->mSex.snpsRefX){
+                *fout << its << ";";
+            }
+            *fout << "\t";
+        }
+        
+        *fout << mOptions->mSex.getFullRefY() << "\t";
+
+        if (mOptions->mSex.snpsRefY.empty()) {
+            *fout << "NA\t";
+        } else {
+            for (const auto & its : mOptions->mSex.snpsRefY) {
+                *fout << its << ";";
+            }
+            *fout << "\t";
+        }
+        
+        *fout << "total\n";
+
+        std::map<int, std::string> tmpSnpMap;
+        if (!mOptions->mSex.seqVecX.empty()){
+            for (const auto & its : mOptions->mSex.seqVecX) {
+                *fout << "X\t" << get<1>(its) << "\t0\t0\tNA\t" << get<0>(its) << "\t";
+                tmpSnpMap = get<2>(its);
+                if (tmpSnpMap.empty()) {
+                    *fout << "NA";
+                } else {
+                    for (const auto & itm : tmpSnpMap) {
+                        *fout << itm.first << mOptions->mSex.getFullRefX()[itm.first] << "|" << get<0>(its)[itm.first] << ";";
+                    }
+                }
+                *fout << "\tNA\tNA\teach\n";
+            }
+        }
+
+        if (!mOptions->mSex.seqVecY.empty()) {
+            for (const auto & its : mOptions->mSex.seqVecY) {
+                *fout << "Y\t0\t" << get<1>(its) << "\t0\tNA\tNA\tNA\t" << get<0>(its) << "\t";
+                tmpSnpMap = get<2>(its);
+                if (tmpSnpMap.empty()) {
+                    *fout << "NA";
+                } else {
+                    for (const auto & itm : tmpSnpMap) {
+                        *fout << itm.first << mOptions->mSex.getFullRefY()[itm.first] << "|" << get<0>(its)[itm.first] << ";";
+                    }
+                }
+                *fout << "\teach\n";
+            }
+        }
+        
+        tmpSnpMap.clear();
         
         fout->flush();
         fout->clear();

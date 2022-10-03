@@ -211,3 +211,11 @@ void Sex::print(){
             ";\n refx: " << refX.mStr << "; refy: " << refY.mStr << 
             ";\n readsx: " << readsX << "; readsy: " << readsY << "\n"; 
 }
+
+std::string Sex::getFullRefX(){
+    return std::string(primerF.mStr + refX.mStr + primerR.mStr);
+}
+
+std::string Sex::getFullRefY(){
+    return std::string(primerF.mStr + refY.mStr + primerR.mStr);
+}

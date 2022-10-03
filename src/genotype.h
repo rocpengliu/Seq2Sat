@@ -130,6 +130,8 @@ public:
     double YXRationCuttoff;
     std::string sexMF;//Male, Female, Inconclusive
     void print();
+    std::string getFullRefX();
+    std::string getFullRefY();
     std::vector<std::tuple<std::string, int, std::map<int, std::string>>> seqVecX;
     std::vector<std::tuple<std::string, int, std::map<int, std::string>>> seqVecY;
     std::set<int> snpsRefX;
