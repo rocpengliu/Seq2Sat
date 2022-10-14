@@ -1398,6 +1398,7 @@ void SsrScanner::preAnalyze(Read* & r1, std::size_t & ffpos, std::size_t & rfpos
             }
 
         } else if (!locVarIt->ff.mStr.empty() && !locVarIt->rf.mStr.empty()) {
+            
             std::string minff = locVarIt->ff.mStr.substr(locVarIt->ff.mStr.length() - std::min(mOptions->mLocVars.locVarOptions.minMatchesFR, static_cast<int>(locVarIt->ff.mStr.length())));
             ffpos = r1->mSeq.mStr.find(minff);
 
@@ -1667,7 +1668,7 @@ std::string SsrScanner::scanVar(Read* & r1) {
             r1->trimFront(locVarIt->fp.length());
             r1->resize(locMap[locName].second);
             locMap.clear();
-            std::map<std::string, std::map < std::string, Genotype>>::iterator itGenotypeMap = tmpAllGenotypeMap.find(locVarIt->name);
+            std::map<std::string, std::map<std::string, Genotype>>::iterator itGenotypeMap = tmpAllGenotypeMap.find(locVarIt->name);
             std::map<std::string, Genotype> tmpGenotypeMap;
             Genotype* tmpGenotype = new Genotype();
             if (itGenotypeMap == tmpAllGenotypeMap.end()) {

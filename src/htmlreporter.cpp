@@ -544,21 +544,21 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
     ofs << "<h1 style='text-align:left;'><a href='https://github.com/seq2sat' target='_blank' style='color:#009900;text-decoration:none;'>Seq2Sat Report</a </h1>"<<endl;
     ofs << "<div style='font-size:12px;font-weight:normal;text-align:left;color:#666666;padding:5px;'>" << "Sample: " << basename(mOptions->prefix) << "</div>" << endl;
 
-    ofs << "<div class='section_div'>\n";
-    ofs << "<div class='section_title' onclick=showOrHide('sex')><a name='sex'>Sex loci <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
-    ofs << "<div id='sex'  style='display:none'>\n";
+
     
     if(mOptions->mVarType == ssr){
-        if(!mOptions->mSex.sexMarker.empty()){
+        if(!mOptions->mSex.sexMarker.empty()) {
+            ofs << "<div class='section_div'>\n";
+            ofs << "<div class='section_title' onclick=showOrHide('sex')><a name='sex'>Sex loci <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
+            ofs << "<div id='sex'  style='display:none'>\n";
             reportSex(ofs);
+            ofs << "</div>\n";
+            ofs << "</div>\n";
         }
     } else {
         //reportAllSnps(ofs, allSnpsMap);
     }
-
-    ofs << "</div>\n";
-    ofs << "</div>\n";
-    
+ 
     ofs << "<div class='section_div'>\n";
     ofs << "<div class='section_title' onclick=showOrHide('genotype')><a name='genotype'>All genotypes <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
     ofs << "<div id='genotype'  style='display:none'>\n";

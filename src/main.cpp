@@ -39,6 +39,7 @@ int main(int argc, char* argv[]){
     
     cmd.add<string>("loc", 0, "loci file containing loci names, 5'primer sequence, reverse complement of 3'primer sequence, 5'flank region, 3'flank region, repeat unit and reference microsatellite repeat array, separated by '\t", false, "");
     cmd.add<int>("maxMismatchesPSeq", 0, "maximum mismatches for primer sequences 2", false, 2);
+    cmd.add<int>("minMatchesFR", 0, "minimum matches for the forward and reverse flanking regions counting from MRA region, the longer the more sensitive, default: 6 bp", false, 6);
     cmd.add<int>("minSeqs", 0, "minimum number of reads for a genotype, default: 10", false, 10);
     cmd.add<int>("minWarningSeqs", 0, "minimum number of reads for warning a genotype, default: 50", false, 50);
     cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%)", false, 10);
@@ -172,6 +173,7 @@ int main(int argc, char* argv[]){
     // I/O
     opt->var = cmd.get<string>("var");
     opt->mLocVars.locVarOptions.maxMismatchesPSeq = cmd.get<int>("maxMismatchesPSeq");
+    opt->mLocVars.locVarOptions.minMatchesFR = cmd.get<int>("minMatchesFR");
     opt->mLocVars.locVarOptions.minSeqs = cmd.get<int>("minSeqs");
     opt->mLocVars.locVarOptions.minWarningSeqs = cmd.get<int>("minWarningSeqs");
     opt->mLocVars.locVarOptions.minSeqsPer = cmd.get<int>("minSeqsPercentage");
