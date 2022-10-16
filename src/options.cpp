@@ -382,7 +382,7 @@ void Options::readLocFile(){
     int readed = 0;
     std::vector<std::string> splitVec;
     std::string lineStr;
-    
+
     if (mVarType == ssr) {
         mLocVars.refLocMap.clear();
         splitVec.reserve(8);
@@ -484,7 +484,6 @@ void Options::readLocFile(){
     }
     
     fileIn.close();
-
     if (verbose) {
         loginfo("Read loci of: " + std::to_string(mVarType == ssr ? mLocVars.refLocMap.size() : mLocSnps.refLocMap.size()));
     }

@@ -376,9 +376,6 @@ int main(int argc, char* argv[]){
         opt->htmlFile = cmd.get<string>("html");
         opt->reportTitle = cmd.get<string>("report_title");
         
-        opt->readLocFile();
-        opt->readSexLoc();
-        
         Evaluator eva(opt);
         if (supportEvaluation) {
             eva.evaluateSeqLen();
@@ -434,6 +431,9 @@ int main(int argc, char* argv[]){
             }
         }
         
+        opt->readLocFile();
+        opt->readSexLoc();
+        
         Processor p(opt);
         p.process();
 
@@ -458,8 +458,6 @@ int main(int argc, char* argv[]){
             opt->htmlFile = it.prefix + ".html";
             opt->reportTitle = it.prefix;
             if(opt->verbose) cCout("Processing sample: " + basename(opt->prefix));
-            opt->readLocFile();
-            opt->readSexLoc();
             
             Evaluator eva(opt);
             if (supportEvaluation) {
@@ -516,7 +514,10 @@ int main(int argc, char* argv[]){
                     opt->polyGTrim.enabled = true;
                 }
             }
-        
+
+            opt->readLocFile();
+            opt->readSexLoc();
+            
             Processor p(opt);
             p.process();
             
