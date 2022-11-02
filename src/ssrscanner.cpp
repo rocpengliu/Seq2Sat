@@ -1023,7 +1023,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
     if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
     if (mOptions->verbose) loginfo("Starting to write genotype table!");
 
-    *fout << "#Locus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tAllele\tNumReads\tPutativeAllele\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
+    *fout << "#Sample\tLocus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tAllele\tNumReads\tPutativeAllele\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
     for (auto & it : sortedAllGenotypeMapVec.at(1)) {//marker, seq, genotype
         auto locVarIt = &(mOptions->mLocVars.refLocMap[it.first]);
         std::map<int, int> genoReadsMap;
@@ -1095,7 +1095,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
             it2.second.baseLocVar.totalReads = (tmpVar == genoReadsMapT.end() ? 0 : tmpVar->second);
             
 //            std::cout << "it2.second.baseLocVar.totalReads: " << it2.second.baseLocVar.totalReads << "\n";
-            *fout << it.first << "\t" << it2.second.baseLocVar.repuitAll.mStr << "\t" <<
+            *fout << mOptions->prefix << "\t" << it.first << "\t" << it2.second.baseLocVar.repuitAll.mStr << "\t" <<
                     it2.second.baseLocVar.mraBase << "\t" <<
                     it2.second.baseLocVar.mraName << "\t" << it2.second.baseLocVar.mra.mStr.length() << "\t" <<
                     it2.second.baseLocVar.effectiveLen << "\t" << it2.second.numReads << "\t" <<
