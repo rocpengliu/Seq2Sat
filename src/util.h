@@ -484,6 +484,7 @@ inline std::string getGenotype(std::string & mra, std::string & ssr, bool adp = 
         endPos = mra.find(ssr, startPos + ssr.length());
         if (endPos != std::string::npos) {
             if (endPos - startPos == ssr.length()) {
+                
             } else {
                 if(adp){
                     genStr.append("|(" + ssr + ")" + std::to_string(count) + "|" + mra.substr(startPos + ssr.length(), endPos - (startPos + ssr.length())));

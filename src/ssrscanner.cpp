@@ -903,7 +903,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
         std::set<int> ffSet;
         std::set<int> rfSet;
-        std::vector<std::pair < std::string, Genotype>> tmpVec;
+        std::vector<std::pair<std::string, Genotype>> tmpVec;
         tmpVec.reserve(it.second.size());
         std::vector<std::pair<std::string, Genotype>> tmpMraVec;
         tmpMraVec.reserve(it.second.size());
@@ -1090,11 +1090,10 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
         
         genoReadsMap.clear();
         
-        for ( auto & it2 : it.second) {
+        for (auto & it2 : it.second) {
             auto tmpVar = genoReadsMapT.find(it2.second.baseLocVar.effectiveLen);
             it2.second.baseLocVar.totalReads = (tmpVar == genoReadsMapT.end() ? 0 : tmpVar->second);
             
-//            std::cout << "it2.second.baseLocVar.totalReads: " << it2.second.baseLocVar.totalReads << "\n";
             *fout << basename(mOptions->prefix) << "\t" << it.first << "\t" << it2.second.baseLocVar.repuitAll.mStr << "\t" <<
                     it2.second.baseLocVar.mraBase << "\t" <<
                     it2.second.baseLocVar.mraName << "\t" << it2.second.baseLocVar.mra.mStr.length() << "\t" <<
@@ -1103,20 +1102,36 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     it2.second.baseLocVar.ff.mStr << "\t" << it2.second.baseLocVar.mra.mStr << "\t"
                     << it2.second.baseLocVar.rf.mStr << "\t";
             if (!locVarIt->refSnpsSetffMap[basename(mOptions->prefix)].empty()) {
+                int count = 0;
                 for (const auto & snps : locVarIt->refSnpsSetffMap[basename(mOptions->prefix)]) {
-                    *fout << snps << locVarIt->effectiveSeq.mStr[snps] << "|" << it2.second.baseLocVar.effectiveSeq.mStr[snps] << ";";
+                    if(locVarIt->ff.mStr[snps] != it2.second.baseLocVar.ff.mStr[snps]){
+                        *fout << snps << locVarIt->ff.mStr[snps] << "|" << it2.second.baseLocVar.ff.mStr[snps] << ";";
+                        //*fout << snps << locVarIt->effectiveSeq.mStr[snps] << "|" << it2.second.baseLocVar.effectiveSeq.mStr[snps] << ";";
+                        count++;
+                    }
+                }
+                if (count == 0) {
+                    *fout << "NA;";
                 }
             } else {
-                *fout << "NA";
+                *fout << "NA;";
             }
             *fout << "\t";
 
             if (!locVarIt->refSnpsSetrfMap[basename(mOptions->prefix)].empty()) {
+                int count = 0;
                 for (const auto & snps : locVarIt->refSnpsSetrfMap[basename(mOptions->prefix)]) {
-                    *fout << snps << locVarIt->effectiveSeq.mStr[snps] << "|" << it2.second.baseLocVar.effectiveSeq.mStr[snps] << ";";
+                    if(locVarIt->rf.mStr[snps] != it2.second.baseLocVar.rf.mStr[snps]){
+                        *fout << snps << locVarIt->rf.mStr[snps] << "|" << it2.second.baseLocVar.rf.mStr[snps] << ";";
+                        count++;
+                        //*fout << snps << locVarIt->effectiveSeq.mStr[snps] << "|" << it2.second.baseLocVar.effectiveSeq.mStr[snps] << ";";
+                    }
                 }
+                if (count == 0) {
+                    *fout << "NA;";
+                } 
             } else {
-                *fout << "NA";
+                *fout << "NA;";
             }
             *fout << "\n";
         }
