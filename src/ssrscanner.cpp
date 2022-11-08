@@ -1037,55 +1037,119 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
         if(genoReadsMap.size() == 1){//only one peak;
             genoReadsMapT[genoReadsMap.begin()->first] = genoReadsMap.begin()->second;
         } else if (genoReadsMap.size() > 1){// > 1 peak;
-            auto maxGenoReads = getMaxKeyValue(genoReadsMap);//key max value pair;
-            genoReadsMapT[maxGenoReads.first] = maxGenoReads.second;
-
-            int occ = 0;
-            for (const auto & it2 : genoReadsMap) {
-                if (it2.second == maxGenoReads.second) {
-                    occ++;
-                }
-            }
-
-            if (occ == 1) {
-                for (const auto & it2 : genoReadsMap) {
-                    if (it2.first > maxGenoReads.first) {
-                        genoReadsMap2[it2.first] = it2.second;
+            
+            //get the break point of genotypes in x
+            int pre = 0, cur = 0;
+            auto itg = genoReadsMap.begin();
+            pre = itg->first;
+            std::vector<int> gapVec;
+            std::advance(itg, 1);
+            while(itg != genoReadsMap.end()){
+                cur = itg->first;
+                int gap = cur - pre;
+                if(locVarIt->repuit2.length() == 0){
+                    if(gap != locVarIt->repuit.length()){
+                        gapVec.emplace_back(cur);
                     }
-                }
-
-                if (!genoReadsMap2.empty()) {
-                    auto maxGenoReads2 = getMaxKeyValue(genoReadsMap2, true);
-                    int repul = locVarIt->repuit.mStr.length();
-                    if (maxGenoReads2.first - maxGenoReads.first == repul) {
-                        if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio1) {
-                            genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
-                        }
-                    } else if (maxGenoReads2.first - maxGenoReads.first == repul * 2) {
-                        if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2) {
-                            genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
-                        }
-                    } else if (maxGenoReads2.first - maxGenoReads.first == repul * 3) {
-                        if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
-                            genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                } else {
+                    if(locVarIt->repuit.length() == locVarIt->repuit2.length()) {
+                        if (gap != locVarIt->repuit.length()) {
+                            gapVec.emplace_back(cur);
                         }
                     } else {
-                        if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
-                            genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                        auto maxssr = std::max(locVarIt->repuit.length(), locVarIt->repuit2.length());
+                        if(gap != locVarIt->repuit.length() && gap != locVarIt->repuit2.length() && gap > maxssr){
+                            gapVec.emplace_back(cur);
                         }
                     }
                 }
-                
-                genoReadsMap2.clear();
-                
-            } else if (occ > 1) {
+                pre = cur;
+                itg++;
+            }
+
+            if (gapVec.empty()) {
+                auto maxGenoReads = getMaxKeyValue(genoReadsMap); //key max value pair;
+                genoReadsMapT[maxGenoReads.first] = maxGenoReads.second;
+
+                int occ = 0;
                 for (const auto & it2 : genoReadsMap) {
-                    if (it2.second == maxGenoReads.second && it2.first != maxGenoReads.first) {
-                        genoReadsMapT[it2.first] = maxGenoReads.second;
-                        break;
+                    if (it2.second == maxGenoReads.second) {
+                        occ++;
                     }
                 }
+
+                if (occ == 1) {
+                    for (const auto & it2 : genoReadsMap) {
+                        if (it2.first > maxGenoReads.first) {
+                            genoReadsMap2[it2.first] = it2.second;
+                        }
+                    }
+                    if (!genoReadsMap2.empty()) {
+                        auto maxGenoReads2 = getMaxKeyValue(genoReadsMap2, true);
+                        int repul = locVarIt->repuit.mStr.length();
+                        if (maxGenoReads2.first - maxGenoReads.first == repul) {
+                            if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio1) {
+                                genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                            }
+                        } else if (maxGenoReads2.first - maxGenoReads.first == repul * 2) {
+                            if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2) {
+                                genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                            }
+                        } else if (maxGenoReads2.first - maxGenoReads.first == repul * 3) {
+                            if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
+                                genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                            }
+                        } else {
+                            if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
+                                genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                            }
+                        }
+                    }
+
+                    genoReadsMap2.clear();
+
+                } else if (occ > 1) {
+                    for (const auto & it2 : genoReadsMap) {
+                        if (it2.second == maxGenoReads.second && it2.first != maxGenoReads.first) {
+                            genoReadsMapT[it2.first] = maxGenoReads.second;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                
+                std::set<int> maxSet;
+                std::map<int, int> outMap;
+                auto range_pre = genoReadsMap.begin();
+                for(const auto & itgv : gapVec){
+                    auto range_cur = genoReadsMap.find(itgv);
+                    if (range_cur != genoReadsMap.end()) {
+                        outMap.insert(range_pre, range_cur);
+                        maxSet.insert(getMaxKeyValue(outMap).first);
+                        outMap.clear();
+                        range_pre = range_cur;
+                    }
+                }
+
+                if (range_pre != genoReadsMap.end()) {
+                    outMap.insert(range_pre, genoReadsMap.end());
+                    maxSet.insert(getMaxKeyValue(outMap).first);
+                    outMap.clear();
+                }
+
+                if (maxSet.size() > 2) {
+                    auto rem = maxSet.begin();
+                    std::advance(rem, (maxSet.size() - 2));
+                    maxSet.erase(maxSet.begin(), rem);
+                }
+
+                for (const auto & itgmv : maxSet) {
+                    genoReadsMapT[genoReadsMap.find(itgmv)->first] = genoReadsMap.find(itgmv)->second;
+                }
+                
+                maxSet.clear();
             }
+            
         }
         
         genoReadsMap.clear();

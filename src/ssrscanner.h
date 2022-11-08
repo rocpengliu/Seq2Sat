@@ -12,6 +12,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cmath>
+#include <bits/stdc++.h>
 
 #include "options.h"
 #include "read.h"
