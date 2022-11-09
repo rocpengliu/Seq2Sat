@@ -226,6 +226,7 @@ public:
         minSeqsPer = 5;
         minWarningSeqs = 50;
         minMatchesFR = 6;
+        maxMismatchesPer4FR = 0.3;
         maxScore = -1;
         maxScorePrimer = -1;
         numBestSeqs = 0;
@@ -251,6 +252,7 @@ public:
     int minWarningSeqs;
     int minSeqsPer;//against largest peak; 10/%
     int minMatchesFR;//minimum matches bps for both flanking regions
+    double maxMismatchesPer4FR;//percentage for minimum matches bps for both flanking regions;
     int maxScore;
     int maxScorePrimer;
     int numBestSeqs;

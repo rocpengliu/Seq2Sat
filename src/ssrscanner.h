@@ -79,7 +79,9 @@ private:
     
     void resetData();
     
-    std::size_t mutationMatch(std::string & target, std::string query, bool rev = false);//must passed by value for target;
+    //std::size_t mutationMatch(std::string target, std::string query, bool rev = false);//must passed by value for target;
+    
+    std::size_t mutationMatchFR(std::string target, std::string query, int mis, bool rev = false);
     
     //std::string getGenotype(std::string & mra, std::string & ssr);
     
@@ -102,7 +104,7 @@ private:
     LocVar* locVarIt;
     std::string readName;
     std::stringstream ss;
-    std::map<std::string, std::map<std::string, Genotype>> tmpAllGenotypeMap;
+    std::map<std::string, std::map<std::string, Genotype>> tmpAllGenotypeMap;//marker, seq, geno
     //Sex tmpSex;
     std::map<std::string, std::map<std::string, int>> tmpSexMap;
     //std::map<std::string, std::vector<std::pair<std::string, Genotype>>> sortedAllGenotypeMap;
