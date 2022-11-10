@@ -173,7 +173,7 @@ int main(int argc, char* argv[]){
     // I/O
     opt->var = cmd.get<string>("var");
     opt->mLocVars.locVarOptions.maxMismatchesPSeq = cmd.get<int>("maxMismatchesPSeq");
-    opt->mLocVars.locVarOptions.maxMismatchesPer4FR = cmd.get<int>("maxMismatchesPer4FR");
+    opt->mLocVars.locVarOptions.maxMismatchesPer4FR = cmd.get<double>("maxMismatchesPer4FR");
     opt->mLocVars.locVarOptions.minSeqs = cmd.get<int>("minSeqs");
     opt->mLocVars.locVarOptions.minWarningSeqs = cmd.get<int>("minWarningSeqs");
     opt->mLocVars.locVarOptions.minSeqsPer = cmd.get<int>("minSeqsPercentage");
