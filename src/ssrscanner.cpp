@@ -897,23 +897,24 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
     for (auto & it : allGenotypeMap) {//marker, seq, genotypes;
         auto locVarIt = &(mOptions->mLocVars.refLocMap.find(it.first)->second);
         int maxReads = 0;
-        for (const auto & it2 : it.second) {
-            if (it2.second.numReads > maxReads) {
-                maxReads = it2.second.numReads;
-            }
-        }
-        
-//        std::map<int, int> tmpReadsMap;
-//        for(const auto & it2 : it.second){
-//            tmpReadsMap[it2.first.length()] += it2.second.numReads;
-//        }
-//        
-//        for(const auto & it2 : tmpReadsMap){
-//            if(it2.second > maxReads){
-//                maxReads = it2.second;
+//        for (const auto & it2 : it.second) {
+//            if (it2.second.numReads > maxReads) {
+//                maxReads = it2.second.numReads;
 //            }
 //        }
+        
+        std::map<int, int> tmpReadsMap;
+        for(const auto & it2 : it.second){
+            tmpReadsMap[it2.first.length()] += it2.second.numReads;
+        }
+        
+        for(const auto & it2 : tmpReadsMap){
+            if(it2.second > maxReads){
+                maxReads = it2.second;
+            }
+        }
 
+        tmpReadsMap.clear();
 
         std::set<int> ffSet;
         std::set<int> rfSet;
