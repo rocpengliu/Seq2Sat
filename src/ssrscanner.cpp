@@ -887,8 +887,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
     std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMap;
     std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMraMap;
-    std::vector<std::map < std::string, std::vector<std::pair < std::string, Genotype>>>> sortedAllGenotypeMapVec
-    {
+    std::vector<std::map < std::string, std::vector<std::pair < std::string, Genotype>>>> sortedAllGenotypeMapVec{
         sortedAllGenotypeMap, sortedAllGenotypeMraMap
     };
     const char* target;
@@ -903,6 +902,18 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                 maxReads = it2.second.numReads;
             }
         }
+        
+//        std::map<int, int> tmpReadsMap;
+//        for(const auto & it2 : it.second){
+//            tmpReadsMap[it2.first.length()] += it2.second.numReads;
+//        }
+//        
+//        for(const auto & it2 : tmpReadsMap){
+//            if(it2.second > maxReads){
+//                maxReads = it2.second;
+//            }
+//        }
+
 
         std::set<int> ffSet;
         std::set<int> rfSet;
@@ -911,6 +922,10 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
         std::vector<std::pair < std::string, Genotype>> tmpMraVec;
         tmpMraVec.reserve(it.second.size());
         for (auto & it2 : it.second) {
+//            int nReads = tmpReadsMap.find(it2.first.length())->second;
+//            if (nReads >= mOptions->mLocVars.locVarOptions.minSeqs &&
+//                    (nReads * 100 / maxReads) >= mOptions->mLocVars.locVarOptions.minSeqsPer &&
+//                    it2.second.baseLocVar.mra.mStr.length() >= (it2.second.baseLocVar.repuit.mStr.length() + it2.second.baseLocVar.repuit2.mStr.length()) * mOptions->mLocVars.locVarOptions.minNSSRUnit) {
             if (it2.second.numReads >= mOptions->mLocVars.locVarOptions.minSeqs &&
                     (it2.second.numReads * 100 / maxReads) >= mOptions->mLocVars.locVarOptions.minSeqsPer &&
                     it2.second.baseLocVar.mra.mStr.length() >= (it2.second.baseLocVar.repuit.mStr.length() + it2.second.baseLocVar.repuit2.mStr.length()) * mOptions->mLocVars.locVarOptions.minNSSRUnit) {

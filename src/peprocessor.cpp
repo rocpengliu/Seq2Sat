@@ -199,16 +199,18 @@ bool PairEndProcessor::process(){
     cerr << "Insert size peak (evaluated by paired-end reads): " << peakInsertSize << endl;
 
     // make JSON report
+    
     JsonReporter jr(mOptions);
     jr.setDupHist(dupHist, dupMeanGC, dupRate);
     jr.setInsertHist(mInsertSizeHist, peakInsertSize);
     jr.report(sortedAllGenotypeMapVec, allSnpsMap, finalFilterResult, finalPreStats1, finalPostStats1, finalPreStats2, finalPostStats2);
-
+    cerr << "Finished Json report" << endl;
     // make HTML report
     HtmlReporter hr(mOptions);
     hr.setDupHist(dupHist, dupMeanGC, dupRate);
     hr.setInsertHist(mInsertSizeHist, peakInsertSize);
     hr.report(sortedAllGenotypeMapVec, allSnpsMap, finalFilterResult, finalPreStats1, finalPostStats1, finalPreStats2, finalPostStats2);
+    cerr << "Finished Html report" << endl;
 
     // clean up
     for(int t=0; t<mOptions->thread; t++){

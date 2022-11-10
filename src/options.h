@@ -250,7 +250,7 @@ public:
     int maxMismatchesPSeq;
     int minSeqs;
     int minWarningSeqs;
-    int minSeqsPer;//against largest peak; 10/%
+    int minSeqsPer;//against largest peak; 5/%
     int minMatchesFR;//minimum matches bps for both flanking regions
     double maxMismatchesPer4FR;//percentage for minimum matches bps for both flanking regions;
     int maxScore;
