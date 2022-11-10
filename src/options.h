@@ -222,7 +222,7 @@ class LocVarOptions{
 public:
     LocVarOptions(){
         maxMismatchesPSeq = 2;
-        minSeqs = 10;
+        minSeqs = 5;
         minSeqsPer = 5;
         minWarningSeqs = 50;
         minMatchesFR = 6;
@@ -289,7 +289,7 @@ public:
         maxScorePrimer = -1;
         modeCode = EDLIB_MODE_NW;
         alignTask = EDLIB_TASK_PATH;
-        minSeqs = 10;
+        minSeqs = 5;
     };
 public:
     int maxMismatchesPSeq;
