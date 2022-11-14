@@ -58,7 +58,7 @@ int main(int argc, char* argv[]){
     cmd.add<string>("sex", 0, "sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by '\t", false, "");
     cmd.add<unsigned int>("maxMismatchesSexPSeq", 0, "maximum number of mismatches for sex primers, default: 2", false, 2);
     cmd.add<unsigned int>("maxMismatchesSexRefSeq", 0, "maximum number of mismatches for sex reference sequences, default: 2", false, 2);
-    cmd.add<double>("yxRatio", 0, "minimum ratio of numbers of reads Y/X to W/Z, default: 0.1", false, 0.1);
+    cmd.add<double>("yxRatio", 0, "minimum ratio of numbers of reads Y/X to W/Z, default: 0.001", false, 0.001);
     cmd.add<int>("minTotalReadsX", 0, "minimum number of reads assigned to X; default: 10", false, 10);
     cmd.add<int>("minTotalReadsY", 0, "minimum number of reads assigned to Y; default: 10", false, 10);
     cmd.add<int>("minReadsX", 0, "minimum number of reads assigned to each variant of X; default: 5", false, 5);

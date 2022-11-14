@@ -1239,7 +1239,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     if (mOptions->mSex.minTotalReadsY < mOptions->mSex.readsY) {
                         mOptions->mSex.sexMF = "Male";
                     } else {
-                        mOptions->mSex.sexMF = "Female";
+                        mOptions->mSex.sexMF = "Inconclusive";
                     }
                 } else {
                     mOptions->mSex.sexMF = "Inconclusive";

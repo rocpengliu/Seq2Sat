@@ -200,7 +200,7 @@ Sex::Sex(){
     this->mismatchesRY = 2;
     this->lengthEqual = false;
     this->YXRatio = 0;
-    this->YXRationCuttoff = 0.1;
+    this->YXRationCuttoff = 0.0001;
     this->sexMF = "Inconclusive";
     this->seqVecX.clear();
     this->seqVecY.clear();
