@@ -29,7 +29,6 @@ int main(int argc, char* argv[]){
     }
     cmdline::parser cmd;
     cmd.add<string>("var", 0, "genetic variance, must be either microsatellite/ssr or snp", false, "");
-    cmd.add<string>("sampleTable", 's', "Sample table consisting of sample prefix/name, forward sequence file, reverse sequence file if paired-end, and must be separated by '\t', it is highly recommended if you have multiple samples", false, "");
     cmd.add<string>("in1", 'i', "read1 input file name", false, "");
     cmd.add<string>("in2", 'I', "read2 input file name", false, "");
     cmd.add<string>("prefix", 'X', "prefix name for output files, eg: sample01", false, "");
@@ -364,7 +363,7 @@ int main(int argc, char* argv[]){
     command = ss.str();
     bool supportEvaluation = !opt->inputFromSTDIN && opt->in1!="/dev/stdin";
     time_t t1 = time(NULL);
-    opt->sampleTable = cmd.get<string>("sampleTable");
+    //opt->sampleTable = cmd.get<string>("sampleTable");
     if (opt->sampleTable.empty()) {
         opt->in1 = cmd.get<string>("in1");
         opt->in2 = cmd.get<string>("in2");
@@ -386,9 +385,9 @@ int main(int argc, char* argv[]){
         // using evaluator to guess how many reads in total
         if (opt->shallDetectAdapter(false)) {
             if (!supportEvaluation) {
-                //cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
+                cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
             } else {
-                //cerr << "Detecting adapter sequence for read1..." << endl;
+                cerr << "Detecting adapter sequence for read1..." << endl;
                 string adapt = eva.evalAdapterAndReadNum(readNum, false);
                 if (adapt.length() > 60)
                     adapt.resize(0, 60);
@@ -396,7 +395,7 @@ int main(int argc, char* argv[]){
                     opt->adapter.sequence = adapt;
                     opt->adapter.detectedAdapter1 = adapt;
                 } else {
-                    //cerr << "No adapter detected for read1" << endl;
+                    cerr << "No adapter detected for read1" << endl;
                     opt->adapter.sequence = "";
                 }
                 cerr << endl;
@@ -404,9 +403,9 @@ int main(int argc, char* argv[]){
         }
         if (opt->shallDetectAdapter(true)) {
             if (!supportEvaluation) {
-                //cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
+                cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
             } else {
-                //cerr << "Detecting adapter sequence for read2..." << endl;
+                cerr << "Detecting adapter sequence for read2..." << endl;
                 string adapt = eva.evalAdapterAndReadNum(readNum, true);
                 if (adapt.length() > 60)
                     adapt.resize(0, 60);
@@ -414,7 +413,7 @@ int main(int argc, char* argv[]){
                     opt->adapter.sequenceR2 = adapt;
                     opt->adapter.detectedAdapter2 = adapt;
                 } else {
-                    //cerr << "No adapter detected for read2" << endl;
+                    cerr << "No adapter detected for read2" << endl;
                     opt->adapter.sequenceR2 = "";
                 }
                 cerr << endl;
@@ -433,9 +432,16 @@ int main(int argc, char* argv[]){
         
         opt->readLocFile();
         opt->readSexLoc();
+        Processor* p = new Processor(opt);
+        p->process();
+        //Processor p(opt);
+        //p.process();
         
-        Processor p(opt);
-        p.process();
+
+        if (p) {
+            delete p;
+            p = NULL;
+        }
 
         time_t t2 = time(NULL);
 
@@ -532,7 +538,7 @@ int main(int argc, char* argv[]){
         //HtmlReporterAll hra(opt);
         //hra.report();
     }
-    
+
     if(opt){
         delete opt;
         opt = NULL;
