@@ -34,9 +34,9 @@ bool SnpScanner::scanVar(Read* & r1) {
     std::map<std::string, std::pair<int, int>> locMap;
     //cCout("cccccccccccccccccccccccccccccc000000000000000000000");
     for (auto & it : mOptions->mLocSnps.refLocMap) {
-//        cCout("cccccccccccccccccccccccccccccc111111111111111");
-//        it.second.print();
-//        r1->print();
+       // cCout("cccccccccccccccccccccccccccccc111111111111111");
+        it.second.print();
+        r1->print();
         fpData = it.second.fp.mStr.c_str();
         fpLength = it.second.fp.mStr.length();
         rpData = it.second.rp.mStr.c_str();
@@ -103,23 +103,23 @@ bool SnpScanner::scanVar(Read* & r1) {
             }
         }
         locSnpIt = mOptions->mLocSnps.refLocMap[locName];
-//        locSnpIt.print();
+        locSnpIt.print();
 //        cCout(locName, 'y');
 //        cCout(locMap[locName].first, 'y');
 //        cCout(locMap[locName].second, 'y');
 //        r1->print();
-        r1->trimFront(locSnpIt.fp.length());
-        r1->resize(locMap[locName].second);
+//        r1->trimFront(locSnpIt.fp.length());
+//        r1->resize(locMap[locName].second);
         //r1->resize(locSnpIt.ref.mStr.length());
         locMap.clear();
         
         if(mOptions->debug) cCout("detected marker: " + locSnpIt.name, 'r');
         
-        //r1->print();
-        
-        //cCout("0000000000000000000", 'r');
-        //cCout(r1->mSeq.mStr.length(), 'g');
-        //cCout(locSnpIt.ref.mStr.length(), 'r');
+//        r1->print();
+//        
+//        cCout("0000000000000000000", 'r');
+//        cCout(r1->mSeq.mStr.length(), 'g');
+//        cCout(locSnpIt.ref.mStr.length(), 'r');
         if (r1->mSeq.mStr.length() == locSnpIt.ref.mStr.length()) {
 
             readSeq = r1->mSeq.mStr.c_str();

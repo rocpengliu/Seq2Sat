@@ -418,8 +418,14 @@ void Options::readLocFile(){
                     splitStr(splitVec[5], mrasVec, "|");
                     tmpLocVar.repuit = mrasVec.at(0);
                     tmpLocVar.repuit2 = mrasVec.at(1);
+                    if(tmpLocVar.repuit.length() == tmpLocVar.repuit2.length()){
+                        tmpLocVar.repuitAllLen = tmpLocVar.repuit.length();
+                    } else {
+                        tmpLocVar.repuitAllLen = tmpLocVar.repuit.length() + tmpLocVar.repuit2.length();
+                    }
                 } else {
                     tmpLocVar.repuit = splitVec[5];
+                    tmpLocVar.repuitAllLen = 0;
                 }
                 tmpLocVar.nRep = std::stoi(splitVec[6]);
                 if (tmpLocVar.repuit.mStr.length() == 2 || tmpLocVar.repuit.mStr.length() == 3) {

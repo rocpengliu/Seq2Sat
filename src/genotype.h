@@ -29,6 +29,7 @@ public:
     Sequence ff;
     Sequence rf;
     Sequence repuitAll;
+    int repuitAllLen;//if rep1.len == rep2.len, then repAllLen = rep1.len; otherwise = rep1.len + rep2.len; if rep2.len = 0; then repalllen = 0;
     Sequence repuit;
     Sequence repuit2;
     std::string mraBase;

@@ -20,6 +20,7 @@ SingleEndProcessor::SingleEndProcessor(Options* opt){
     mZipFile = NULL;
     mUmiProcessor = new UmiProcessor(opt);
     mLeftWriter =  NULL;
+    mFailedWriter = NULL;
 
     mDuplicate = NULL;
     if(mOptions->duplicate.enabled) {
@@ -31,6 +32,11 @@ SingleEndProcessor::SingleEndProcessor(Options* opt){
 SingleEndProcessor::~SingleEndProcessor() {
     delete mFilter;
     if(mDuplicate) {
+        delete mDuplicate;
+        mDuplicate = NULL;
+    }
+
+    if (mDuplicate) {
         delete mDuplicate;
         mDuplicate = NULL;
     }
@@ -50,12 +56,21 @@ void SingleEndProcessor::initOutput() {
     if(mOptions->out1.empty())
         return;
     mLeftWriter = new WriterThread(mOptions, mOptions->out1);
+
+    if (!mOptions->outFRFile.empty()) {
+        mFailedWriter = new WriterThread(mOptions, mOptions->outFRFile);
+    }
 }
 
 void SingleEndProcessor::closeOutput() {
     if(mLeftWriter) {
         delete mLeftWriter;
         mLeftWriter = NULL;
+    }
+    
+    if (mFailedWriter) {
+        delete mFailedWriter;
+        mFailedWriter = NULL;
     }
 }
 
@@ -87,13 +102,21 @@ bool SingleEndProcessor::process(){
     if(mLeftWriter)
         leftWriterThread = new std::thread(std::bind(&SingleEndProcessor::writeTask, this, mLeftWriter));
 
+    std::thread* failedWriterThread = NULL;
+    if (mFailedWriter) {
+        failedWriterThread = new std::thread(std::bind(&SingleEndProcessor::writeTask, this, mFailedWriter));
+    }
+
     producer.join();
     for(int t=0; t<mOptions->thread; t++){
         threads[t]->join();
     }
 
-    if(leftWriterThread)
+    if (leftWriterThread)
         leftWriterThread->join();
+    
+    if (failedWriterThread)
+        failedWriterThread->join();
 
     if(mOptions->verbose)
         loginfo("start to generate reports\n");
@@ -102,22 +125,58 @@ bool SingleEndProcessor::process(){
     vector<Stats*> preStats;
     vector<Stats*> postStats;
     vector<FilterResult*> filterResults;
+    std::vector<std::map<std::string, std::map < std::string, Genotype>>> totalGenotypeSsrMapVec;
+    totalGenotypeSsrMapVec.reserve(mOptions->thread);
+    std::vector<std::map<std::string, std::map < std::string, LocSnp>>> totalGenotypeSnpMapVec;
+    totalGenotypeSnpMapVec.reserve(mOptions->thread);
+    std::vector<std::map<std::string, std::map<std::string, int>>> totalSexLocVec;
+    totalSexLocVec.reserve(mOptions->thread);
+
+    if (mOptions->mVarType == ssr) {
+        totalGenotypeSsrMapVec.reserve(mOptions->thread);
+    } else if (mOptions->mVarType == snp) {
+        totalGenotypeSnpMapVec.reserve(mOptions->thread);
+    }
+    
     for(int t=0; t<mOptions->thread; t++){
         preStats.push_back(configs[t]->getPreStats1());
         postStats.push_back(configs[t]->getPostStats1());
         filterResults.push_back(configs[t]->getFilterResult());
+
+        if (mOptions->mVarType == ssr) {
+            totalGenotypeSsrMapVec.push_back(configs[t]->getSsrScanner()->getGenotypeMap());
+            totalSexLocVec.emplace_back(configs[t]->getSsrScanner()->getSexLoc());
+        } else if (mOptions->mVarType == snp) {
+            totalGenotypeSnpMapVec.push_back(configs[t]->getSnpScanner()->getSubGenotypeMap());
+            //totalSexLocVec.emplace_back(configs[t]->getSnpScanner()->getSexLoc());
+        }
     }
+    
     Stats* finalPreStats = Stats::merge(preStats);
     Stats* finalPostStats = Stats::merge(postStats);
     FilterResult* finalFilterResult = FilterResult::merge(filterResults);
-    
-    //std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> sortedAllGenotypeMapVec = mSsrScanner->report();
-    //std::map<std::string, std::vector<std::pair<std::string, Genotype>>> sortedAllGenotypeMap = mSsrScanner->report();
 
-    // read filter results to the first thread's
-    for(int t=1; t<mOptions->thread; t++){
-        preStats.push_back(configs[t]->getPreStats1());
-        postStats.push_back(configs[t]->getPostStats1());
+    std::map<std::string, std::map < std::string, Genotype>> allGenotypeMap; //marker, seq, geno
+    std::vector<std::map < std::string, std::vector<std::pair < std::string, Genotype>>>> sortedAllGenotypeMapVec;
+    std::map<std::string, std::map < std::string, LocSnp>> allSnpsMap;
+    std::vector<std::map < std::string, std::vector<std::pair < std::string, LocSnp>>>> sortedAllSnpsMapVec;
+
+    if (mOptions->mVarType == ssr) {
+        allGenotypeMap = SsrScanner::merge(totalGenotypeSsrMapVec);
+        if (!mOptions->mSex.sexMarker.empty()) {
+            SsrScanner::merge(totalSexLocVec, mOptions);
+        }
+        sortedAllGenotypeMapVec = SsrScanner::report(mOptions, allGenotypeMap);
+        if (!mOptions->samples.empty()) {
+            for (auto & it : mOptions->samples) {
+                if (it.prefix == mOptions->prefix) {
+                    //it.sortedAllGenotypeMapVec = sortedAllGenotypeMapVec;
+                    break;
+                }
+            }
+        }
+    } else if (mOptions->mVarType == snp) {
+        allSnpsMap = SnpScanner::merge(mOptions, totalGenotypeSnpMapVec);
     }
 
     int* dupHist = NULL;
@@ -134,15 +193,15 @@ bool SingleEndProcessor::process(){
         cerr << "Duplication rate (may be overestimated since this is SE data): " << dupRate * 100.0 << "%" << endl;
     }
 
-    // make JSON report
-//    JsonReporter jr(mOptions);
-//    jr.setDupHist(dupHist, dupMeanGC, dupRate);
-//    jr.report(sortedAllGenotypeMapVec, finalFilterResult, finalPreStats, finalPostStats);
-//
-//    // make HTML report
-//    HtmlReporter hr(mOptions);
-//    hr.setDupHist(dupHist, dupMeanGC, dupRate);
-//    hr.report(sortedAllGenotypeMapVec, finalFilterResult, finalPreStats, finalPostStats);
+    JsonReporter jr(mOptions);
+    jr.setDupHist(dupHist, dupMeanGC, dupRate);
+    jr.report(sortedAllGenotypeMapVec, allSnpsMap, finalFilterResult, finalPreStats, finalPostStats);
+    cerr << "Finished Json report" << endl;
+    // make HTML report
+    HtmlReporter hr(mOptions);
+    hr.setDupHist(dupHist, dupMeanGC, dupRate);
+    hr.report(sortedAllGenotypeMapVec, allSnpsMap, finalFilterResult, finalPreStats, finalPostStats);
+    cerr << "Finished Html report" << endl;
 
     // clean up
     for(int t=0; t<mOptions->thread; t++){
@@ -167,6 +226,9 @@ bool SingleEndProcessor::process(){
     if(leftWriterThread)
         delete leftWriterThread;
 
+    if (failedWriterThread)
+        delete failedWriterThread;
+
     closeOutput();
 
     return true;
@@ -174,7 +236,8 @@ bool SingleEndProcessor::process(){
 
 bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
     string outstr;
-    string failedOut;
+    string failedOutput;
+    string locus = "";
     int readPassed = 0;
     for(int p=0;p<pack->count;p++){
 
@@ -227,11 +290,20 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
 
         if( r1 != NULL &&  result == PASS_FILTER) {
 
-            bool found = false;
+            locus.clear();
 
-            if(found)
+            if (mOptions->mVarType == ssr) {
+                locus = config->getSsrScanner()->scanVar(r1);
+            } else {
+                config->getSnpScanner()->scanVar(r1);
+            }
+
+            if (locus.empty()) {
+                failedOutput += r1->toStringWithTag(locus);
+            } else {
                 outstr += r1->toString();
-
+            }
+            
             // stats the read after filtering
             config->getPostStats1()->statRead(r1);
             readPassed++;
@@ -253,6 +325,13 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
         memcpy(ldata, outstr.c_str(), outstr.size());
         mLeftWriter->input(ldata, outstr.size());
     }
+
+    if (mFailedWriter && !failedOutput.empty()) {
+        char* fdata = new char[failedOutput.size()];
+        memcpy(fdata, failedOutput.c_str(), failedOutput.size());
+        mFailedWriter->input(fdata, failedOutput.size());
+    }
+    
     mOutputMtx.unlock();
 
     config->markProcessed(pack->count);
@@ -268,8 +347,6 @@ void SingleEndProcessor::initPackRepository() {
     memset(mRepo.packBuffer, 0, sizeof(ReadPack*)*PACK_NUM_LIMIT);
     mRepo.writePos = 0;
     mRepo.readPos = 0;
-    //mRepo.readCounter = 0;
-    
 }
 
 void SingleEndProcessor::destroyPackRepository() {
@@ -278,34 +355,12 @@ void SingleEndProcessor::destroyPackRepository() {
 }
 
 void SingleEndProcessor::producePack(ReadPack* pack){
-    //std::unique_lock<std::mutex> lock(mRepo.mtx);
-    /*while(((mRepo.writePos + 1) % PACK_NUM_LIMIT)
-        == mRepo.readPos) {
-        //mRepo.repoNotFull.wait(lock);
-    }*/
-
     mRepo.packBuffer[mRepo.writePos] = pack;
     mRepo.writePos++;
-
-    /*if (mRepo.writePos == PACK_NUM_LIMIT)
-        mRepo.writePos = 0;*/
-
-    //mRepo.repoNotEmpty.notify_all();
-    //lock.unlock();
 }
 
 void SingleEndProcessor::consumePack(ThreadConfig* config){
     ReadPack* data;
-    //std::unique_lock<std::mutex> lock(mRepo.mtx);
-    // buffer is empty, just wait here.
-    /*while(mRepo.writePos % PACK_NUM_LIMIT == mRepo.readPos % PACK_NUM_LIMIT) {
-        if(mProduceFinished){
-            //lock.unlock();
-            return;
-        }
-        //mRepo.repoNotEmpty.wait(lock);
-    }*/
-
     mInputMtx.lock();
     while(mRepo.writePos <= mRepo.readPos) {
         usleep(1000);
@@ -316,20 +371,12 @@ void SingleEndProcessor::consumePack(ThreadConfig* config){
     }
     data = mRepo.packBuffer[mRepo.readPos];
     mRepo.readPos++;
-
-    /*if (mRepo.readPos >= PACK_NUM_LIMIT)
-        mRepo.readPos = 0;*/
     mInputMtx.unlock();
-
-    //lock.unlock();
-    //mRepo.repoNotFull.notify_all();
-
     processSingleEnd(data, config);
 
 }
 
-void SingleEndProcessor::producerTask()
-{
+void SingleEndProcessor::producerTask(){
     if(mOptions->verbose)
         loginfo("start to load data");
     long lastReported = 0;
@@ -377,9 +424,8 @@ void SingleEndProcessor::producerTask()
             //re-initialize data for next pack
             data = new Read*[PACK_SIZE];
             memset(data, 0, sizeof(Read*)*PACK_SIZE);
-            // if the consumer is far behind this producer, sleep and wait to limit memory usage
+            // if the consumer/writer is far behind this producer/reader, sleep and wait to limit memory usage
             while(mRepo.writePos - mRepo.readPos > PACK_IN_MEM_LIMIT){
-                //cerr<<"sleep"<<endl;
                 slept++;
                 usleep(100);
             }
@@ -387,43 +433,26 @@ void SingleEndProcessor::producerTask()
             // if the writer threads are far behind this producer, sleep and wait
             // check this only when necessary
             if(readNum % (PACK_SIZE * PACK_IN_MEM_LIMIT) == 0 && mLeftWriter) {
-                while(mLeftWriter->bufferLength() > PACK_IN_MEM_LIMIT) {
+                while(mLeftWriter->bufferLength() > PACK_IN_MEM_LIMIT || (mFailedWriter && mFailedWriter->bufferLength() > PACK_IN_MEM_LIMIT)) {
                     slept++;
                     usleep(1000);
                 }
             }
             // reset count to 0
             count = 0;
-            // re-evaluate split size
-            // TODO: following codes are commented since it may cause threading related conflicts in some systems
-            /*if(mOptions->split.needEvaluation && !splitSizeReEvaluated && readNum >= mOptions->split.size) {
-                splitSizeReEvaluated = true;
-                // greater than the initial evaluation
-                if(readNum >= 1024*1024) {
-                    size_t bytesRead;
-                    size_t bytesTotal;
-                    reader.getBytes(bytesRead, bytesTotal);
-                    mOptions->split.size *=  (double)bytesTotal / ((double)bytesRead * (double) mOptions->split.number);
-                    if(mOptions->split.size <= 0)
-                        mOptions->split.size = 1;
-                }
-            }*/
         }
     }
 
-    //std::unique_lock<std::mutex> lock(mRepo.readCounterMtx);
     mProduceFinished = true;
     if(mOptions->verbose)
         loginfo("all reads loaded, start to monitor thread status");
-    //lock.unlock();
 
     // if the last data initialized is not used, free it
     if(data != NULL)
         delete[] data;
 }
 
-void SingleEndProcessor::consumerTask(ThreadConfig* config)
-{
+void SingleEndProcessor::consumerTask(ThreadConfig* config){
     while(true) {
         if(config->canBeStopped()){
             mFinishedThreads++;
@@ -434,25 +463,23 @@ void SingleEndProcessor::consumerTask(ThreadConfig* config)
                 break;
             usleep(1000);
         }
-        //std::unique_lock<std::mutex> lock(mRepo.readCounterMtx);
+
         if(mProduceFinished && mRepo.writePos == mRepo.readPos){
             mFinishedThreads++;
             if(mOptions->verbose) {
                 string msg = "thread " + to_string(config->getThreadId() + 1) + " data processing completed";
                 loginfo(msg);
             }
-            //lock.unlock();
             break;
         }
+        
         if(mProduceFinished){
             if(mOptions->verbose) {
                 string msg = "thread " + to_string(config->getThreadId() + 1) + " is processing the " + to_string(mRepo.readPos) + " / " + to_string(mRepo.writePos) + " pack";
                 loginfo(msg);
             }
             consumePack(config);
-            //lock.unlock();
         } else {
-            //lock.unlock();
             consumePack(config);
         }
     }
@@ -460,6 +487,9 @@ void SingleEndProcessor::consumerTask(ThreadConfig* config)
     if(mFinishedThreads == mOptions->thread) {
         if(mLeftWriter)
             mLeftWriter->setInputCompleted();
+        
+        if(mFailedWriter)
+            mFailedWriter->setInputCompleted();
     }
 
     if(mOptions->verbose) {

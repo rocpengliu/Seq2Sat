@@ -470,6 +470,66 @@ inline void splitStr(const string & str, std::vector<std::string> & ret_, string
     return;
 }
 
+inline int findDigitLen(std::string str){
+    int len = 0;
+    for(int i = 0; i < str.length(); i++){
+        if(isdigit(str[i])){
+            len++;
+        } else {
+            break;
+        }
+    }
+    return len;
+}
+
+inline std::string findSingSSR(std::string & cssr){
+    std::string newStr;
+    int pos = 0;
+    while(pos < cssr.length()){
+        if(cssr[pos] == '('){
+            auto len = findDigitLen(cssr.substr(pos + 5));
+            newStr += cssr.substr(pos, len + 5);
+            pos += (5 + len);
+        } else {
+            
+            if(pos < cssr.length() - 1){
+                if(cssr[pos] == cssr[pos + 1]){
+                    newStr += "(";
+                    newStr += cssr[pos];
+                    int rep = 1;
+                    while(pos < cssr.length() - 1){
+                        if(cssr[pos] == cssr[pos + 1]){
+                            rep++;
+                            pos++;
+                            if(pos == cssr.length()- 1){
+                                newStr += ")";
+                                newStr += std::to_string(rep);
+                                return(newStr);
+                            }
+                        } else {
+                            pos++;
+                            newStr += ")";
+                            newStr += std::to_string(rep);
+                            break;
+                        }
+                    }
+                    
+                } else {
+                    newStr += cssr[pos];
+                    pos++;
+                }
+                
+            } else {
+                newStr += cssr[pos];
+                pos++;
+            }
+        }
+        
+    }
+    
+    return newStr;
+}
+
 inline std::string getGenotype(std::string & mra, std::string & ssr, bool adp = false) {
     std::string genStr = "";
     size_t startPos = mra.find(ssr);
@@ -503,7 +563,13 @@ inline std::string getGenotype(std::string & mra, std::string & ssr, bool adp = 
         }
         startPos = endPos;
     }
-    return genStr;
+    
+    if(adp){
+        return genStr;
+    } else {
+        return findSingSSR(genStr);
+    }
+    
 }
 
 inline std::string getGenotype(std::string & mra, std::string & ssr, std::string & ssr2) {
@@ -592,4 +658,98 @@ std::pair<K,V> getMaxKeyValue(const std::map<K, V> & map, bool reverse = false){
     }
 }
 
+template<typename K, typename V>
+std::map<K,V> getTop2MaxKeyValue(const std::map<K, V> & map){
+    std::map<K, V> tmp = map;
+    std::pair<K,V> m1 = getMaxKeyValue(tmp);
+    tmp.erase(m1.first);
+    std::pair<K,V> m2 = getMaxKeyValue(tmp);
+    tmp.clear();
+    tmp = {m1, m2};
+    return(tmp);
+}
+
+template<typename K, typename V>
+std::map<K, V> get2Peaks(const std::map<K, V> & map, double hlRatio, double hlRatio2) {
+    auto it = map.begin();
+    auto nReads = it->second;
+    auto nReadsPeak = nReads;
+    auto loc = it->first;
+    auto locPeak = loc;
+    std::map<K, V> res;
+    int i = 1;
+    while (i < map.size()) {
+        i++;
+        std::advance(it, 1);
+        if (nReadsPeak < it->second) {
+            nReadsPeak = it->second;
+            locPeak = it->first;
+        }
+        if (it->second >= nReads) {
+            nReads = it->second;
+            loc = it->first;
+        } else {
+            res[loc] = nReads;
+            std::cout << nReads << " : " << loc << "\n";
+            nReads = it->second;
+            loc = it->first;
+            break;
+        }
+    }
+    if (res.empty()) {
+        res[locPeak] = nReadsPeak;
+        return (res);
+    }
+
+    bool cont = false;
+    if (i == map.size()) {
+        if ((double) nReads / nReadsPeak >= hlRatio) {
+            res[loc] = nReads;
+            return (res);
+        } else {
+            cont = true;
+        }
+        
+    } else if(i == map.size() - 1) {
+        i++;
+        std::advance(it, 1);
+        if((double) nReads / nReadsPeak >= hlRatio && (double) (it->second) / nReadsPeak >= hlRatio2){
+            if(nReads > it->second){
+                res[loc] = nReads;
+            } else {
+                res[it->first] = it->second;
+            }
+            
+            return (res);
+        } else {
+            cont = true;
+        }
+    } else {
+        i++;
+        std::advance(it, 1);
+        cont = true;
+    }
+
+    if (cont) {
+        nReads = it->second;
+        loc = it->first;
+        while (i < map.size()) {
+            i++;
+            std::advance(it, 1);
+            if (it->second >= nReads) {
+                nReads = it->second;
+                loc = it->first;
+            }
+        }
+
+        std::map<K, V> map2;
+        for (const auto & itt : map) {
+            if (itt.first >= loc) {
+                map2[itt.first] = itt.second;
+            }
+        }
+        res.insert(getMaxKeyValue(map2));
+    }
+    return (res);
+}
 #endif /* UTIL_H */

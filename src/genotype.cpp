@@ -25,6 +25,7 @@ LocVar::LocVar() {
     this->refSnpsSetrfMap.clear();
     this->mraBase = "";
     this->totalReads = 0;
+    this->repuitAllLen = 0;
 }
 
 LocVar::LocVar(std::string & read, std::pair<size_t, int> & mraPosLenReadF, std::string & ssr){
@@ -64,30 +65,19 @@ void LocVar::printSnpMap(){
     std::string msg = "name: " + name +  " ff: " + ff.mStr + " mra: " + mra.mStr + " rf: " + rf.mStr;
     
     msg += "\nffSnpMap:\n";
-    cCout("000000000000000000000000", 'y');
     for(const auto & it : refSnpsSetffMap){
         for(const auto & it2 : it.second){
-            //if(it2 > 0){
-            cCout("0000000000000000000000001111111111111111111", 'y');
               msg += it.first + " : " + std::to_string(it2) + "\n";  
-              cCout("0000000000000000000000002222222222222222", 'y');
-            //}
         }
     }
     
-    cCout("0000000000000000000000003333333333333333333", 'y');
     msg += "rfSnpMap:\n";
     for(auto & it : refSnpsSetrfMap){
         for(const auto & it2 : it.second) {
-            //if (it2 > 0) {
-            cCout("000000000000000000000000444444444444444444444", 'y');
                 msg += it.first + " : " + std::to_string(it2) + "\n";
-            //}
-                cCout("000000000000000000000000555555555555555555", 'y');
         }
     }
     cCout(msg, 'g');
-    cCout("0000000000000000000000006666666666666", 'y');
 }
 
 LocVar::LocVar(std::string name, Sequence fp, Sequence rp, Sequence ff, Sequence rf, Sequence repuit, int nRep, unsigned int edCutoff, Sequence mra){

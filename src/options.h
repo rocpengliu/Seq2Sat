@@ -243,8 +243,8 @@ public:
         maxDeletionRPrimer = 4;
         maxInsertionRPrimer = 4;
         maxMismatchesRPrimer = 4;
-        hlRatio1 = 0.3;
-        hlRatio2 = 0.1;
+        hlRatio1 = 0.5;
+        hlRatio2 = 0.3;
     };
 public:
     int maxMismatchesPSeq;

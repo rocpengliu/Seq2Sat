@@ -43,8 +43,8 @@ int main(int argc, char* argv[]){
     cmd.add<int>("minSeqs", 0, "minimum number of reads for a genotype, default: 5", false, 5);
     cmd.add<int>("minWarningSeqs", 0, "minimum number of reads for warning a genotype, default: 50", false, 50);
     cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%)", false, 5);
-    cmd.add<double>("hlRatio1", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.3", false, 0.3);
-    cmd.add<double>("hlRatio2", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 0.1", false, 0.1);
+    cmd.add<double>("hlRatio1", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.5", false, 0.5);
+    cmd.add<double>("hlRatio2", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 0.3", false, 0.3);
     cmd.add<string>("mode", 0, "specify the sequence alignment mode: NW (default) | HW | SHW", false, "NW");
     cmd.add<int>("maxScore", 0, "specify the maximum score of sequence alignment with sore > maxScore will be discarded, default value is -1, and no sequence will be discarded.",false, -1);
     cmd.add<int>("numBestSeqs", 0, "Score will be calculated only for N best sequences (best = with smallest score). If N = 0 then all sequences will be calculated.", 0);

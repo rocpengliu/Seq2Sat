@@ -370,8 +370,11 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                             config->getSnpScanner()->scanVar(merged);
                         }
 
-                        if (!locus.empty()) {
+                        if (locus.empty()) {
                             failedOutput += merged->toStringWithTag(locus);
+                        } else {
+                            outstr1 += r1->toString();
+                            outstr2 += r2->toString();
                         }
                         analysisEachRead = false;
                     }
@@ -385,14 +388,14 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
             }
             
             
-            if(found) {
-                if(mOptions->outputToSTDOUT) {
-                    singleOutput += r1->toString() + r2->toString();
-                } else {
-                    outstr1 += r1->toString();
-                    outstr2 += r2->toString();
-                }
-            }
+//            if(found) {
+//                if(mOptions->outputToSTDOUT) {
+//                    singleOutput += r1->toString() + r2->toString();
+//                } else {
+//                    outstr1 += r1->toString();
+//                    outstr2 += r2->toString();
+//                }
+//            }
 
             // stats the read after filtering
             config->getPostStats1()->statRead(r1);
@@ -512,7 +515,7 @@ void PairEndProcessor::producerTask(){
     FastqReaderPair reader(mOptions->in1, mOptions->in2, true, mOptions->phred64, mOptions->interleavedInput);
     int count=0;
     bool needToBreak = false;
-    //if(mOptions->debug) cCout("start to read data: " + mOptions->in1 + " and " + mOptions->in2);
+    if(mOptions->debug) cCout("start to read data: " + mOptions->in1 + " and " + mOptions->in2);
     while(true){
         //if(mOptions->debug) cCout("reading data 1");
         ReadPair* read = reader.read();
