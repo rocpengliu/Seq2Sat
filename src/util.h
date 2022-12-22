@@ -690,7 +690,6 @@ std::map<K, V> get2Peaks(const std::map<K, V> & map, double hlRatio, double hlRa
             loc = it->first;
         } else {
             res[loc] = nReads;
-            std::cout << nReads << " : " << loc << "\n";
             nReads = it->second;
             loc = it->first;
             break;
