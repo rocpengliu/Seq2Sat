@@ -564,11 +564,11 @@ inline std::string getGenotype(std::string & mra, std::string & ssr, bool adp = 
         startPos = endPos;
     }
     
-    if(adp){
+    //if(adp){
         return genStr;
-    } else {
-        return findSingSSR(genStr);
-    }
+    //} else {
+        //return findSingSSR(genStr);
+    //}
     
 }
 
