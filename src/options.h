@@ -243,8 +243,8 @@ public:
         maxDeletionRPrimer = 4;
         maxInsertionRPrimer = 4;
         maxMismatchesRPrimer = 4;
-        hlRatio1 = 0.5;
-        hlRatio2 = 0.3;
+        hlRatio1 = 0.4;
+        hlRatio2 = 0.2;
     };
 public:
     int maxMismatchesPSeq;
@@ -448,6 +448,7 @@ public:
     std::string var;
     std::string sampleTable;
     
+    int minAmpliconEffectiveLen;//length without primers for both sex and nonsex loci
     MultiLocVars mLocVars;
     MultiLocSnps mLocSnps;
     string prefix;

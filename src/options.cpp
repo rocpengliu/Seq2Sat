@@ -37,6 +37,7 @@ Options::Options(){
     sexFile = "";
     sampleTable = "";
     samples.clear();
+    minAmpliconEffectiveLen = 6;
 }
 
 void Options::init() {

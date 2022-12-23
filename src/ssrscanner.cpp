@@ -766,11 +766,12 @@ void SsrScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
 
     for (auto & it : totalSexLocVec) {
         for (const auto & it2 : it["X"]) {
-            seqMapX[it2.first] += it2.second;
+            mOptions->isPaired() ? (seqMapX[it2.first] += it2.second * 2 ): (seqMapX[it2.first] += it2.second);
+            
         }
 
         for (const auto & it2 : it["Y"]) {
-            seqMapY[it2.first] += it2.second;
+             mOptions->isPaired() ? (seqMapY[it2.first] += it2.second * 2) : seqMapY[it2.first] += it2.second;
         }
     }
 
@@ -1005,7 +1006,6 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                             (double) (twoPeaksMap.begin()->second) / twoPeaksMap.rbegin()->second;
                     
                     int diff = twoPeaksMap.rbegin()->first - twoPeaksMap.begin()->first;
-                    
                     if (locVarIt->repuitAllLen == 0 || locVarIt->repuitAllLen == locVarIt->repuit.length()) {
                         if (diff <= locVarIt->repuit.length()) {
                             if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio1) {
@@ -1546,40 +1546,25 @@ std::string SsrScanner::scanVar(Read* & r1) {
     readLength = r1->mSeq.length();
     readName = r1->mName;
     returnedlocus.clear();
+    checkLoci = true;
     if (mOptions->mSex.sexMarker.empty()) {
         checkLoci = true;
+    } else if(r1->length() < (mOptions->mSex.primerF.length() + mOptions->mSex.primerR.length())){
+        checkLoci = true;
     } else {
-        fpData = mOptions->mSex.primerF.mStr.c_str();
-        rpData = mOptions->mSex.primerR.mStr.c_str();
-        bool fpMatched = true;
-        bool rpMatched = true;
-        int fpMismatches = 0;
-        int rpMismatches = 0;
+        int fpMismatches = (int) edit_distance(mOptions->mSex.primerF.mStr,
+                r1->mSeq.mStr.substr(0, mOptions->mSex.primerF.length()));
 
-        for (int i = 0; i < mOptions->mSex.primerF.length(); i++) {
-            if (fpData[i] != readSeq[i]) {
-                fpMismatches++;
-            }
+        if (fpMismatches > mOptions->mSex.mismatchesPF) {
+            checkLoci = true;
+        } else {
+            //checkLoci = false;
+            int rpMismatches = (int) edit_distance(mOptions->mSex.primerR.mStr,
+                    r1->mSeq.mStr.substr(r1->mSeq.length() - mOptions->mSex.primerR.length()));
 
-            if (fpMismatches > mOptions->mSex.mismatchesPF) {
-                fpMatched = false;
-                break;
-            }
-        }
-
-        if (fpMatched) {
-            int rlen = r1->length() - mOptions->mSex.primerR.length();
-            for (int i = 0; i < mOptions->mSex.primerR.length(); i++) {
-                if (rpData[i] != readSeq[rlen + i]) {
-                    rpMismatches++;
-                }
-                if (rpMismatches > mOptions->mSex.mismatchesPR) {
-                    rpMatched = false;
-                    break;
-                }
-            }
-            if (rpMatched) {
-
+            if (rpMismatches > mOptions->mSex.mismatchesPF) {
+                checkLoci = true;
+            } else {
                 if (mOptions->mSex.lengthEqual) {
                     unsigned int edx = edit_distance(mOptions->mSex.refX.mStr,
                             r1->mSeq.mStr.substr(mOptions->mSex.primerF.length(),
@@ -1590,34 +1575,27 @@ std::string SsrScanner::scanVar(Read* & r1) {
                             (r1->mSeq.length() - mOptions->mSex.primerF.length() - mOptions->mSex.primerR.length())));
 
                     if (edx == edy) {
-                        //checkLoci = true;
-                        returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                        //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                        checkLoci = true;
                     } else {
                         unsigned int edmin = std::min(edx, edy);
                         if (edmin == edx) {
                             if (edx > mOptions->mSex.mismatchesRX) {
-                                //checkLoci = true;
-                                returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                                //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                                checkLoci = true;
                             } else {
                                 checkLoci = false;
-                                //tmpSex.readsX++;
-                                //tmpSex.seqMapX[r1->mSeq.mStr]++;
                                 tmpSexMap["X"][r1->mSeq.mStr]++;
-                                //returnedlocus = mOptions->mSex.sexMarker;
-                                returnedlocus = mOptions->mSex.sexMarker + "_true";
-
+                                //returnedlocus = mOptions->mSex.sexMarker + "_true";
                             }
                         } else {
                             if (edy > mOptions->mSex.mismatchesRY) {
-                                //checkLoci = true;
-                                returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                                //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                                checkLoci = true;
                             } else {
                                 checkLoci = false;
-                                //tmpSex.readsY++;
-                                //tmpSex.seqMapY[r1->mSeq.mStr]++;
                                 tmpSexMap["Y"][r1->mSeq.mStr]++;
-                                returnedlocus = mOptions->mSex.sexMarker + "_true";
-                                //returnedlocus = mOptions->mSex.sexMarker;
+                                //returnedlocus = mOptions->mSex.sexMarker + "_true";
                             }
                         }
                     }
@@ -1627,90 +1605,57 @@ std::string SsrScanner::scanVar(Read* & r1) {
                                 r1->mSeq.mStr.substr(mOptions->mSex.primerF.length(),
                                 (r1->mSeq.length() - mOptions->mSex.primerF.length() - mOptions->mSex.primerR.length())));
                         if (ed > mOptions->mSex.mismatchesRX) {
-                            //checkLoci = true;
-                            returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                            //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                            checkLoci = true;
                         } else {
                             checkLoci = false;
-                            //tmpSex.readsX++;
-                            //tmpSex.seqMapX[r1->mSeq.mStr]++;
                             tmpSexMap["X"][r1->mSeq.mStr]++;
-                            returnedlocus = mOptions->mSex.sexMarker + "_true";
-                            //returnedlocus = mOptions->mSex.sexMarker;
+                            //returnedlocus = mOptions->mSex.sexMarker + "_true";
                         }
                     } else if (r1->mSeq.length() - mOptions->mSex.primerF.length() - mOptions->mSex.primerR.length() == mOptions->mSex.refY.length()) {
                         unsigned int ed = edit_distance(mOptions->mSex.refY.mStr,
                                 r1->mSeq.mStr.substr(mOptions->mSex.primerF.length(),
                                 (r1->mSeq.length() - mOptions->mSex.primerF.length() - mOptions->mSex.primerR.length())));
                         if (ed > mOptions->mSex.mismatchesRY) {
-                            //checkLoci = true;
-                            returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                            //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                            checkLoci = true;
                         } else {
                             checkLoci = false;
-                            //tmpSex.readsY++;
-                            //tmpSex.seqMapY[r1->mSeq.mStr]++;
                             tmpSexMap["Y"][r1->mSeq.mStr]++;
-                            returnedlocus = mOptions->mSex.sexMarker + "_true";
-                            //returnedlocus = mOptions->mSex.sexMarker;
+                            //returnedlocus = mOptions->mSex.sexMarker + "_true";
                         }
                     } else {
-                        //checkLoci = true;
-                        returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                        //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+                        checkLoci = true;
                     }
                 }
-
-
-            } else {
-                checkLoci = true;
             }
-        } else {
-            checkLoci = true;
         }
     }
-    if (checkLoci) {
+
+    if (!checkLoci) {
+        returnedlocus = mOptions->mSex.sexMarker + "_true";
+    } else {
+
         std::map<std::string, std::pair<int, int>> locMap; //loci, seq score, trimpos;
-        
+
         for (auto & it : mOptions->mLocVars.refLocMap) {
-            fpData = it.second.fp.mStr.c_str();
-            fpLength = it.second.fp.mStr.length();
-            rpData = it.second.rp.mStr.c_str();
-            rpLength = it.second.rp.mStr.length();
-            bool fpMatched = true;
-            bool rpMatched = true;
-            int fpMismatches = 0;
-            int rpMismatches = 0;
-            int numMismaches = 0;
-            int numDeletions = 0;
-            int numInsertions = 0;
-            for (int i = 0; i < it.second.fp.mStr.length(); i++) {
-                if (fpData[i] != readSeq[i]) {
-                    fpMismatches++;
-
-                    if (fpMismatches > mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
-                        fpMatched = false;
-                        break;
+            if (r1->mSeq.length() > (it.second.fp.length() + it.second.rp.length())) {
+                int fpMismatches = (int) edit_distance(it.second.fp.mStr, r1->mSeq.mStr.substr(0, it.second.fp.length()));
+                if (fpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
+                    int rpMismatches = (int) edit_distance(it.second.rp.mStr, r1->mSeq.mStr.substr(r1->mSeq.length() - it.second.rp.length()));
+                    if (rpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
+                        locMap[it.second.name] = std::make_pair((fpMismatches + rpMismatches), readLength - it.second.fp.mStr.length() - it.second.rp.mStr.length());
+                        //should punish if there are mismatches in fp; 
+                        //and could not be the best if there are indel in the head of the rp
                     }
-                }
-            }
-            if (fpMatched) {
-                int rlen = r1->length() - it.second.rp.mStr.length();
-                for (int i = 0; i < it.second.rp.mStr.length(); i++) {
-                    if (rpData[i] != readSeq[rlen + i]) {
-                        rpMismatches++;
-                    }
-                    if (rpMismatches > mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
-                        rpMatched = false;
-                        break;
-                    }
-                }
-
-                if (rpMatched) {
-                    locMap[it.second.name] = std::make_pair((fpMismatches + rpMismatches), readLength - it.second.fp.mStr.length() - it.second.rp.mStr.length());
-                    //should punish if there are mismatches in fp; 
-                    //and could not be the best if there are indel in the head of the rp
                 }
             }
         }
-        if (!locMap.empty()) {
+        
+        if(locMap.empty()){
+            returnedlocus = "_failed";
+        } else {
             std::string locName = "";
             
             if (locMap.size() == 1) {
