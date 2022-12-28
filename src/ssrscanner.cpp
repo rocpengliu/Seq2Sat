@@ -835,7 +835,7 @@ void SsrScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
 std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> SsrScanner::report(Options * & mOptions, std::map<std::string, std::map<std::string, Genotype>> &allGenotypeMap) {
 
     std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMap;
-    std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMraMap;
+    std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMraMap;//marker, seq, geno
     std::vector<std::map < std::string, std::vector<std::pair < std::string, Genotype>>>> sortedAllGenotypeMapVec
     {
         sortedAllGenotypeMap, sortedAllGenotypeMraMap
@@ -889,18 +889,21 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     readSeq = it2.second.baseLocVar.ff.mStr.c_str();
                     readLength = it2.second.baseLocVar.ff.mStr.length();
                     it2.second.baseLocVar.snpsMapff = SsrScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
+                    
                     for (auto & it3 : it2.second.baseLocVar.snpsMapff) {
                         ffSet.insert(it3.first);
                     }
+                    
                     target = locVarIt->rf.mStr.c_str();
                     targetLength = locVarIt->rf.mStr.length();
                     readSeq = it2.second.baseLocVar.rf.mStr.c_str();
                     readLength = it2.second.baseLocVar.rf.mStr.length();
                     it2.second.baseLocVar.snpsMaprf = SsrScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
 
-                    for (auto & it3 : it2.second.baseLocVar.snpsMaprf) {
+                    for (auto & it3 : it2.second.baseLocVar.snpsMaprf){
                         rfSet.insert(it3.first);
                     }
+                    
                     mOptions->mLocVars.refLocMap[it.first] = *locVarIt;
                     it2.second.baseLocVar.mraName = tmpGeno;
                     it2.second.baseLocVar.repuitAll = locVarIt->repuitAll;
@@ -948,184 +951,363 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
     *fout << "#Sample\tLocus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tAllele\tNumReads\tPutativeAllele\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
     for (auto & it : sortedAllGenotypeMapVec.at(1)) {//marker, seq, genotype
-        auto locVarIt = &(mOptions->mLocVars.refLocMap[it.first]);
+        auto locVarIt = &(mOptions->mLocVars.refLocMap[it.first]);//marker
         std::map<int, int> genoReadsMap;
         std::map<int, int> genoReadsMap2;
         std::map<int, int> genoReadsMapT;
-
+        
+        std::map<int, int> ffsnpMap;
+        std::map<int, int> rfsnpMap;
         for (const auto & it2 : it.second) {
             genoReadsMap[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
+
+            auto ffset = mOptions->mLocVars.refLocMap[it.first].refSnpsSetffMap[basename(mOptions->prefix)];
+
+            if (!ffset.empty()) {
+                if (!it2.second.baseLocVar.snpsMapff.empty()) {
+                    for(const auto & snp : it2.second.baseLocVar.snpsMapff){
+                        ffsnpMap[snp.first]++;
+                    }
+                }
+            }
+
+            auto rfset = mOptions->mLocVars.refLocMap[it.first].refSnpsSetrfMap[basename(mOptions->prefix)];
+
+            if (!rfset.empty()) {
+                if (!it2.second.baseLocVar.snpsMaprf.empty()) {
+                    for (const auto & snp : it2.second.baseLocVar.snpsMaprf) {
+                        rfsnpMap[snp.first]++;
+                    }
+                }
+            }
+            
         }
+        
 
         if (genoReadsMap.size() == 1) {//only one peak;
             genoReadsMapT[genoReadsMap.begin()->first] = genoReadsMap.begin()->second;
         } else if (genoReadsMap.size() > 1) {// > 1 peak;
 
-            //get the break point of genotypes in x
-            int pre = 0, cur = 0;
-            auto itg = genoReadsMap.begin();
-            pre = itg->first;
-            std::vector<int> gapVec;
-            std::advance(itg, 1);
-            while (itg != genoReadsMap.end()) {
-                cur = itg->first;
-                int gap = cur - pre;
-                if (locVarIt->repuit2.length() == 0) {
-                    if (gap != locVarIt->repuit.length()) {
-                        gapVec.emplace_back(cur);
+            //firstly analyze the genotype based on snps, which is more accurate, i guess
+            
+            std::pair<double, int> ratiofp{0, 0};//ratio, pos
+            std::pair<double, int> ratiorp{0, 0};
+            if(!ffsnpMap.empty()){
+                double ratio = 0;
+                int pos = 0;
+                for(const auto & s : ffsnpMap){
+                    auto geno1 = s.second;
+                    if (geno1 != it.second.size()) {
+                        auto geno2 = it.second.size() - geno1;
+                        auto tmpratio = geno1 > geno2 ? ((double) geno1 / geno2) : ((double) geno2 / geno1);
+                        if (tmpratio >= 1 && tmpratio <= 1.5) {
+                            if (s.first == ffsnpMap.begin()->first) {
+                                ratio = tmpratio;
+                                pos = s.first;
+                            } else {
+                                if (ratio > tmpratio) {
+                                    ratio = tmpratio;
+                                    pos = s.first;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if(ratio != 0) ratiofp = std::make_pair(ratio, pos);
+            }
+
+            if (!rfsnpMap.empty()) {
+                double ratio = 0;
+                int pos = 0;
+                for (const auto & s : rfsnpMap) {
+                    auto geno1 = s.second;
+                    if (geno1 != it.second.size()) {
+                        auto geno2 = it.second.size() - geno1;
+                        auto tmpratio = geno1 > geno2 ? ((double) geno1 / geno2) : ((double) geno2 / geno1);
+                        if (tmpratio >= 1 && tmpratio <= 1.5) {
+                            if (s.first == rfsnpMap.begin()->first) {
+                                ratio = tmpratio;
+                                pos = s.first;
+                            } else {
+                                if (ratio > tmpratio) {
+                                    ratio = tmpratio;
+                                    pos = s.first;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (ratio != 0) ratiorp = std::make_pair(ratio, pos);
+            }
+
+            std::map<int, int> outMap1;
+            std::map<int, int> outMap2;
+            if (ratiofp.first != 0 && ratiorp.first != 0) {
+                if(ratiofp.first < ratiorp.first) {
+                    for (const auto & it2 : it.second) {
+                        if (!it2.second.baseLocVar.snpsMapff.empty()) {
+                            bool found = false;
+                            for (const auto & it3 : it2.second.baseLocVar.snpsMapff) {
+                                if (ratiofp.second == it3.first) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (found) {
+                                outMap1[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                            } else {
+                                outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                            }
+                        } else {
+                            outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                        }
                     }
                 } else {
-                    if (locVarIt->repuit.length() == locVarIt->repuit2.length()) {
+                    for (const auto & it2 : it.second) {
+                        if (!it2.second.baseLocVar.snpsMaprf.empty()) {
+                            bool found = false;
+                            for (const auto & it3 : it2.second.baseLocVar.snpsMaprf) {
+                                if (ratiorp.second == it3.first) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (found) {
+                                outMap1[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                            } else {
+                                outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                            }
+                        } else {
+                            outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                        }
+                    }
+                }
+            } else if (ratiofp.first != 0 && ratiorp.first == 0) {
+                for (const auto & it2 : it.second) {
+                    if(!it2.second.baseLocVar.snpsMapff.empty()){
+                        bool found = false;
+                        for (const auto & it3 : it2.second.baseLocVar.snpsMapff) {
+                            if (ratiofp.second == it3.first) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) {
+                            outMap1[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                        } else {
+                            outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                        } 
+                    } else {
+                        outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                    }
+                }
+            } else if (ratiofp.first == 0 && ratiorp.first != 0) {
+                for (const auto & it2 : it.second) {
+                    if (!it2.second.baseLocVar.snpsMaprf.empty()) {
+                        bool found = false;
+                        for (const auto & it3 : it2.second.baseLocVar.snpsMaprf) {
+                            if (ratiorp.second == it3.first) {
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (found) {
+                            outMap1[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                        } else {
+                            outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                        }
+                    } else {
+                        outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                    }
+                }
+            } else {
+
+            }
+
+            if(!outMap1.empty() && !outMap2.empty()) {
+                genoReadsMapT.insert(getMaxKeyValue(outMap1));
+                cCout(locVarIt->name, 'y');
+                cCout(getMaxKeyValue(outMap1).first, getMaxKeyValue(outMap1).second, 'g');
+                outMap1.clear();
+                
+                genoReadsMapT.insert(getMaxKeyValue(outMap2));
+                cCout(getMaxKeyValue(outMap2).first, getMaxKeyValue(outMap2).second, 'r');
+                outMap2.clear();
+
+                
+                
+            } else {
+
+                //get the break point of genotypes in x
+                int pre = 0, cur = 0;
+                auto itg = genoReadsMap.begin();
+                pre = itg->first;
+                std::vector<int> gapVec;
+                std::advance(itg, 1);
+                while (itg != genoReadsMap.end()) {
+                    cur = itg->first;
+                    int gap = cur - pre;
+                    if (locVarIt->repuit2.length() == 0) {
                         if (gap != locVarIt->repuit.length()) {
                             gapVec.emplace_back(cur);
                         }
                     } else {
-                        auto maxssr = std::max(locVarIt->repuit.length(), locVarIt->repuit2.length());
-                        if (gap != locVarIt->repuit.length() && gap != locVarIt->repuit2.length() && gap > maxssr) {
-                            gapVec.emplace_back(cur);
+                        if (locVarIt->repuit.length() == locVarIt->repuit2.length()) {
+                            if (gap != locVarIt->repuit.length()) {
+                                gapVec.emplace_back(cur);
+                            }
+                        } else {
+                            auto maxssr = std::max(locVarIt->repuit.length(), locVarIt->repuit2.length());
+                            if (gap != locVarIt->repuit.length() && gap != locVarIt->repuit2.length() && gap > maxssr) {
+                                gapVec.emplace_back(cur);
+                            }
                         }
                     }
+                    pre = cur;
+                    itg++;
                 }
-                pre = cur;
-                itg++;
-            }
 
-            if (gapVec.empty()) {
+                if (gapVec.empty()) {
 
-                //get the two trend;
-                int repul = locVarIt->repuit.mStr.length();
-                auto twoPeaksMap = get2Peaks(genoReadsMap, mOptions->mLocVars.locVarOptions.hlRatio1, mOptions->mLocVars.locVarOptions.hlRatio2);
 
-                if (twoPeaksMap.size() == 1) {
-                    genoReadsMapT = twoPeaksMap;
-                    twoPeaksMap.clear();
+                    //get the two trend;
+                    int repul = locVarIt->repuit.mStr.length();
+                    auto twoPeaksMap = get2Peaks(genoReadsMap, mOptions->mLocVars.locVarOptions.hlRatio1, mOptions->mLocVars.locVarOptions.hlRatio2);
+
+                    if (twoPeaksMap.size() == 1) {
+                        genoReadsMapT = twoPeaksMap;
+                        twoPeaksMap.clear();
+                    } else {
+
+                        double ratio = twoPeaksMap.begin()->second > twoPeaksMap.rbegin()->second ?
+                                (double) (twoPeaksMap.rbegin()->second) / twoPeaksMap.begin()->second :
+                                (double) (twoPeaksMap.begin()->second) / twoPeaksMap.rbegin()->second;
+
+                        int diff = twoPeaksMap.rbegin()->first - twoPeaksMap.begin()->first;
+                        if (locVarIt->repuitAllLen == 0 || locVarIt->repuitAllLen == locVarIt->repuit.length()) {
+                            if (diff <= locVarIt->repuit.length()) {
+                                if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio1) {
+                                    genoReadsMapT = twoPeaksMap;
+                                }
+                            } else if (diff <= 2 * locVarIt->repuit.length()) {
+                                if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2) {
+                                    genoReadsMapT = twoPeaksMap;
+                                }
+                            } else if (diff <= 3 * locVarIt->repuit.length()) {
+                                if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
+                                    genoReadsMapT = twoPeaksMap;
+                                }
+                            } else {
+                                if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
+                                    genoReadsMapT = twoPeaksMap;
+                                }
+                            }
+                        } else {
+                            if (diff <= locVarIt->repuit.length() || diff <= locVarIt->repuit2.length() || diff <= locVarIt->repuitAllLen) {
+                                if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio1) {
+                                    genoReadsMapT = twoPeaksMap;
+                                }
+                            } else if (diff <= 2 * locVarIt->repuit.length() || 2 * diff <= locVarIt->repuit2.length() || diff <= 2 * locVarIt->repuitAllLen) {
+                                if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2) {
+                                    genoReadsMapT = twoPeaksMap;
+                                }
+                            } else if (diff <= 3 * locVarIt->repuit.length() || diff <= 3 * locVarIt->repuit2.length() || diff <= 3 * locVarIt->repuitAllLen) {
+                                if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
+                                    genoReadsMapT = twoPeaksMap;
+                                }
+                            } else {
+                                if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
+                                    genoReadsMapT = twoPeaksMap;
+                                }
+                            }
+                        }
+
+                        if (genoReadsMapT.empty()) {
+                            auto maxGenoReads = getMaxKeyValue(genoReadsMap); //key max value pair;
+                            genoReadsMapT[maxGenoReads.first] = maxGenoReads.second;
+
+                            int occ = 0;
+                            for (const auto & it2 : genoReadsMap) {
+                                if (it2.second == maxGenoReads.second) {
+                                    occ++;
+                                }
+                            }
+
+                            if (occ == 1) {
+                                for (const auto & it2 : genoReadsMap) {
+                                    if (it2.first > maxGenoReads.first) {
+                                        genoReadsMap2[it2.first] = it2.second;
+                                    }
+                                }
+                                if (!genoReadsMap2.empty()) {
+                                    auto maxGenoReads2 = getMaxKeyValue(genoReadsMap2, true);
+
+                                    if (maxGenoReads2.first - maxGenoReads.first <= repul) {
+                                        if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio1) {
+                                            genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                                        }
+                                    } else if (maxGenoReads2.first - maxGenoReads.first <= repul * 2) {
+                                        if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2) {
+                                            genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                                        }
+                                    } else if (maxGenoReads2.first - maxGenoReads.first <= repul * 3) {
+                                        if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
+                                            genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                                        }
+                                    } else {
+                                        if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
+                                            genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
+                                        }
+                                    }
+                                }
+
+                                genoReadsMap2.clear();
+
+                            } else if (occ > 1) {
+                                for (const auto & it2 : genoReadsMap) {
+                                    if (it2.second == maxGenoReads.second && it2.first != maxGenoReads.first) {
+                                        genoReadsMapT[it2.first] = maxGenoReads.second;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 } else {
 
-                    double ratio = twoPeaksMap.begin()->second > twoPeaksMap.rbegin()->second ?
-                            (double) (twoPeaksMap.rbegin()->second) / twoPeaksMap.begin()->second :
-                            (double) (twoPeaksMap.begin()->second) / twoPeaksMap.rbegin()->second;
-                    
-                    int diff = twoPeaksMap.rbegin()->first - twoPeaksMap.begin()->first;
-                    if (locVarIt->repuitAllLen == 0 || locVarIt->repuitAllLen == locVarIt->repuit.length()) {
-                        if (diff <= locVarIt->repuit.length()) {
-                            if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio1) {
-                                genoReadsMapT = twoPeaksMap;
-                            }
-                        } else if (diff <= 2 * locVarIt->repuit.length()) {
-                            if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2) {
-                                genoReadsMapT = twoPeaksMap;
-                            }
-                        } else if (diff <= 3 * locVarIt->repuit.length()) {
-                            if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
-                                genoReadsMapT = twoPeaksMap;
-                            }
-                        } else {
-                            if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
-                                genoReadsMapT = twoPeaksMap;
-                            }
-                        }
-                    } else {
-                        if (diff <= locVarIt->repuit.length() || diff <= locVarIt->repuit2.length() || diff <= locVarIt->repuitAllLen) {
-                            if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio1) {
-                                genoReadsMapT = twoPeaksMap;
-                            }
-                        } else if (diff <= 2 * locVarIt->repuit.length() || 2 * diff <= locVarIt->repuit2.length() || diff <= 2 * locVarIt->repuitAllLen) {
-                            if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2) {
-                                genoReadsMapT = twoPeaksMap;
-                            }
-                        } else if (diff <= 3 * locVarIt->repuit.length() || diff <= 3 * locVarIt->repuit2.length() || diff <= 3 * locVarIt->repuitAllLen) {
-                            if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
-                                genoReadsMapT = twoPeaksMap;
-                            }
-                        } else {
-                            if (ratio >= mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
-                                genoReadsMapT = twoPeaksMap;
-                            }
+                    std::map<int, int> maxMap;
+                    std::map<int, int> outMap;
+                    auto range_pre = genoReadsMap.begin();
+                    for (const auto & itgv : gapVec) {
+                        auto range_cur = genoReadsMap.find(itgv);
+                        if (range_cur != genoReadsMap.end()) {
+                            outMap.insert(range_pre, range_cur);
+                            maxMap.insert(getMaxKeyValue(outMap));
+                            outMap.clear();
+                            range_pre = range_cur;
                         }
                     }
 
-                    if (genoReadsMapT.empty()) {
-                        auto maxGenoReads = getMaxKeyValue(genoReadsMap); //key max value pair;
-                        genoReadsMapT[maxGenoReads.first] = maxGenoReads.second;
-
-                        int occ = 0;
-                        for (const auto & it2 : genoReadsMap) {
-                            if (it2.second == maxGenoReads.second) {
-                                occ++;
-                            }
-                        }
-
-                        if (occ == 1) {
-                            for (const auto & it2 : genoReadsMap) {
-                                if (it2.first > maxGenoReads.first) {
-                                    genoReadsMap2[it2.first] = it2.second;
-                                }
-                            }
-                            if (!genoReadsMap2.empty()) {
-                                auto maxGenoReads2 = getMaxKeyValue(genoReadsMap2, true);
-
-                                if (maxGenoReads2.first - maxGenoReads.first <= repul) {
-                                    if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio1) {
-                                        genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
-                                    }
-                                } else if (maxGenoReads2.first - maxGenoReads.first <= repul * 2) {
-                                    if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2) {
-                                        genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
-                                    }
-                                } else if (maxGenoReads2.first - maxGenoReads.first <= repul * 3) {
-                                    if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
-                                        genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
-                                    }
-                                } else {
-                                    if ((double) maxGenoReads2.second / maxGenoReads.second >= mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
-                                        genoReadsMapT[maxGenoReads2.first] = maxGenoReads2.second;
-                                    }
-                                }
-                            }
-
-                            genoReadsMap2.clear();
-
-                        } else if (occ > 1) {
-                            for (const auto & it2 : genoReadsMap) {
-                                if (it2.second == maxGenoReads.second && it2.first != maxGenoReads.first) {
-                                    genoReadsMapT[it2.first] = maxGenoReads.second;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-            } else {
-
-                std::map<int, int> maxMap;
-                std::map<int, int> outMap;
-                auto range_pre = genoReadsMap.begin();
-                for (const auto & itgv : gapVec) {
-                    auto range_cur = genoReadsMap.find(itgv);
-                    if (range_cur != genoReadsMap.end()) {
-                        outMap.insert(range_pre, range_cur);
+                    if (range_pre != genoReadsMap.end()) {
+                        outMap.insert(range_pre, genoReadsMap.end());
                         maxMap.insert(getMaxKeyValue(outMap));
                         outMap.clear();
-                        range_pre = range_cur;
                     }
+
+                    if (maxMap.size() > 2) {
+                        genoReadsMapT = getTop2MaxKeyValue(maxMap);
+                    } else {
+                        genoReadsMapT = maxMap;
+                    }
+
+                    maxMap.clear();
                 }
 
-                if (range_pre != genoReadsMap.end()) {
-                    outMap.insert(range_pre, genoReadsMap.end());
-                    maxMap.insert(getMaxKeyValue(outMap));
-                    outMap.clear();
-                }
-
-                if (maxMap.size() > 2) {
-                    genoReadsMapT = getTop2MaxKeyValue(maxMap);
-                } else {
-                    genoReadsMapT = maxMap;
-                }
-
-                maxMap.clear();
             }
-
         }
 
         genoReadsMap.clear();

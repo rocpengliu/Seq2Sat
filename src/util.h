@@ -97,6 +97,29 @@ void cCout(const T & str, char color = 'd', bool newLine = true) {
     logmtx.unlock();
 }
 
+template <typename T1, typename T2>
+void cCout(const T1 & str1, const T2 & str2, char color = 'r') {
+    logmtx.lock();
+    if (color == 'r') {
+        std::cout << "\033[1;31m" << str1 << " -> " << str2 << "\033[0m\n";
+    } else if (color == 'g') {
+        std::cout << "\033[1;32m" << str1 << " -> " << str2  << "\033[0m\n";
+    } else if (color == 'y') {
+        std::cout << "\033[1;33m" << str1 << " -> " << str2  << "\033[0m\n";
+    } else if (color == 'b') {
+        std::cout << "\033[1;34m" << str1 << " -> " << str2  << "\033[0m\n";
+    } else if (color == 'm') {
+        std::cout << "\033[1;35m" << str1 << " -> " << str2  << "\033[0m\n";
+    } else if (color == 'c') {
+        std::cout << "\033[1;36m" << str1 << " -> " << str2  << "\033[0m\n";
+    } else if (color == 'w') {
+        std::cout << "\033[1;37m" << str1 << " -> " << str2  << "\033[0m\n";
+    } else {
+        std::cout << "\033[1;30m" << str1 << " -> " << str2  << "\033[0m\n";
+    }
+    logmtx.unlock();
+}
+
 template <typename T>
 std::string addColor(const T & str, char color = 'd', bool newLine = true) {
     std::stringstream ss;

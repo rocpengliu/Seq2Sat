@@ -306,7 +306,7 @@ public:
     };
     
 public:
-    std::map<std::string, LocVar> refLocMap;//change to pointer to reduce memory usage
+    std::map<std::string, LocVar> refLocMap;//change to pointer to reduce memory usage// sample -> locvar
     LocVarOptions locVarOptions;
 };
 
