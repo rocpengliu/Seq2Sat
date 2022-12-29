@@ -980,10 +980,8 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     }
                 }
             }
-            
         }
-        
-
+           
         if (genoReadsMap.size() == 1) {//only one peak;
             genoReadsMapT[genoReadsMap.begin()->first] = genoReadsMap.begin()->second;
         } else if (genoReadsMap.size() > 1) {// > 1 peak;
@@ -1056,12 +1054,12 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                                 }
                             }
                             if (found) {
-                                outMap1[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                                outMap1[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                             } else {
-                                outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                                outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                             }
                         } else {
-                            outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                            outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                         }
                     }
                 } else {
@@ -1075,12 +1073,12 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                                 }
                             }
                             if (found) {
-                                outMap1[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                                outMap1[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                             } else {
-                                outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                                outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                             }
                         } else {
-                            outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                            outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                         }
                     }
                 }
@@ -1095,12 +1093,12 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                             }
                         }
                         if (found) {
-                            outMap1[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                            outMap1[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                         } else {
-                            outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                            outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                         } 
                     } else {
-                        outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                        outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                     }
                 }
             } else if (ratiofp.first == 0 && ratiorp.first != 0) {
@@ -1115,12 +1113,12 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                         }
 
                         if (found) {
-                            outMap1[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                            outMap1[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                         } else {
-                            outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                            outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                         }
                     } else {
-                        outMap2[it2.second.baseLocVar.effectiveLen] = it2.second.numReads;
+                        outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                     }
                 }
             } else {
@@ -1129,16 +1127,9 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
             if(!outMap1.empty() && !outMap2.empty()) {
                 genoReadsMapT.insert(getMaxKeyValue(outMap1));
-                cCout(locVarIt->name, 'y');
-                cCout(getMaxKeyValue(outMap1).first, getMaxKeyValue(outMap1).second, 'g');
                 outMap1.clear();
-                
                 genoReadsMapT.insert(getMaxKeyValue(outMap2));
-                cCout(getMaxKeyValue(outMap2).first, getMaxKeyValue(outMap2).second, 'r');
                 outMap2.clear();
-
-                
-                
             } else {
 
                 //get the break point of genotypes in x
