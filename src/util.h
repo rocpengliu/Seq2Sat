@@ -720,6 +720,9 @@ std::map<K, V> get2Peaks(const std::map<K, V> & map, double hlRatio, double hlRa
     }
     if (res.empty()) {
         res[locPeak] = nReadsPeak;
+        if (nReadsPeak == nReads) {
+            res[loc] = nReads;
+        }
         return (res);
     }
 

@@ -837,9 +837,8 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
     std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMap;
     std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMraMap;//marker, seq, geno
     std::vector<std::map < std::string, std::vector<std::pair < std::string, Genotype>>>> sortedAllGenotypeMapVec
-    {
-        sortedAllGenotypeMap, sortedAllGenotypeMraMap
-    };
+    { sortedAllGenotypeMap, sortedAllGenotypeMraMap};
+    
     const char* target;
     int targetLength;
     const char* readSeq;
@@ -981,7 +980,12 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                 }
             }
         }
-           
+        
+//        cCout("aaaaaaaaaaaaaaaaaaa", locVarIt->name);
+//        for(const auto & i : genoReadsMap){
+//            cCout(i.first, i.second, 'r');
+//        }
+//           
         if (genoReadsMap.size() == 1) {//only one peak;
             genoReadsMapT[genoReadsMap.begin()->first] = genoReadsMap.begin()->second;
         } else if (genoReadsMap.size() > 1) {// > 1 peak;
@@ -1168,6 +1172,11 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     int repul = locVarIt->repuit.mStr.length();
                     auto twoPeaksMap = get2Peaks(genoReadsMap, mOptions->mLocVars.locVarOptions.hlRatio1, mOptions->mLocVars.locVarOptions.hlRatio2);
 
+                    //cCout("bbbbbbbbbbbbbbbbbbbbbbb");
+//                    for(const auto & i : twoPeaksMap){
+//                        cCout(i.first, i.second, 'g');
+//                    }
+                    
                     if (twoPeaksMap.size() == 1) {
                         genoReadsMapT = twoPeaksMap;
                         twoPeaksMap.clear();
