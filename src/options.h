@@ -245,6 +245,7 @@ public:
         maxMismatchesRPrimer = 4;
         hlRatio1 = 0.4;
         hlRatio2 = 0.2;
+        varRatio = 1.5;
     };
 public:
     int maxMismatchesPSeq;
@@ -260,6 +261,7 @@ public:
     int minNSSRUnit;
     double hlRatio1; //if two locus size is 1 ssr unit;
     double hlRatio2; //if two locus size is 2 ssr unit;
+    double varRatio; //if there are variations in mra, flanking regions, the n of one allele against the other, the ideal should be 1, but default one is 1.5
     std::string mode;
     bool findAlignment;
     bool findStartLocation;

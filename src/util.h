@@ -667,16 +667,24 @@ inline string trimStr(const string& str) {
 }
 
 template<typename K, typename V>
-std::pair<K,V> getMaxKeyValue(const std::map<K, V> & map, bool reverse = false){
-    if(!reverse){
-        return *std::max_element(map.begin(), map.end(),
-            [](std::pair<K, V> const & x, std::pair<K, V> const & y){
+std::pair<K, V> getMinKeyValue(const std::map<K, V> & map, bool reverse = false) {
+    return *std::min_element(map.begin(), map.end(),
+            [](std::pair<K, V> const & x, std::pair<K, V> const & y) {
                 return x.second < y.second;
             });
-    } else {
+}
+
+template<typename K, typename V>
+std::pair<K, V> getMaxKeyValue(const std::map<K, V> & map, bool reverse = false) {
+    if (reverse) {
         return *std::max_element(map.rbegin(), map.rend(),
                 [](std::pair<K, V> const & x, std::pair<K, V> const & y) {
                     return x.second < y.second;
+                });
+    } else {
+        return *std::max_element(map.begin(), map.end(),
+                [](std::pair<K, V> const & x, std::pair<K, V> const & y) {
+                    return x.second <= y.second;
                 });
     }
 }
@@ -686,7 +694,7 @@ std::map<K,V> getTop2MaxKeyValue(const std::map<K, V> & map){
     std::map<K, V> tmp = map;
     std::pair<K,V> m1 = getMaxKeyValue(tmp);
     tmp.erase(m1.first);
-    std::pair<K,V> m2 = getMaxKeyValue(tmp);
+    std::pair<K,V> m2 = getMaxKeyValue(tmp, true);
     tmp.clear();
     tmp = {m1, m2};
     return(tmp);
@@ -773,7 +781,7 @@ std::map<K, V> get2Peaks(const std::map<K, V> & map, double hlRatio, double hlRa
                 map2[itt.first] = itt.second;
             }
         }
-        res.insert(getMaxKeyValue(map2));
+        res.insert(getMaxKeyValue(map2, true));
     }
     return (res);
 }

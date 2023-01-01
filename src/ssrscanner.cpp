@@ -837,7 +837,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
     std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMap;
     std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMraMap;//marker, seq, geno
     std::vector<std::map < std::string, std::vector<std::pair < std::string, Genotype>>>> sortedAllGenotypeMapVec
-    { sortedAllGenotypeMap, sortedAllGenotypeMraMap};
+    {sortedAllGenotypeMap, sortedAllGenotypeMraMap};
     
     const char* target;
     int targetLength;
@@ -957,9 +957,10 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
         
         std::map<int, int> ffsnpMap;
         std::map<int, int> rfsnpMap;
+        std::map<std::string, int> mraBaseMap;
         for (const auto & it2 : it.second) {
             genoReadsMap[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
-
+            mraBaseMap[it2.second.baseLocVar.mraBase]++;
             auto ffset = mOptions->mLocVars.refLocMap[it.first].refSnpsSetffMap[basename(mOptions->prefix)];
 
             if (!ffset.empty()) {
@@ -990,6 +991,38 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
             genoReadsMapT[genoReadsMap.begin()->first] = genoReadsMap.begin()->second;
         } else if (genoReadsMap.size() > 1) {// > 1 peak;
 
+            std::pair<std::string, double> mraBaseRatio{"", 0};
+            if (mraBaseMap.size() > 1) {
+                
+                std::set<std::string> keySet;
+                for(const auto & mit : mraBaseMap){
+                    keySet.insert(mit.first);
+                }
+                
+                std::map<std::string, double> keyRatioMap;
+                for(const auto & mkey : keySet){
+                    int alle1 = 0;
+                    int alle2 = 0;
+                    for(const auto & mit : mraBaseMap){
+                        if(mkey == mit.first){
+                            alle1 += mit.second;
+                        } else {
+                            alle2 += mit.second;
+                        }
+                        
+                        double ratio = alle1 > alle2 ? ((double) alle1 / alle2 ) : ((double) alle2 / alle1);
+                        
+                        if(ratio >= 1 && ratio <= mOptions->mLocVars.locVarOptions.varRatio){
+                            keyRatioMap[mkey] = ratio;
+                        }
+                    }
+                }
+                if(!keyRatioMap.empty()){
+                    mraBaseRatio = getMinKeyValue(keyRatioMap);
+                }
+            }
+            
+            
             //firstly analyze the genotype based on snps, which is more accurate, i guess
             
             std::pair<double, int> ratiofp{0, 0};//ratio, pos
@@ -1002,7 +1035,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     if (geno1 != it.second.size()) {
                         auto geno2 = it.second.size() - geno1;
                         auto tmpratio = geno1 > geno2 ? ((double) geno1 / geno2) : ((double) geno2 / geno1);
-                        if (tmpratio >= 1 && tmpratio <= 1.5) {
+                        if (tmpratio >= 1 && tmpratio <= mOptions->mLocVars.locVarOptions.varRatio) {
                             if (s.first == ffsnpMap.begin()->first) {
                                 ratio = tmpratio;
                                 pos = s.first;
@@ -1027,7 +1060,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     if (geno1 != it.second.size()) {
                         auto geno2 = it.second.size() - geno1;
                         auto tmpratio = geno1 > geno2 ? ((double) geno1 / geno2) : ((double) geno2 / geno1);
-                        if (tmpratio >= 1 && tmpratio <= 1.5) {
+                        if (tmpratio >= 1 && tmpratio <= mOptions->mLocVars.locVarOptions.varRatio) {
                             if (s.first == rfsnpMap.begin()->first) {
                                 ratio = tmpratio;
                                 pos = s.first;
@@ -1046,49 +1079,58 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
             std::map<int, int> outMap1;
             std::map<int, int> outMap2;
-            if (ratiofp.first != 0 && ratiorp.first != 0) {
-                if(ratiofp.first < ratiorp.first) {
-                    for (const auto & it2 : it.second) {
-                        if (!it2.second.baseLocVar.snpsMapff.empty()) {
-                            bool found = false;
-                            for (const auto & it3 : it2.second.baseLocVar.snpsMapff) {
-                                if (ratiofp.second == it3.first) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (found) {
-                                outMap1[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
-                            } else {
-                                outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
-                            }
-                        } else {
-                            outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
-                        }
+            
+            bool analBase = false;
+            bool analFF = false;
+            bool analRF = false;
+            if (mraBaseRatio.second == 0) {
+                 if (ratiofp.first != 0 && ratiorp.first != 0) {
+                     if(ratiofp.first < ratiorp.first){
+                         analFF = true;
+                     } else {
+                         analRF = true;
+                     }
+                 } else if (ratiofp.first != 0 && ratiorp.first == 0){
+                     analFF = true;
+                 } else if(ratiofp.first == 0 && ratiorp.first != 0){
+                     analRF = true;
+                 } else {
+                     
+                 }
+            } else {
+
+                if (ratiofp.first != 0 && ratiorp.first != 0) {
+                    double minRatio = std::min(mraBaseRatio.second, std::min(ratiofp.first, ratiorp.first));
+                    
+                    if(ratiofp.first == minRatio){
+                        analFF = true;
+                    } else if(ratiorp.first == minRatio){
+                        analRF = true;
+                    } else {
+                        analBase = true;
+                    }
+                    
+                } else if (ratiofp.first != 0 && ratiorp.first == 0) {
+                    if(ratiofp.first <= mraBaseRatio.second){
+                        analFF = true;
+                    } else {
+                        analBase = true;
+                    }
+                } else if (ratiofp.first == 0 && ratiorp.first != 0) {
+                    if(ratiorp.first <= mraBaseRatio.second){
+                        analRF = true;
+                    } else {
+                        analBase = true;
                     }
                 } else {
-                    for (const auto & it2 : it.second) {
-                        if (!it2.second.baseLocVar.snpsMaprf.empty()) {
-                            bool found = false;
-                            for (const auto & it3 : it2.second.baseLocVar.snpsMaprf) {
-                                if (ratiorp.second == it3.first) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (found) {
-                                outMap1[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
-                            } else {
-                                outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
-                            }
-                        } else {
-                            outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
-                        }
-                    }
+                    analBase = true;
                 }
-            } else if (ratiofp.first != 0 && ratiorp.first == 0) {
+
+            }
+
+            if (analFF) {
                 for (const auto & it2 : it.second) {
-                    if(!it2.second.baseLocVar.snpsMapff.empty()){
+                    if (!it2.second.baseLocVar.snpsMapff.empty()) {
                         bool found = false;
                         for (const auto & it3 : it2.second.baseLocVar.snpsMapff) {
                             if (ratiofp.second == it3.first) {
@@ -1100,12 +1142,12 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                             outMap1[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                         } else {
                             outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
-                        } 
+                        }
                     } else {
                         outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                     }
                 }
-            } else if (ratiofp.first == 0 && ratiorp.first != 0) {
+            } else if (analRF) {
                 for (const auto & it2 : it.second) {
                     if (!it2.second.baseLocVar.snpsMaprf.empty()) {
                         bool found = false;
@@ -1115,7 +1157,6 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                                 break;
                             }
                         }
-
                         if (found) {
                             outMap1[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                         } else {
@@ -1125,14 +1166,22 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                         outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                     }
                 }
+            } else if(analBase){
+                for (const auto & it2 : it.second) {
+                    if(mraBaseRatio.first == it2.second.baseLocVar.mraBase){
+                        outMap1[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
+                    } else {
+                        outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
+                    }
+                }
             } else {
-
+                
             }
 
             if(!outMap1.empty() && !outMap2.empty()) {
-                genoReadsMapT.insert(getMaxKeyValue(outMap1));
+                genoReadsMapT.insert(getMaxKeyValue(outMap1, true));
                 outMap1.clear();
-                genoReadsMapT.insert(getMaxKeyValue(outMap2));
+                genoReadsMapT.insert(getMaxKeyValue(outMap2, true));
                 outMap2.clear();
             } else {
 
@@ -1286,7 +1335,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                         auto range_cur = genoReadsMap.find(itgv);
                         if (range_cur != genoReadsMap.end()) {
                             outMap.insert(range_pre, range_cur);
-                            maxMap.insert(getMaxKeyValue(outMap));
+                            maxMap.insert(getMaxKeyValue(outMap, true));
                             outMap.clear();
                             range_pre = range_cur;
                         }
@@ -1294,7 +1343,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
                     if (range_pre != genoReadsMap.end()) {
                         outMap.insert(range_pre, genoReadsMap.end());
-                        maxMap.insert(getMaxKeyValue(outMap));
+                        maxMap.insert(getMaxKeyValue(outMap, true));
                         outMap.clear();
                     }
 
