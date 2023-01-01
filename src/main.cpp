@@ -44,6 +44,7 @@ int main(int argc, char* argv[]){
     cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%)", false, 5);
     cmd.add<double>("hlRatio1", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.4", false, 0.4);
     cmd.add<double>("hlRatio2", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 0.2", false, 0.2);
+    cmd.add<double>("maxVarRatio", 0, "ratio of two heter alleles based on variations either in flanking regions or MRA, the ideal is 1, default: 1.5", false, 1.5);
     cmd.add<string>("mode", 0, "specify the sequence alignment mode: NW (default) | HW | SHW", false, "NW");
     cmd.add<int>("maxScore", 0, "specify the maximum score of sequence alignment with sore > maxScore will be discarded, default value is -1, and no sequence will be discarded.",false, -1);
     cmd.add<int>("numBestSeqs", 0, "Score will be calculated only for N best sequences (best = with smallest score). If N = 0 then all sequences will be calculated.", 0);
@@ -178,6 +179,7 @@ int main(int argc, char* argv[]){
     opt->mLocVars.locVarOptions.minSeqsPer = cmd.get<int>("minSeqsPercentage");
     opt->mLocVars.locVarOptions.hlRatio1 = cmd.get<double>("hlRatio1");
     opt->mLocVars.locVarOptions.hlRatio2 = cmd.get<double>("hlRatio2");
+    opt->mLocVars.locVarOptions.varRatio = cmd.get<double>("maxVarRatio");
     opt->mLocVars.locVarOptions.maxScore = cmd.get<int>("maxScore");
     opt->mLocVars.locVarOptions.numBestSeqs = cmd.get<int>("numBestSeqs");
     opt->mLocVars.locVarOptions.coreRep = cmd.get<int>("core");
