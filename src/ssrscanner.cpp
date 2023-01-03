@@ -1009,11 +1009,12 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                         } else {
                             alle2 += mit.second;
                         }
-                        
-                        double ratio = alle1 > alle2 ? ((double) alle1 / alle2 ) : ((double) alle2 / alle1);
-                        
-                        if(ratio >= 1 && ratio <= mOptions->mLocVars.locVarOptions.varRatio){
-                            keyRatioMap[mkey] = ratio;
+
+                        if (std::min(alle1, alle2) != 0) {
+                            double ratio = alle1 > alle2 ? ((double) alle1 / alle2) : ((double) alle2 / alle1);
+                            if (ratio >= 1 && ratio <= mOptions->mLocVars.locVarOptions.varRatio) {
+                                keyRatioMap[mkey] = ratio;
+                            }
                         }
                     }
                 }
