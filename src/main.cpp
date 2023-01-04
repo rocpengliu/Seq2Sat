@@ -132,7 +132,7 @@ int main(int argc, char* argv[]){
 
     // length filtering
     cmd.add("disable_length_filtering", 'L', "length filtering is enabled by default. If this option is specified, length filtering is disabled");
-    cmd.add<int>("length_required", 'l', "reads shorter than length_required will be discarded, default is 50.", false, 50);
+    cmd.add<int>("length_required", 'l', "reads shorter than length_required will be discarded, default is 30.", false, 30);
     cmd.add<int>("length_limit", 0, "reads longer than length_limit will be discarded, default 0 means no limitation.", false, 0);
 
     // low complexity filtering
