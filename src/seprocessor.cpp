@@ -294,6 +294,11 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
 
             if (mOptions->mVarType == ssr) {
                 locus = config->getSsrScanner()->scanVar(r1);
+                size_t found = locus.find("_failed");
+                if (found != std::string::npos && found == (locus.length() - 7)) {
+                    auto revReads = r1->reverseComplement();
+                    locus = config->getSsrScanner()->scanVar(revReads);
+                }
             } else {
                 config->getSnpScanner()->scanVar(r1);
             }

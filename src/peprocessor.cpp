@@ -366,6 +366,12 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
 
                         if (mOptions->mVarType == ssr) {
                             locus = config->getSsrScanner()->scanVar(merged);
+                            size_t found = locus.find("_failed");
+                            if(found != std::string::npos && found == (locus.length() - 7)){
+                                auto revReads = merged->reverseComplement();
+                                locus = config->getSsrScanner()->scanVar(revReads);
+                            }
+                            
                         } else {
                             config->getSnpScanner()->scanVar(merged);
                         }
