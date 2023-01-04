@@ -1179,13 +1179,37 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                 
             }
 
+            bool shouldGo = false;
             if(!outMap1.empty() && !outMap2.empty()) {
-                genoReadsMapT.insert(getMaxKeyValue(outMap1, true));
+//                genoReadsMapT.insert(getMaxKeyValue(outMap1, true));
+//                outMap1.clear();
+//                genoReadsMapT.insert(getMaxKeyValue(outMap2, true));
+//                outMap2.clear();
+                
+                auto p1 = getMaxKeyValue(outMap1, true);
                 outMap1.clear();
-                genoReadsMapT.insert(getMaxKeyValue(outMap2, true));
+                auto p2 = getMaxKeyValue(outMap2, true);
                 outMap2.clear();
+                if(p1.first == p2.first){
+                    auto ra = (double) std::min(p1.second, p2.second) / std::max(p1.second, p2.second);
+                    if(ra >= mOptions->mLocVars.locVarOptions.heterRatio) {
+                        genoReadsMapT.insert(p1);
+                        genoReadsMapT.insert(p2);
+                        shouldGo = false;
+                    } else {
+                        shouldGo = true;
+                    }
+                } else {
+                    genoReadsMapT.insert(p1);
+                    genoReadsMapT.insert(p2);
+                    shouldGo = false;
+                }
+                        
             } else {
+                shouldGo = true;
+            }
 
+            if (shouldGo) {
                 //get the break point of genotypes in x
                 int pre = 0, cur = 0;
                 auto itg = genoReadsMap.begin();
@@ -1223,10 +1247,10 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     auto twoPeaksMap = get2Peaks(genoReadsMap, mOptions->mLocVars.locVarOptions.hlRatio1, mOptions->mLocVars.locVarOptions.hlRatio2);
 
                     //cCout("bbbbbbbbbbbbbbbbbbbbbbb");
-//                    for(const auto & i : twoPeaksMap){
-//                        cCout(i.first, i.second, 'g');
-//                    }
-                    
+                    //                    for(const auto & i : twoPeaksMap){
+                    //                        cCout(i.first, i.second, 'g');
+                    //                    }
+
                     if (twoPeaksMap.size() == 1) {
                         genoReadsMapT = twoPeaksMap;
                         twoPeaksMap.clear();
@@ -1356,7 +1380,6 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
                     maxMap.clear();
                 }
-
             }
         }
 

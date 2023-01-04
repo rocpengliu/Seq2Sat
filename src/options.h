@@ -246,6 +246,7 @@ public:
         hlRatio1 = 0.4;
         hlRatio2 = 0.2;
         varRatio = 1.5;
+        heterRatio = 0.3;
     };
 public:
     int maxMismatchesPSeq;
@@ -262,6 +263,7 @@ public:
     double hlRatio1; //if two locus size is 1 ssr unit;
     double hlRatio2; //if two locus size is 2 ssr unit;
     double varRatio; //if there are variations in mra, flanking regions, the n of one allele against the other, the ideal should be 1, but default one is 1.5
+    double heterRatio;//how to determine variations in mra, flanking regions are true, and if two max peak size are same, if it > heterratio, the variation based genotype is true
     std::string mode;
     bool findAlignment;
     bool findStartLocation;
