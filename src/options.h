@@ -226,7 +226,7 @@ public:
         minSeqsPer = 5;
         minWarningSeqs = 50;
         minMatchesFR = 6;
-        maxMismatchesPer4FR = 0.3;
+        maxMismatchesPer4FR = 0.1;
         maxScore = -1;
         maxScorePrimer = -1;
         numBestSeqs = 0;
@@ -234,7 +234,7 @@ public:
         minNSSRUnit = 3;
         mode = "HW";
         silent = false;
-        printRes = false;
+        printRes = true;
         format = "NICE";
         findAlignment = false;
         findStartLocation = false;

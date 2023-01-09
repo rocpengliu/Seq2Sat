@@ -91,7 +91,7 @@ int SsrScanner::doSubStrAlignment(const char* & pData, int pLength, const char* 
                     if (mOptions->mLocVars.locVarOptions.printRes) {
                         ss << "rev_RPrimer: " << pData << " (" << pLength << " residues) against rev_read " << readName << ": (" << rLength << " residues)" << ": score = " << result.editDistance << "\n";
                         //cCout();
-                        printAlignment(pData, rData, result.alignment, result.alignmentLength, *result.endLocations, mOptions->mLocVars.locVarOptions.modeCode);
+                        printAlignment(pData, rData, result.alignment, result.alignmentLength, *(result.endLocations), mOptions->mLocVars.locVarOptions.modeCode);
                     }
                 }
 
@@ -122,7 +122,7 @@ int SsrScanner::doSubStrAlignment(const char* & pData, int pLength, const char* 
                 if (mOptions->mLocVars.locVarOptions.printRes) {
                     ss << "RPrimer: " << pData << " (" << pLength << " residues) against read " << readName << ": (" << rLength << " residues)" << ": score = " << result.editDistance << "\n";
                     //cCout();
-                    printAlignment(pData, rData, result.alignment, result.alignmentLength, *result.endLocations, mOptions->mLocVars.locVarOptions.modeCode);
+                    printAlignment(pData, rData, result.alignment, result.alignmentLength, *(result.endLocations), mOptions->mLocVars.locVarOptions.modeCode);
                 }
             }
         }
@@ -131,7 +131,7 @@ int SsrScanner::doSubStrAlignment(const char* & pData, int pLength, const char* 
     return trimPos;
 }
 
-std::map<int, std::string> SsrScanner::doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength) {
+std::pair<std::map<int, std::string>, bool> SsrScanner::doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength) {
     EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
             edlibNewAlignConfig(mOptions->mLocVars.locVarOptions.maxScorePrimer,
             mOptions->mLocVars.locVarOptions.modeCode,
@@ -139,7 +139,7 @@ std::map<int, std::string> SsrScanner::doSimpleAlignment(Options * & mOptions, c
             NULL, 0));
 
     std::map<int, std::string> snpsMap;
-
+    std::set<int> indelSet;
     if (result.status == EDLIB_STATUS_OK) {
         for (int i = 0; i < result.alignmentLength; i++) {
             auto cur = result.alignment[i];
@@ -148,15 +148,19 @@ std::map<int, std::string> SsrScanner::doSimpleAlignment(Options * & mOptions, c
             } else if (cur == EDLIB_EDOP_MISMATCH) {
                 snpsMap[i] = tData[i];
             } else if (cur == EDLIB_EDOP_INSERT) {
-
+                indelSet.insert(i);
             } else if (cur == EDLIB_EDOP_DELETE) {
-
+                indelSet.insert(i);
             }
         }
 
     }
     edlibFreeAlignResult(result);
-    return snpsMap;
+    if(indelSet.empty()){
+        return std::make_pair(snpsMap, true);
+    } else {
+        return std::make_pair(snpsMap, false);
+    }
 }
 
 void SsrScanner::printAlignment(const char* & query, const char* & target,
@@ -217,7 +221,7 @@ int SsrScanner::doAlignment(const char* & qData, int qLength, const std::string 
             NULL, 0));
 
     if (result.status == EDLIB_STATUS_OK) {
-        endPos = *result.endLocations;
+        endPos = *(result.endLocations);
         doScanVariance(result, variance, qData, tData, *(result.endLocations));
         if (mOptions->mLocVars.locVarOptions.printRes && printAlignment) {
             printVariance(result, variance, qData, qName, tData, tName, *(result.endLocations));
@@ -794,10 +798,10 @@ void SsrScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                 readSeq = it.first.c_str();
                 readLength = it.first.length();
                 auto snpsMapX = SsrScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
-                for (auto & it2 : snpsMapX) {
+                for (auto & it2 : snpsMapX.first) {
                     mOptions->mSex.snpsRefX.insert(it2.first);
                 }
-                mOptions->mSex.seqVecX.emplace_back(std::make_tuple(it.first, it.second, snpsMapX));
+                mOptions->mSex.seqVecX.emplace_back(std::make_tuple(it.first, it.second, snpsMapX.first));
             }
         }
 
@@ -818,10 +822,10 @@ void SsrScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                 readSeq = it.first.c_str();
                 readLength = it.first.length();
                 auto snpsMapY = SsrScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
-                for (auto & it2 : snpsMapY) {
+                for (auto & it2 : snpsMapY.first) {
                     mOptions->mSex.snpsRefY.insert(it2.first);
                 }
-                mOptions->mSex.seqVecY.emplace_back(std::make_tuple(it.first, it.second, snpsMapY));
+                mOptions->mSex.seqVecY.emplace_back(std::make_tuple(it.first, it.second, snpsMapY.first));
             }
         }
         std::sort(mOptions->mSex.seqVecY.begin(), mOptions->mSex.seqVecY.end(),
@@ -887,28 +891,32 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     targetLength = locVarIt->ff.mStr.length();
                     readSeq = it2.second.baseLocVar.ff.mStr.c_str();
                     readLength = it2.second.baseLocVar.ff.mStr.length();
-                    it2.second.baseLocVar.snpsMapff = SsrScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
-                    
-                    for (auto & it3 : it2.second.baseLocVar.snpsMapff) {
-                        ffSet.insert(it3.first);
-                    }
-                    
-                    target = locVarIt->rf.mStr.c_str();
-                    targetLength = locVarIt->rf.mStr.length();
-                    readSeq = it2.second.baseLocVar.rf.mStr.c_str();
-                    readLength = it2.second.baseLocVar.rf.mStr.length();
-                    it2.second.baseLocVar.snpsMaprf = SsrScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
+                    auto mapSetff = SsrScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
+                    if (mapSetff.second) {
+                        it2.second.baseLocVar.snpsMapff = mapSetff.first;
 
-                    for (auto & it3 : it2.second.baseLocVar.snpsMaprf){
-                        rfSet.insert(it3.first);
+                        for (auto & it3 : it2.second.baseLocVar.snpsMapff) {
+                            ffSet.insert(it3.first);
+                        }
+
+                        target = locVarIt->rf.mStr.c_str();
+                        targetLength = locVarIt->rf.mStr.length();
+                        readSeq = it2.second.baseLocVar.rf.mStr.c_str();
+                        readLength = it2.second.baseLocVar.rf.mStr.length();
+                        auto mapSetrf = SsrScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
+                        if (mapSetrf.second) {
+                            it2.second.baseLocVar.snpsMaprf = mapSetrf.first;
+                            for (auto & it3 : it2.second.baseLocVar.snpsMaprf) {
+                                rfSet.insert(it3.first);
+                            }
+                            mOptions->mLocVars.refLocMap[it.first] = *locVarIt;
+                            it2.second.baseLocVar.mraName = tmpGeno;
+                            it2.second.baseLocVar.repuitAll = locVarIt->repuitAll;
+                            it2.second.baseLocVar.mraBase = getMraBase(it2.second.baseLocVar.mraName);
+                            tmpVec.push_back(std::make_pair(it2.first, it2.second));
+                            tmpMraVec.push_back(std::make_pair(it2.first, it2.second));
+                        }
                     }
-                    
-                    mOptions->mLocVars.refLocMap[it.first] = *locVarIt;
-                    it2.second.baseLocVar.mraName = tmpGeno;
-                    it2.second.baseLocVar.repuitAll = locVarIt->repuitAll;
-                    it2.second.baseLocVar.mraBase = getMraBase(it2.second.baseLocVar.mraName);
-                    tmpVec.push_back(std::make_pair(it2.first, it2.second));
-                    tmpMraVec.push_back(std::make_pair(it2.first, it2.second));
                 }
             }
         }
@@ -1903,6 +1911,13 @@ std::string SsrScanner::scanVar(Read* & r1) {
                         locMap[it.second.name] = std::make_pair((fpMismatches + rpMismatches), readLength - it.second.fp.mStr.length() - it.second.rp.mStr.length());
                         //should punish if there are mismatches in fp; 
                         //and could not be the best if there are indel in the head of the rp
+                    } else {
+                        fpData = it.second.rp.mStr.c_str();
+                        fpLength = it.second.rp.length();
+                        auto endBool = doPrimerAlignment(fpData, fpLength, it.second.name, readSeq, readLength, r1->mName, true);
+                        if (get<2>(endBool) && get<1>(endBool) <= readLength){
+                            locMap[it.second.name] = std::make_pair((fpMismatches + get<0>(endBool)), get<1>(endBool) - it.second.fp.mStr.length() - it.second.rp.mStr.length());
+                        }
                     }
                 }
             }
@@ -2049,4 +2064,358 @@ std::string SsrScanner::scanVar(Read* & r1) {
     }
     ss.str();
     return returnedlocus;
+}
+
+//std::string SsrScanner::scanVar(Read* & r1) {
+//    ss.str("");
+//    readSeq = r1->mSeq.mStr.c_str();
+//    readLength = r1->mSeq.length();
+//    readName = r1->mName;
+//    returnedlocus.clear();
+//    checkLoci = true;
+//    if (mOptions->mSex.sexMarker.empty()) {
+//        checkLoci = true;
+//    } else if(r1->length() < (mOptions->mSex.primerF.length() + mOptions->mSex.primerR.length())){
+//        checkLoci = true;
+//    } else {
+//        int fpMismatches = (int) edit_distance(mOptions->mSex.primerF.mStr,
+//                r1->mSeq.mStr.substr(0, mOptions->mSex.primerF.length()));
+//
+//        if (fpMismatches > mOptions->mSex.mismatchesPF) {
+//            checkLoci = true;
+//        } else {
+//            //checkLoci = false;
+//            int rpMismatches = (int) edit_distance(mOptions->mSex.primerR.mStr,
+//                    r1->mSeq.mStr.substr(r1->mSeq.length() - mOptions->mSex.primerR.length()));
+//
+//            if (rpMismatches > mOptions->mSex.mismatchesPF) {
+//                checkLoci = true;
+//            } else {
+//                if (mOptions->mSex.lengthEqual) {
+//                    unsigned int edx = edit_distance(mOptions->mSex.refX.mStr,
+//                            r1->mSeq.mStr.substr(mOptions->mSex.primerF.length(),
+//                            (r1->mSeq.length() - mOptions->mSex.primerF.length() - mOptions->mSex.primerR.length())));
+//
+//                    unsigned int edy = edit_distance(mOptions->mSex.refY.mStr,
+//                            r1->mSeq.mStr.substr(mOptions->mSex.primerF.length(),
+//                            (r1->mSeq.length() - mOptions->mSex.primerF.length() - mOptions->mSex.primerR.length())));
+//
+//                    if (edx == edy) {
+//                        //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+//                        checkLoci = true;
+//                    } else {
+//                        unsigned int edmin = std::min(edx, edy);
+//                        if (edmin == edx) {
+//                            if (edx > mOptions->mSex.mismatchesRX) {
+//                                //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+//                                checkLoci = true;
+//                            } else {
+//                                checkLoci = false;
+//                                tmpSexMap["X"][r1->mSeq.mStr]++;
+//                                //returnedlocus = mOptions->mSex.sexMarker + "_true";
+//                            }
+//                        } else {
+//                            if (edy > mOptions->mSex.mismatchesRY) {
+//                                //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+//                                checkLoci = true;
+//                            } else {
+//                                checkLoci = false;
+//                                tmpSexMap["Y"][r1->mSeq.mStr]++;
+//                                //returnedlocus = mOptions->mSex.sexMarker + "_true";
+//                            }
+//                        }
+//                    }
+//                } else {
+//                    if (r1->mSeq.length() - mOptions->mSex.primerF.length() - mOptions->mSex.primerR.length() == mOptions->mSex.refX.length()) {
+//                        unsigned int ed = edit_distance(mOptions->mSex.refX.mStr,
+//                                r1->mSeq.mStr.substr(mOptions->mSex.primerF.length(),
+//                                (r1->mSeq.length() - mOptions->mSex.primerF.length() - mOptions->mSex.primerR.length())));
+//                        if (ed > mOptions->mSex.mismatchesRX) {
+//                            //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+//                            checkLoci = true;
+//                        } else {
+//                            checkLoci = false;
+//                            tmpSexMap["X"][r1->mSeq.mStr]++;
+//                            //returnedlocus = mOptions->mSex.sexMarker + "_true";
+//                        }
+//                    } else if (r1->mSeq.length() - mOptions->mSex.primerF.length() - mOptions->mSex.primerR.length() == mOptions->mSex.refY.length()) {
+//                        unsigned int ed = edit_distance(mOptions->mSex.refY.mStr,
+//                                r1->mSeq.mStr.substr(mOptions->mSex.primerF.length(),
+//                                (r1->mSeq.length() - mOptions->mSex.primerF.length() - mOptions->mSex.primerR.length())));
+//                        if (ed > mOptions->mSex.mismatchesRY) {
+//                            //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+//                            checkLoci = true;
+//                        } else {
+//                            checkLoci = false;
+//                            tmpSexMap["Y"][r1->mSeq.mStr]++;
+//                            //returnedlocus = mOptions->mSex.sexMarker + "_true";
+//                        }
+//                    } else {
+//                        //returnedlocus = mOptions->mSex.sexMarker + "_failed";
+//                        checkLoci = true;
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    if (!checkLoci) {
+//        returnedlocus = mOptions->mSex.sexMarker + "_true";
+//    } else {
+//
+//        std::map<std::string, std::pair<int, int>> locMap; //loci, seq score, trimpos;
+//
+//        for (auto & it : mOptions->mLocVars.refLocMap) {
+//            if (r1->mSeq.length() > (it.second.fp.length() + it.second.rp.length())) {
+//                int fpMismatches = (int) edit_distance(it.second.fp.mStr, r1->mSeq.mStr.substr(0, it.second.fp.length()));
+//                if (fpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
+//                    int rpMismatches = (int) edit_distance(it.second.rp.mStr, r1->mSeq.mStr.substr(r1->mSeq.length() - it.second.rp.length()));
+//                    if (rpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
+//                        locMap[it.second.name] = std::make_pair((fpMismatches + rpMismatches), readLength - it.second.fp.mStr.length() - it.second.rp.mStr.length());
+//                        //should punish if there are mismatches in fp; 
+//                        //and could not be the best if there are indel in the head of the rp
+//                    }
+//                }
+//            }
+//        }
+//        
+//        if(locMap.empty()){
+//            returnedlocus = "_failed";
+//        } else {
+//            std::string locName = "";
+//            
+//            if (locMap.size() == 1) {
+//                locName = locMap.begin()->first;
+//            } else {
+//                std::vector<int> seqScoreVec(locMap.size());
+//                for (const auto & it : locMap) {
+//                    seqScoreVec.push_back(it.second.first);
+//                }
+//                auto minValue = *std::min_element(seqScoreVec.begin(), seqScoreVec.end());
+//                //warning, what if there are multiple identical values
+//                seqScoreVec.clear();
+//
+//                for (const auto & it : locMap) {
+//                    if (it.second.first == minValue) {
+//                        locName = it.first;
+//                        ss.str();
+//                        break; //warning, what if there are multiple identical values
+//                    }
+//                }
+//            }
+//
+//            locVarIt = &(mOptions->mLocVars.refLocMap[locName]);
+//            r1->trimFront(locVarIt->fp.length());
+//            r1->resize(locMap[locName].second);
+//            locMap.clear();
+//            minReadLen = std::max(locVarIt->ff.length(), locVarIt->rf.length()) + 
+//                    mOptions->mLocVars.locVarOptions.minNSSRUnit * (locVarIt->repuit.mStr.length() + locVarIt->repuit2.mStr.length());
+//            if( r1->length() < minReadLen){
+//                returnedlocus = locVarIt->name + "_failed";
+//                return(returnedlocus);
+//            }
+//            
+//            std::map<std::string, std::map < std::string, Genotype>>::iterator itGenotypeMap = tmpAllGenotypeMap.find(locVarIt->name);
+//            std::map<std::string, Genotype> tmpGenotypeMap;
+//            Genotype* tmpGenotype = new Genotype();
+//            if (itGenotypeMap == tmpAllGenotypeMap.end()) {
+//                if (r1->mSeq.mStr == locVarIt->effectiveSeq.mStr) {//identical seq with ref
+//                    tmpGenotype->baseLocVar = *locVarIt;
+//                    tmpGenotype->numReads++;
+//                    tmpGenotypeMap[r1->mSeq.mStr] = *tmpGenotype;
+//                    tmpAllGenotypeMap[locVarIt->name] = tmpGenotypeMap;
+//                    returnedlocus = locVarIt->name + "_true";
+//                    if (mOptions->mLocVars.locVarOptions.printRes) {
+//                        //ss << "Genotype: " << tmpGenotype.numReads << " : " << tmpGenotype.baseLocVar.mra.mStr << "\n";
+//                    }
+//                } else {
+//                    if (simpleAnalyzeFlankingRegion(r1)) {
+//                        auto ffpos = static_cast<std::size_t> (locVarIt->ff.length());
+//                        auto rfpos = static_cast<std::size_t> (r1->length() - locVarIt->rf.length());
+//                        tmpGenotype->baseLocVar = LocVar(r1->mSeq.mStr, ffpos, rfpos, locVarIt->repuit.mStr);
+//                        tmpGenotype->numReads++;
+//                        tmpGenotypeMap[r1->mSeq.mStr] = *tmpGenotype;
+//                        tmpAllGenotypeMap[locVarIt->name] = tmpGenotypeMap;
+//                        returnedlocus = locVarIt->name + "_true";
+//                    } else {
+//                        returnedlocus = locVarIt->name + "_failed";
+//                    }
+//
+//                    if (mOptions->mLocVars.locVarOptions.printRes) {
+//                        // cCout(ss.str(), 'y');
+//                    }
+//                }
+//
+//            } else {
+//                std::map<std::string, Genotype>::iterator tmpGenotypeMapIT = itGenotypeMap->second.find(r1->mSeq.mStr);
+//
+//                if (tmpGenotypeMapIT == itGenotypeMap->second.end()) {
+//
+//                    if (r1->mSeq.mStr == locVarIt->effectiveSeq.mStr) {//identical seq with refe;
+//                        tmpGenotype->baseLocVar = *locVarIt;
+//                        tmpGenotype->numReads++;
+//                        itGenotypeMap->second[r1->mSeq.mStr] = *tmpGenotype;
+//                        if (mOptions->mLocVars.locVarOptions.printRes) {
+//                            //ss << "Genotype: " << tmpGenotype.numReads << " : " << tmpGenotype.baseLocVar.mra.mStr << "\n";
+//                        }
+//                        returnedlocus = locVarIt->name + "_true";
+//                    } else {
+//                        if (simpleAnalyzeFlankingRegion(r1)) {
+//                            auto ffpos = static_cast<std::size_t>(locVarIt->ff.length());
+//                            auto rfpos = static_cast<std::size_t>(r1->length() - locVarIt->rf.length());
+//                            tmpGenotype->baseLocVar = LocVar(r1->mSeq.mStr, ffpos, rfpos, locVarIt->repuit.mStr);
+//                            tmpGenotype->numReads++;
+//                            itGenotypeMap->second[r1->mSeq.mStr] = *tmpGenotype;
+//                            returnedlocus = locVarIt->name + "_true";
+//                        } else {
+//                            returnedlocus = locVarIt->name + "_failed";
+//                        }
+//                        
+//                        if (mOptions->mLocVars.locVarOptions.printRes) {
+//                            //cCout(ss.str(), 'y');
+//                        }
+//                    }
+//                } else {
+//                    tmpGenotypeMapIT->second.numReads++;
+//                    returnedlocus = locVarIt->name + "_true";
+//                }
+//            }
+//
+//            if (tmpGenotype) {
+//                delete tmpGenotype;
+//                tmpGenotype = NULL;
+//            }
+//        }
+//    }
+//    ss.str();
+//    return returnedlocus;
+//}
+
+bool SsrScanner::simpleAnalyzeFlankingRegion(Read* & r1) {
+
+    if (locVarIt->ff.length() == 0 && locVarIt->rf.length() == 0) {
+        return true;
+    } else if (locVarIt->ff.length() != 0 && locVarIt->rf.length() == 0) {
+        int misF = locVarIt->ff.mStr.length() * mOptions->mLocVars.locVarOptions.maxMismatchesPer4FR == 0 ? 1 : (locVarIt->ff.mStr.length() * mOptions->mLocVars.locVarOptions.maxMismatchesPer4FR);
+        unsigned int edf = edit_distance(locVarIt->ff.mStr, r1->mSeq.mStr.substr(0, locVarIt->ff.length()));
+        if (misF >= ((int) edf)) {
+            return true;
+        } else {
+            return false;
+        }
+    } else if (locVarIt->ff.length() == 0 && locVarIt->rf.length() != 0) {
+        int misR = locVarIt->rf.mStr.length() * mOptions->mLocVars.locVarOptions.maxMismatchesPer4FR == 0 ? 1 : (locVarIt->rf.mStr.length() * mOptions->mLocVars.locVarOptions.maxMismatchesPer4FR);
+        unsigned int edr = edit_distance(locVarIt->rf.mStr, r1->mSeq.mStr.substr(r1->mSeq.length() - locVarIt->rf.length()));
+        if (misR >= ((int) edr)) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        int misF = locVarIt->ff.mStr.length() * mOptions->mLocVars.locVarOptions.maxMismatchesPer4FR == 0 ? 1 : (locVarIt->ff.mStr.length() * mOptions->mLocVars.locVarOptions.maxMismatchesPer4FR);
+        int misR = locVarIt->rf.mStr.length() * mOptions->mLocVars.locVarOptions.maxMismatchesPer4FR == 0 ? 1 : (locVarIt->rf.mStr.length() * mOptions->mLocVars.locVarOptions.maxMismatchesPer4FR);
+        unsigned int edf = edit_distance(locVarIt->ff.mStr, r1->mSeq.mStr.substr(0, locVarIt->ff.length()));
+        unsigned int edr = edit_distance(locVarIt->rf.mStr, r1->mSeq.mStr.substr((r1->mSeq.length() - locVarIt->rf.length())));
+
+        if(misF >= ((int) edf) && misR >= ((int) edr)){
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+}
+
+ std::tuple<int, int, bool> SsrScanner::doPrimerAlignment(const char* & qData, int qLength, const std::string & qName,
+        const char* & tData, int tLength, const std::string & tName, bool printAlignment) {
+    
+    EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
+                                edlibNewAlignConfig(-1, EDLIB_MODE_HW, EDLIB_TASK_PATH, NULL, 0));
+
+    if (result.status == EDLIB_STATUS_OK) {
+        
+        std::set<int> snpsSet;
+        std::set<int> indelSet;
+        for (int i = 0; i < result.alignmentLength; i++) {
+            auto cur = result.alignment[i];
+            if (cur == EDLIB_EDOP_MATCH) {
+
+            } else if (cur == EDLIB_EDOP_MISMATCH) {
+                snpsSet.insert(i);
+            } else if (cur == EDLIB_EDOP_INSERT) {
+                indelSet.insert(i);
+            } else if (cur == EDLIB_EDOP_DELETE) {
+                indelSet.insert(i);
+            }
+        }
+//
+//         printf("aaaaaaaaaaaaa\n");
+//        printAlignment2(qData, tData, result.alignment, result.alignmentLength, *(result.endLocations), EDLIB_MODE_HW);
+//
+//        int endPos = *(result.endLocations) + 1;
+//        printf("%s\n", qData);
+//        printf("%s\n", tData);
+//        printf("%ld -> %ld\n", snpsSet.size(), indelSet.size());
+//        printf("%d\n", endPos);
+//        printf("bbbbbbbbbbbbb\n");
+        
+        int endPos = *(result.endLocations) + 1;
+        edlibFreeAlignResult(result);
+        if(indelSet.empty() && snpsSet.size() <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq){
+            return std::make_tuple(snpsSet.size(), endPos, true);
+        } else {
+            return std::make_tuple(0, 0, false);
+        }
+    } else {
+        edlibFreeAlignResult(result);
+        return std::make_tuple(0, 0, false);
+    }
+}
+
+void SsrScanner::printAlignment2(const char* query, const char* target,
+                    const unsigned char* alignment, const int alignmentLength,
+                    const int position, const EdlibAlignMode modeCode) {
+    int tIdx = -1;
+    int qIdx = -1;
+    if (modeCode == EDLIB_MODE_HW) {
+        tIdx = position;
+        for (int i = 0; i < alignmentLength; i++) {
+            if (alignment[i] != EDLIB_EDOP_INSERT)
+                tIdx--;
+        }
+    }
+    for (int start = 0; start < alignmentLength; start += 50) {
+        // target
+        printf("T: ");
+        int startTIdx = -1;
+        for (int j = start; j < start + 50 && j < alignmentLength; j++) {
+            if (alignment[j] == EDLIB_EDOP_INSERT)
+                printf("-");
+            else
+                printf("%c", target[++tIdx]);
+            if (j == start)
+                startTIdx = tIdx;
+        }
+        printf(" (%d - %d)\n", max(startTIdx, 0), tIdx);
+
+        // match / mismatch
+        printf("   ");
+        for (int j = start; j < start + 50 && j < alignmentLength; j++) {
+            printf(alignment[j] == EDLIB_EDOP_MATCH ? "|" : " ");
+        }
+        printf("\n");
+
+        // query
+        printf("Q: ");
+        int startQIdx = qIdx;
+        for (int j = start; j < start + 50 && j < alignmentLength; j++) {
+            if (alignment[j] == EDLIB_EDOP_DELETE)
+                printf("-");
+            else
+                printf("%c", query[++qIdx]);
+            if (j == start)
+                startQIdx = qIdx;
+        }
+        printf(" (%d - %d)\n\n", max(startQIdx, 0), qIdx);
+    }
 }

@@ -25,7 +25,7 @@ public:
 public:
     std::string name;
     Sequence fp;
-    Sequence rp;
+    Sequence rp;//MUST be reverse complementary seq;
     Sequence ff;
     Sequence rf;
     Sequence repuitAll;

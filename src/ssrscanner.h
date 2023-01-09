@@ -36,7 +36,7 @@ public:
     static std::map<std::string, std::map<std::string, Genotype>> merge(std::vector<std::map<std::string, std::map<std::string, Genotype>>> & totalGenotypeSsrMapVec);
     void static merge(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions);
     inline std::map<std::string, std::map< std::string, Genotype>> getGenotypeMap() {return tmpAllGenotypeMap;};
-    static std::map<int, std::string> doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength);
+    static std::pair<std::map<int, std::string>, bool>  doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength);
     //inline std::map<std::string, std::vector<std::pair<std::string, Genotype>>> getSortedGenotypeMap() {return sortedAllGenotypeMap;};
     inline std::map<std::string, std::map<std::string, int>> getSexLoc(){return tmpSexMap;};
     
@@ -45,6 +45,10 @@ private:
     int doAlignment(const char* & qData, int qLength, const std::string & qName,
                      const char* & tData, int tLength, const std::string & tName, 
                      Variance & variance, bool printAlignment);
+    
+     std::tuple<int, int, bool> doPrimerAlignment(const char* & qData, int qLength, const std::string & qName,
+                     const char* & tData, int tLength, const std::string & tName, 
+                     bool printAlignment);
 
     void doScanVariance(EdlibAlignResult & result, Variance & variance, const char* & qData, const char* & tData, const int position);
     
@@ -58,11 +62,17 @@ private:
             const unsigned char*  alignment, const int alignmentLength,
             const int position, const EdlibAlignMode modeCode);
     
+    void printAlignment2(const char* query, const char* target,
+                    const unsigned char* alignment, const int alignmentLength,
+                    const int position, const EdlibAlignMode modeCode);
+    
     std::pair<size_t, int> analyzeMRA(std::string rawStr,  const std::string & ssr, std::size_t & ffTrimPos, std::size_t & rfTrimPos);//rawStr must be passed by value not reference
     
     void preAnalyze(Read* & r1, std::size_t & ffpos, std::size_t & rfpos, bool & mraAnalyze);
     
     void analyzeMRASub(Genotype & genotype, std::map<int, std::string> & subMap);
+    
+    bool simpleAnalyzeFlankingRegion(Read* & r1);
     
     void analyzeFlankingRegion(Genotype & genotype, 
                                Variance & ffVar, int endPosF, std::pair<size_t, int> & mraPosLenReadF,
