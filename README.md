@@ -176,7 +176,7 @@ Use seq2fun or seq2fun --help to show the full usage options
 
 ## Bugs or feature requests
 
-To inform us of any bugs or requests, please open a new issue or send an email to peng.liu@ec.gc.ca or rocpengliu@gmail.com
+To inform us of any bugs or requests, please open a new issue or send an email to peng.liu@ec.gc.ca
 
 ## Seq2Sate History & Updates
 07/27/2022 - added functions to generate html report
