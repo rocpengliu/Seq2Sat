@@ -57,7 +57,7 @@ Seq2Sat is a command-line based software for auto-scoring genotype. To help user
 ```
 Use seq2sat or seq2sat --help to show the full usage options
 options:
-      --var                           genetic variance, must be either microsatellite/ssr or snp (string [=])
+      --var                           genetic variance, must be either ssr or snp (string [=])
   -i, --in1                           read1 input file name (string [=])
   -I, --in2                           read2 input file name (string [=])
   -X, --prefix                        prefix name for output files, eg: sample01 (string [=])
