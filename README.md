@@ -39,9 +39,9 @@ cd testdata;
 cat sample.txt| while read i j k l; do ../seq2sat --prefix ${i} -i ${j} -I ${k} --loc loc.txt --sex sexLoc.txt --var ssr -w 8 -V; done;
 ```
 
-### View result
+### View the [result folder](https://www.dropbox.com/scl/fo/w7wh2m8znd22efo8iqnov/h?dl=0&rlkey=okpt21x4qsrkhx8bs85i6v2n1) or one [HTML report](https://www.dropbox.com/s/hq9exmm9qgr3cwu/49090_S9.html?dl=0) 
 ```
-You can download the res folder to view the results in html for the example datasets.
+Seq2Sat generates multiple result files including genotype tables, sex identification files, and html report containing tables figures.
 ```
 
 
