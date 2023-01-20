@@ -989,12 +989,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                 }
             }
         }
-        
-//        cCout("aaaaaaaaaaaaaaaaaaa", locVarIt->name);
-//        for(const auto & i : genoReadsMap){
-//            cCout(i.first, i.second, 'r');
-//        }
-//           
+           
         if (genoReadsMap.size() == 1) {//only one peak;
             genoReadsMapT[genoReadsMap.begin()->first] = genoReadsMap.begin()->second;
         } else if (genoReadsMap.size() > 1) {// > 1 peak;
@@ -1189,10 +1184,6 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
             bool shouldGo = false;
             if(!outMap1.empty() && !outMap2.empty()) {
-//                genoReadsMapT.insert(getMaxKeyValue(outMap1, true));
-//                outMap1.clear();
-//                genoReadsMapT.insert(getMaxKeyValue(outMap2, true));
-//                outMap2.clear();
                 
                 auto p1 = getMaxKeyValue(outMap1, true);
                 outMap1.clear();
@@ -1253,11 +1244,6 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     //get the two trend;
                     int repul = locVarIt->repuit.mStr.length();
                     auto twoPeaksMap = get2Peaks(genoReadsMap, mOptions->mLocVars.locVarOptions.hlRatio1, mOptions->mLocVars.locVarOptions.hlRatio2);
-
-                    //cCout("bbbbbbbbbbbbbbbbbbbbbbb");
-                    //                    for(const auto & i : twoPeaksMap){
-                    //                        cCout(i.first, i.second, 'g');
-                    //                    }
 
                     if (twoPeaksMap.size() == 1) {
                         genoReadsMapT = twoPeaksMap;
