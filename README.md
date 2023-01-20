@@ -42,7 +42,7 @@ Please view the sex identification, genotypes and reads quality in a
 <a href="https://github.com/ecogenomicscanada/Seq2Sat/tree/master/res/49090_S9.html" title="About Me">HTML report</a> for one sample.
 
 
-### Using a user-friendly websited based platform <a href="https://hub.docker.com/repository/docker/rocpengliu/satanalyzer/general" title="SatAnalyzer" target = "_blank">SatAnalyzer</a>.
+### Using a user-friendly websited based platform <a href="https://hub.docker.com/repository/docker/rocpengliu/satanalyzer/general" target="_blank">SatAnalyzer</a>.
 ```
 Seq2Sat is a command-line based software for auto-scoring genotype. To help users without bioinformatics training and manually editing genotype, we have developed a user-friendly webisted based platform SatAnalyzer. It is running in a docker container and it is strong recommended to use it.
 ```
