@@ -32,23 +32,9 @@ make
 
 ### Step 2. Run a small test 
 
-
-
-### Running Seq2Sat
-#### 1.Preparing sample.txt file
-
-This file consists of 3 columns and separated by '\t'. The first column is the prefix name of each sample, and the second is the forward reads file, the thrid column is the reverse reads file. If you have a single-end (SE) reads, remove the reverse reads (third) column. It looks like this:
 ```
-JG_T1M27a_19_48_S913	JG_T1M27a_19_48_S913_L001_R1_001.fastq.gz	ctr
-JG_T1M27b_27_48_S921	JG_T1M27b_27_48_S921_L001_R1_001.fastq.gz	ctr
-JG_T1M27c_1_47_S865	JG_T1M27c_1_47_S865_L001_R1_001.fastq.gz	ctr
-JG_T1M27d_10_47_S873	JG_T1M27d_10_47_S873_L001_R1_001.fastq.gz	ctr
-JG_T1M27e_19_47_S881	JG_T1M27e_19_47_S881_L001_R1_001.fastq.gz	ctr
-JG_T1M27f_27_47_S889	JG_T1M27f_27_47_S889_L001_R1_001.fastq.gz	ctr
-JG_T1M27g_1_46_S833	JG_T1M27g_1_46_S833_L001_R1_001.fastq.gz	ctr
-JG_T1M27h_10_46_S841	JG_T1M27h_10_46_S841_L001_R1_001.fastq.gz	ctr
-JG_T1M27i_19_46_S849	JG_T1M27i_19_46_S849_L001_R1_001.fastq.gz	ctr
-JG_T1M27j_27_46_S857	JG_T1M27j_27_46_S857_L001_R1_001.fastq.gz	ctr
+cd testdata;
+cat sample.txt| while read i j k l; do ../seq2sat --prefix ${i} -i ${j} -I ${k} --loc loc.txt --sex sexLoc.txt --var ssr -w 8 -V; done;
 ```
 
 ## Seq2Sat full usage options
@@ -161,5 +147,8 @@ options:
 To inform us of any bugs or requests, please open a new issue or send an email to peng.liu@ec.gc.ca
 
 ## Seq2Sate History & Updates
-07/27/2022 - added functions to generate html report
+12/20/2022 - first version released  
+10/11/2022 - added functions to generate 3d plot  
+08/10/2022 - added functions for sex identification   
+07/27/2022 - added functions to generate html report  
 05/03/2022 - first realse
