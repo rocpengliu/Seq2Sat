@@ -62,6 +62,7 @@ or -I to specify the reads2 if you have a paired end reads
       -i 49090_S9_L001_R1_001.fastq.gz -I 49090_S9_L001_R2_001.fastq.gz
 ```
 if you have the [sample.txt](https://github.com/ecogenomicscanada/Seq2Sat/tree/master/testdata/sample.txt) file, you must have a tab seperated table consisting of 4 columns for PE reads or 3 columns for SE reads.
+
 for PE reads
 ```
 49090_S9    49090_S9_L001_R1_001.fastq.gz    49090_S9_L001_R2_001.fastq.gz   grp
