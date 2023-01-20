@@ -37,6 +37,11 @@ cd testdata;
 cat sample.txt| while read i j k l; do ../seq2sat --prefix ${i} -i ${j} -I ${k} --loc loc.txt --sex sexLoc.txt --var ssr -w 8 -V; done;
 ```
 
+### View result
+```
+Please view the sex identification, genotypes and reads quality in a [html report](https://github.com/ecogenomicscanada/Seq2Sat/tree/master/res/) for one sample.
+```
+
 ## Seq2Sat full usage options
 ```
 Use seq2sat or seq2sat --help to show the full usage options
