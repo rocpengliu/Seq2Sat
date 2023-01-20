@@ -10,7 +10,7 @@
 * **Multifunctional**: Seq2Sat can conduct genotyping for both microsatellite/SSR and SNPs from both target sequencing and GBS/RAD-seq.
 
 
-* **Ultra-fast**: ~ 5 second/sample using single thread.
+* **Ultra-fast**: ~ 1 second/sample using single thread.
 
 * **Extremely low memory cost**: negligible ~ 0.1 MB RAM.
 
