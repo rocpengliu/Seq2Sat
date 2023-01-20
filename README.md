@@ -70,9 +70,9 @@ for PE reads
 49093_S12   49093_S12_L001_R1_001.fastq.gz   49093_S12_L001_R2_001.fastq.gz  grp
 ```
 looping your samples by
-
+```
 cat sample.txt| while read i j k l; do ../seq2sat --prefix ${i} -i ${j} -I ${k} --loc loc.txt --sex sexLoc.txt --var ssr -w 8 -V; done;
-
+```
 
 for SE reads
 ```
@@ -82,8 +82,9 @@ for SE reads
 49093_S12   49093_S12_L001_R1_001.fastq.gz   grp
 ```
 looping your samples by
-
+```
 cat sample.txt| while read i j k ; do ../seq2sat --prefix ${i} -i ${j} --loc loc.txt --sex sexLoc.txt --var ssr -w 8 -V; done;
+```
 
 
 #### 2. [loci file](https://github.com/ecogenomicscanada/Seq2Sat/tree/master/testdata/loc.txt)
