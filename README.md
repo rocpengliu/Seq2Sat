@@ -53,7 +53,7 @@ Seq2Sat generates multiple result files including genotype tables, sex identific
 Seq2Sat is a command-line based software for auto-scoring genotype. To help users without bioinformatics training and manually editing genotype, we have developed a user-friendly webisted based platform SatAnalyzer. It is running in a docker container and it is strong recommended to use it.
 ```
 ### Input files
-#### 1. fastq.gz files of raw sequencing reads
+#### 1. fastq.gz files of [raw sequencing reads](https://github.com/ecogenomicscanada/Seq2Sat/tree/master/testdata)
 
 ```
 using -i to specify the read1 for single end reads
@@ -61,7 +61,7 @@ using -i to specify the read1 for single end reads
 or -I to specify the reads2 if you have a paired end reads
       -i 49090_S9_L001_R1_001.fastq.gz -I 49090_S9_L001_R2_001.fastq.gz
 ```
-if you have the sample.txt file, you must have a tab seperated table consisting of 4 columns for PE reads or 3 columns for SE reads.
+if you have the [sample.txt](https://github.com/ecogenomicscanada/Seq2Sat/tree/master/testdata/sample.txt) file, you must have a tab seperated table consisting of 4 columns for PE reads or 3 columns for SE reads.
 for PE reads
 ```
 49090_S9    49090_S9_L001_R1_001.fastq.gz    49090_S9_L001_R2_001.fastq.gz   grp
@@ -77,7 +77,7 @@ for SE reads
 49093_S12   49093_S12_L001_R1_001.fastq.gz   grp
 ```
 
-#### 2. loci file
+#### 2. [loci file](https://github.com/ecogenomicscanada/Seq2Sat/tree/master/testdata/loc.txt)
 loci file provides the sequence and other informations about locus name, primer squences, flanking regions and microsatellite repeat array region.
 A loci file must have 8 columns seperated by tab. 
 They are 1. locus name, 2. forward primer sequence, 3. reverse complementary reverse primer sequence, 4. forward flanking region, 5. reverse flanking region, 6. microsatellite repeat unit, 7. number of repeat, 8. MRA region.
@@ -89,7 +89,7 @@ BM6438	GATTCAGCAGTGTCCTCGGG  GCAGAAGGGGTAGTACCAGC  GCACAAGGCTCCTTCATGCTTCTGCTCTG
 BM6506	TGAAGCTTCAGCCTAGCCAG  CTTTGTGACCCCATGGACTGTATG  TAAATT  CGTACACACCTACCTCCTTCATCAATGGATGGTGCCGTGCTCAAGTTGCTAAGTTGTGTCCAACT  CA  18  CACACACACACACACACACACACACACACACACACA
 BM848	CTGGCTAGTACCACATTCCCTCTGC  CTGGCTCTGTGCGACCCCATAGAC  TCCTCAAG  AGGCCCTAGAGGAGAAGCAGGACTCCTCTCTTTCTATGTTGGACTGCTGCTGCTGCTAAGTCGCTTCAGTCGTGT  AC  19  ACACACACACGCACACACACACACACACACACACACAC
 ```
-#### 3. sex loci file (optional)
+#### 3. [sex loci file](https://github.com/ecogenomicscanada/Seq2Sat/tree/master/testdata/sexLoc.txt) (optional)
 If you have amplicons for sex identification, your sex loci file should be 5 columns seperated by tab.
 1. sex locus name, 2. forward primer sequence, 3. reverse complementary reverse primer sequence, 4. X locus sequence, 5. Y locus sequence.
 
