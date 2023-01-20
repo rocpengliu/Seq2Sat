@@ -37,6 +37,9 @@ make
 ```
 cd testdata;
 cat sample.txt| while read i j k l; do ../seq2sat --prefix ${i} -i ${j} -I ${k} --loc loc.txt --sex sexLoc.txt --var ssr -w 8 -V; done;
+
+or for a single sample:
+../seq2sat --prefix 49090_S9 -i 49090_S9_L001_R1_001.fastq.gz -I 49090_S9_L001_R2_001.fastq.gz --loc loc.txt --sex sexLoc.txt --var ssr -w 8 -V;
 ```
 
 ### View the [result folder](https://www.dropbox.com/scl/fo/w7wh2m8znd22efo8iqnov/h?dl=0&rlkey=okpt21x4qsrkhx8bs85i6v2n1) or one [HTML report](https://www.dropbox.com/s/hq9exmm9qgr3cwu/49090_S9.html?dl=0) 
