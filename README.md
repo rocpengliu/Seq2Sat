@@ -17,7 +17,6 @@
 * **All-in-one**: Seq2Sat directly takes raw target sequencing reads as input and output genotype table without any intermediate file writing and loading, making I/O very efficient.
 
 * **Reads-to-report files**: it generates genotype table, a htlm report containging figures and tables for genotype, sex identification, SNPs.
-* 
 
 * **Easy to use**: requires minimal programing skills.
 
