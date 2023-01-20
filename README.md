@@ -69,7 +69,7 @@ for PE reads
 49092_S11   49092_S11_L001_R1_001.fastq.gz   49092_S11_L001_R2_001.fastq.gz  grp
 49093_S12   49093_S12_L001_R1_001.fastq.gz   49093_S12_L001_R2_001.fastq.gz  grp
 ```
-looping your sample by
+looping your samples by
 
 cat sample.txt| while read i j k l; do ../seq2sat --prefix ${i} -i ${j} -I ${k} --loc loc.txt --sex sexLoc.txt --var ssr -w 8 -V; done;
 
@@ -81,7 +81,7 @@ for SE reads
 49092_S11   49092_S11_L001_R1_001.fastq.gz   grp
 49093_S12   49093_S12_L001_R1_001.fastq.gz   grp
 ```
-looping your sample by
+looping your samples by
 
 cat sample.txt| while read i j k ; do ../seq2sat --prefix ${i} -i ${j} --loc loc.txt --sex sexLoc.txt --var ssr -w 8 -V; done;
 
