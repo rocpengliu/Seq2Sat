@@ -52,6 +52,31 @@ Seq2Sat generates multiple result files including genotype tables, sex identific
 ```
 Seq2Sat is a command-line based software for auto-scoring genotype. To help users without bioinformatics training and manually editing genotype, we have developed a user-friendly webisted based platform SatAnalyzer. It is running in a docker container and it is strong recommended to use it.
 ```
+### Input files
+#### 1. fastq.gz files of raw sequencing reads
+
+```
+using -i to specify the read1 for single end reads
+      -i 49090_S9_L001_R1_001.fastq.gz
+or -I to specify the reads2 if you have a paired end reads
+      -i 49090_S9_L001_R1_001.fastq.gz -I 49090_S9_L001_R2_001.fastq.gz
+```
+if you have the sample.txt file, you must have a tab seperated table consisting of 4 columns for PE reads or 3 columns for SE reads.
+for PE reads
+```
+49090_S9	49090_S9_L001_R1_001.fastq.gz 49090_S9_L001_R2_001.fastq.gz grp
+49091_S10	49091_S10_L001_R1_001.fastq.gz      49091_S10_L001_R2_001.fastq.gz	grp
+49092_S11	49092_S11_L001_R1_001.fastq.gz	49092_S11_L001_R2_001.fastq.gz	grp
+49093_S12	49093_S12_L001_R1_001.fastq.gz	49093_S12_L001_R2_001.fastq.gz	grp
+```
+for SE reads
+for PE reads
+```
+49090_S9	49090_S9_L001_R1_001.fastq.gz	      grp
+49091_S10	49091_S10_L001_R1_001.fastq.gz	grp
+49092_S11	49092_S11_L001_R1_001.fastq.gz	grp
+49093_S12	49093_S12_L001_R1_001.fastq.gz	grp
+```
 
 ## Seq2Sat full usage options
 ```
