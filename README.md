@@ -3,7 +3,7 @@
 
 ## Description 
 
-**Seq2Sat** is a novel, multifunctional, ultra-fast and all-in-one software to score microsatellite/SSR from target sequencing.
+**Seq2Sat** is a novel, multifunctional, ultra-fast and all-in-one software to automatically score microsatellite/SSR from target sequencing.
 
 ## Key features of Seq2Sat
 
@@ -38,8 +38,12 @@ cat sample.txt| while read i j k l; do ../seq2sat --prefix ${i} -i ${j} -I ${k} 
 ```
 
 ### View result
+Please view the sex identification, genotypes and reads quality in a [html report](https://github.com/ecogenomicscanada/Seq2Sat/tree/master/res/49090_S9.html) for one sample.
+
+
+### Using a user-friendly websited based platform [SatAnalyzer](https://hub.docker.com/repository/docker/rocpengliu/satanalyzer/general)
 ```
-Please view the sex identification, genotypes and reads quality in a [html report](https://github.com/ecogenomicscanada/Seq2Sat/tree/master/res/) for one sample.
+Seq2Sat is a command-line based software for auto-scoring genotype. To help users without bioinformatics training and manually editing genotype, we have developed a user-friendly webisted based platform SatAnalyzer. It is running in a docker container and it is strong recommended to use it.
 ```
 
 ## Seq2Sat full usage options
