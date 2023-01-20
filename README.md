@@ -7,7 +7,7 @@
 
 ## Key features of Seq2Sat
 
-* **Multifunctional**: Seq2Sat can conduct genotyping for both microsatellite/SSR and SNPs from both target sequencing and GBS/RAD-seq.
+* **Multifunctional**: Seq2Sat can conduct genotyping for both microsatellite/SSR and SNPs from both target sequencing.
 
 
 * **Ultra-fast**: ~ 1 second/sample using single thread.
@@ -16,7 +16,7 @@
 
 * **All-in-one**: Seq2Sat directly takes raw target sequencing reads as input and output genotype table without any intermediate file writing and loading, making I/O very efficient.
 
-* **Multifunctional**: it generates genotype table, a htlm report containging figures and tables for genotype, sex identification.
+* **reads-to-report files**: it generates genotype table, a htlm report containging figures and tables for genotype, sex identification.
 
 * **Easy to use**: requires minimal programing skills.
 
