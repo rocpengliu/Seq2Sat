@@ -64,19 +64,40 @@ or -I to specify the reads2 if you have a paired end reads
 if you have the sample.txt file, you must have a tab seperated table consisting of 4 columns for PE reads or 3 columns for SE reads.
 for PE reads
 ```
-49090_S9	49090_S9_L001_R1_001.fastq.gz 49090_S9_L001_R2_001.fastq.gz grp
-49091_S10	49091_S10_L001_R1_001.fastq.gz      49091_S10_L001_R2_001.fastq.gz	grp
-49092_S11	49092_S11_L001_R1_001.fastq.gz	49092_S11_L001_R2_001.fastq.gz	grp
-49093_S12	49093_S12_L001_R1_001.fastq.gz	49093_S12_L001_R2_001.fastq.gz	grp
+49090_S9    49090_S9_L001_R1_001.fastq.gz    49090_S9_L001_R2_001.fastq.gz   grp
+49091_S10   49091_S10_L001_R1_001.fastq.gz   49091_S10_L001_R2_001.fastq.gz  grp
+49092_S11   49092_S11_L001_R1_001.fastq.gz   49092_S11_L001_R2_001.fastq.gz  grp
+49093_S12   49093_S12_L001_R1_001.fastq.gz   49093_S12_L001_R2_001.fastq.gz  grp
 ```
 for SE reads
-for PE reads
 ```
-49090_S9	49090_S9_L001_R1_001.fastq.gz	      grp
-49091_S10	49091_S10_L001_R1_001.fastq.gz	grp
-49092_S11	49092_S11_L001_R1_001.fastq.gz	grp
-49093_S12	49093_S12_L001_R1_001.fastq.gz	grp
+49090_S9    49090_S9_L001_R1_001.fastq.gz    grp
+49091_S10   49091_S10_L001_R1_001.fastq.gz   grp
+49092_S11   49092_S11_L001_R1_001.fastq.gz   grp
+49093_S12   49093_S12_L001_R1_001.fastq.gz   grp
 ```
+
+#### 2. loci file
+loci file provides the sequence and other informations about locus name, primer squences, flanking regions and microsatellite repeat array region.
+A loci file must have 8 columns seperated by tab. 
+They are 1. locus name, 2. forward primer sequence, 3. reverse complementary reverse primer sequence, 4. forward flanking region, 5. reverse flanking region, 6. microsatellite repeat unit, 7. number of repeat, 8. MRA region.
+
+using --loc loc.txt to specify loc file
+```
+BM4513  AAGTGGTGTAGGCTGTACGC  ACTTGCGCTGCTGATCTCAT  TCCACCCCGCAATCAACTCAGCAATTCAGTACAGCACCC  CCAGAGAAGGGAGGGACTGGAGAGGGGTTCCTGAAACTAGAAGGAAAAGTGCCTGAGGAA  GT  21  GTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGT
+BM6438	GATTCAGCAGTGTCCTCGGG  GCAGAAGGGGTAGTACCAGC  GCACAAGGCTCCTTCATGCTTCTGCTCTGCCCTCTTTAGTGATAGGATTT  CGCCCCCCAGTCTGTGTCTGTGTTCAAGCAGGAAGAAGCC  AC  13  ACACACACACACACACACACACACAC
+BM6506	TGAAGCTTCAGCCTAGCCAG  CTTTGTGACCCCATGGACTGTATG  TAAATT  CGTACACACCTACCTCCTTCATCAATGGATGGTGCCGTGCTCAAGTTGCTAAGTTGTGTCCAACT  CA  18  CACACACACACACACACACACACACACACACACACA
+BM848	CTGGCTAGTACCACATTCCCTCTGC  CTGGCTCTGTGCGACCCCATAGAC  TCCTCAAG  AGGCCCTAGAGGAGAAGCAGGACTCCTCTCTTTCTATGTTGGACTGCTGCTGCTGCTAAGTCGCTTCAGTCGTGT  AC  19  ACACACACACGCACACACACACACACACACACACACAC
+```
+#### 3. sex loci file (optional)
+If you have amplicons for sex identification, your sex loci file should be 5 columns seperated by tab.
+1. sex locus name, 2. forward primer sequence, 3. reverse complementary reverse primer sequence, 4. X locus sequence, 5. Y locus sequence.
+
+using --sex sex.txt to specify sex loc file
+```
+ZFXY	GGAAATCATTCATGAATATCAC	GTACTGTCTGGAATCAGGTCT	TGAATTCTTAAAATTATATTTTTAAATTCAATACACAAAAACTCTATGTGGTCTAGCAGCTAAAATGCCATCACAACACCTTTAAGGATACATACTAGAGTTTCATCTGAGAGCTCACAAAGCACGCTGCGCTGTGGAACTCGTATGCCCTCACCTGTTTG	TTAATTCTTAAAAGTACACAAAAACTGCATGTATTCTAACAACTAAAATGCCATCACACCTTTATGGAATATATACTGGAATTTCCTCTGAGAGCTCGCAAAGCATGCTGTGCTGTGGAACTCGTGTGCCCTCACCTGTTTG
+```
+
 
 ## Seq2Sat full usage options
 ```
