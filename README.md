@@ -3,7 +3,7 @@
 
 ## Description 
 
-**Seq2Sat** is a novel, multifunctional, ultra-fast and all-in-one software to automatically score microsatellite/SSR from target sequencing.
+**Seq2Sat** is a novel, multifunctional, ultra-fast, all-in-one and reads-to-report software to automatically score microsatellite/SSR from target sequencing.
 
 ## Key features of Seq2Sat
 
