@@ -149,6 +149,6 @@ To inform us of any bugs or requests, please open a new issue or send an email t
 ## Seq2Sate History & Updates
 12/20/2022 - first version released  
 10/11/2022 - added functions to generate 3d plot  
-08/10/20022 - added functions for sex identification   
+08/10/2022 - added functions for sex identification   
 07/27/2022 - added functions to generate html report  
 05/03/2022 - first realse
