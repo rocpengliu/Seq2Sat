@@ -16,6 +16,8 @@
 
 * **All-in-one**: Seq2Sat directly takes raw target sequencing reads as input and output genotype table without any intermediate file writing and loading, making I/O very efficient.
 
+* **Multifunctional**: it generates genotype table, a htlm report containging figures and tables for genotype, sex identification.
+
 * **Easy to use**: requires minimal programing skills.
 
 
@@ -38,8 +40,9 @@ cat sample.txt| while read i j k l; do ../seq2sat --prefix ${i} -i ${j} -I ${k} 
 ```
 
 ### View result
-Please view the sex identification, genotypes and reads quality in a
-<a href="https://github.com/ecogenomicscanada/Seq2Sat/tree/master/res/49090_S9.html" title="About Me">HTML report</a> for one sample.
+```
+You can download the res folder to view the results in html for the example datasets.
+```
 
 
 ### Using a user-friendly websited based platform <a href="https://hub.docker.com/repository/docker/rocpengliu/satanalyzer/general" target="_blank">SatAnalyzer</a>.
