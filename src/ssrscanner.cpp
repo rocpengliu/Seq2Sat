@@ -1267,71 +1267,25 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                         genoReadsMapT = maxMap;
                     }
                     maxMap.clear();
-                    int diff = genoReadsMapT.end()->first - genoReadsMapT.begin()->first;
+                    int diff = genoReadsMapT.rbegin()->first - genoReadsMapT.begin()->first;
                     
-//                    if(locVarIt->name == "RT6"){
+//                    if(locVarIt->name == "BF_185"){
 //                        cCout("diff: ", diff, 'r');
 //                        for(const auto & i : genoReadsMapT){
 //                            cCout(i.first, i.second, 'g');
 //                        }
+//                        cCout("diff: ", genoReadsMapT.end()->first, 'r');
+//                        cCout("diff: ", genoReadsMapT.end()->second, 'r');
+//                        cCout("diff: ", genoReadsMapT.begin()->first, 'r');
+//                        cCout("diff: ", genoReadsMapT.begin()->second, 'r');
+//                        cCout("diff: ", genoReadsMapT.rbegin()->first, 'r');
+//                        cCout("diff: ", genoReadsMapT.rbegin()->second, 'r');
 //                    }
-                    if(genoReadsMapT.begin()->second >=  genoReadsMapT.end()->second) {
-                        double ratio = (double)(genoReadsMapT.end()->second) / genoReadsMapT.begin()->second;
-
-//                        if (locVarIt->name == "RT6") {
-//                            cCout("ratio1: ", ratio, 'r');
-//                        }
+                    if(genoReadsMapT.begin()->second < genoReadsMapT.rbegin()->second) {
                         
-                        if (locVarIt->repuitAllLen == 0 || locVarIt->repuitAllLen == locVarIt->repuit.length()) {
-                            if (diff <= locVarIt->repuit.length()) {
-                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio1) {
-                                    genoReadsMapT.clear();
-                                    nogap = true;
-                                }
-                            } else if (diff <= 2 * locVarIt->repuit.length()) {
-                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2) {
-                                    genoReadsMapT.clear();
-                                    nogap = true;
-                                }
-                            } else if (diff <= 3 * locVarIt->repuit.length()) {
-                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
-                                    genoReadsMapT.clear();
-                                    nogap = true;
-                                }
-                            } else {
-                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
-                                    genoReadsMapT.clear();
-                                    nogap = true;
-                                }
-                            }
-                        } else {
-                            if (diff <= locVarIt->repuit.length() || diff <= locVarIt->repuit2.length() || diff <= locVarIt->repuitAllLen) {
-                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio1) {
-                                    genoReadsMapT.clear();
-                                    nogap = true;
-                                }
-                            } else if (diff <= 2 * locVarIt->repuit.length() || 2 * diff <= locVarIt->repuit2.length() || diff <= 2 * locVarIt->repuitAllLen) {
-                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2) {
-                                    genoReadsMapT.clear();
-                                    nogap = true;
-                                }
-                            } else if (diff <= 3 * locVarIt->repuit.length() || diff <= 3 * locVarIt->repuit2.length() || diff <= 3 * locVarIt->repuitAllLen) {
-                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
-                                    genoReadsMapT.clear();
-                                    nogap = true;
-                                }
-                            } else {
-                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
-                                    genoReadsMapT.clear();
-                                    nogap = true;
-                                }
-                            }
-                        }
+                                                double ratio = (double)(genoReadsMapT.begin()->second) / genoReadsMapT.rbegin()->second;
 
-                    } else {
-                        double ratio = (double)(genoReadsMapT.begin()->second) / genoReadsMapT.end()->second;
-
-//                        if (locVarIt->name == "RT6") {
+//                        if (locVarIt->name == "BF_185") {
 //                            cCout("ratio2: ", ratio, 'r');
 //                        }
                         
@@ -1370,6 +1324,62 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                                 }
                             }
                         } 
+                                                
+                    } else {
+                        
+                  //double ratio = (double)(genoReadsMapT.rbegin()->second) / genoReadsMapT.begin()->second;
+//
+////                        if (locVarIt->name == "RT6") {
+////                            cCout("ratio1: ", ratio, 'r');
+////                        }
+//                        
+//                        if (locVarIt->repuitAllLen == 0 || locVarIt->repuitAllLen == locVarIt->repuit.length()) {
+//                            if (diff <= locVarIt->repuit.length()) {
+//                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio1) {
+//                                    genoReadsMapT.clear();
+//                                    nogap = true;
+//                                }
+//                            } else if (diff <= 2 * locVarIt->repuit.length()) {
+//                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2) {
+//                                    genoReadsMapT.clear();
+//                                    nogap = true;
+//                                }
+//                            } else if (diff <= 3 * locVarIt->repuit.length()) {
+//                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
+//                                    genoReadsMapT.clear();
+//                                    nogap = true;
+//                                }
+//                            } else {
+//                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
+//                                    genoReadsMapT.clear();
+//                                    nogap = true;
+//                                }
+//                            }
+//                        } else {
+//                            if (diff <= locVarIt->repuit.length() || diff <= locVarIt->repuit2.length() || diff <= locVarIt->repuitAllLen) {
+//                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio1) {
+//                                    genoReadsMapT.clear();
+//                                    nogap = true;
+//                                }
+//                            } else if (diff <= 2 * locVarIt->repuit.length() || 2 * diff <= locVarIt->repuit2.length() || diff <= 2 * locVarIt->repuitAllLen) {
+//                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2) {
+//                                    genoReadsMapT.clear();
+//                                    nogap = true;
+//                                }
+//                            } else if (diff <= 3 * locVarIt->repuit.length() || diff <= 3 * locVarIt->repuit2.length() || diff <= 3 * locVarIt->repuitAllLen) {
+//                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
+//                                    genoReadsMapT.clear();
+//                                    nogap = true;
+//                                }
+//                            } else {
+//                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
+//                                    genoReadsMapT.clear();
+//                                    nogap = true;
+//                                }
+//                            }
+//                        }
+                        
+                        
                     }
 
                 } else {
