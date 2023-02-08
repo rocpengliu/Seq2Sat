@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <df name="obj">
+      </df>
+      <df name="src">
+        <df name="zlib">
+          <in>crc32.h</in>
+          <in>deflate.h</in>
+          <in>gzguts.h</in>
+          <in>inffast.h</in>
+          <in>inffixed.h</in>
+          <in>inflate.h</in>
+          <in>inftrees.h</in>
+          <in>trees.h</in>
+          <in>zconf.h</in>
+          <in>zlib.h</in>
+          <in>zutil.h</in>
+        </df>
+        <in>adaptertrimmer.cpp</in>
+        <in>adaptertrimmer.h</in>
+        <in>basecorrector.cpp</in>
+        <in>basecorrector.h</in>
+        <in>cmdline.h</in>
+        <in>common.h</in>
+        <in>duplicate.cpp</in>
+        <in>duplicate.h</in>
+        <in>editdistance.cpp</in>
+        <in>editdistance.h</in>
+        <in>edlib.cpp</in>
+        <in>edlib.h</in>
+        <in>evaluator.cpp</in>
+        <in>evaluator.h</in>
+        <in>fastareader.cpp</in>
+        <in>fastareader.h</in>
+        <in>fastqreader.cpp</in>
+        <in>fastqreader.h</in>
+        <in>filter.cpp</in>
+        <in>filter.h</in>
+        <in>filterresult.cpp</in>
+        <in>filterresult.h</in>
+        <in>genotype.cpp</in>
+        <in>genotype.h</in>
+        <in>htmlreporter.cpp</in>
+        <in>htmlreporter.h</in>
+        <in>htmlreporterall.cpp</in>
+        <in>htmlreporterall.h</in>
+        <in>jsonreporter.cpp</in>
+        <in>jsonreporter.h</in>
+        <in>knownadapters.h</in>
+        <in>main.cpp</in>
+        <in>nucleotidetree.cpp</in>
+        <in>nucleotidetree.h</in>
+        <in>options.cpp</in>
+        <in>options.h</in>
+        <in>overlapanalysis.cpp</in>
+        <in>overlapanalysis.h</in>
+        <in>peprocessor.cpp</in>
+        <in>peprocessor.h</in>
+        <in>polyx.cpp</in>
+        <in>polyx.h</in>
+        <in>primerTrimmer.cpp</in>
+        <in>primerTrimmer.h</in>
+        <in>processor.cpp</in>
+        <in>processor.h</in>
+        <in>read.cpp</in>
+        <in>read.h</in>
+        <in>seprocessor.cpp</in>
+        <in>seprocessor.h</in>
+        <in>sequence.cpp</in>
+        <in>sequence.h</in>
+        <in>sexscanner.cpp</in>
+        <in>sexscanner.h</in>
+        <in>snpscanner.cpp</in>
+        <in>snpscanner.h</in>
+        <in>ssrscanner.cpp</in>
+        <in>ssrscanner.h</in>
+        <in>stats.cpp</in>
+        <in>stats.h</in>
+        <in>threadconfig.cpp</in>
+        <in>threadconfig.h</in>
+        <in>umiprocessor.cpp</in>
+        <in>umiprocessor.h</in>
+        <in>unittest.cpp</in>
+        <in>unittest.h</in>
+        <in>util.h</in>
+        <in>writer.cpp</in>
+        <in>writer.h</in>
+        <in>writerthread.cpp</in>
+        <in>writerthread.h</in>
+      </df>
+      <df name="testdata">
+      </df>
+    </df>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <platform>2</platform>
+      </toolsSet>
+      <compile>
+        <compiledirpicklist>
+          <compiledirpicklistitem>.</compiledirpicklistitem>
+          <compiledirpicklistitem>${AUTO_FOLDER}</compiledirpicklistitem>
+        </compiledirpicklist>
+        <compiledir>${AUTO_FOLDER}</compiledir>
+        <compilecommandpicklist>
+          <compilecommandpicklistitem>${MAKE} ${ITEM_NAME}.o</compilecommandpicklistitem>
+          <compilecommandpicklistitem>${AUTO_COMPILE}</compilecommandpicklistitem>
+        </compilecommandpicklist>
+        <compilecommand>${AUTO_COMPILE}</compilecommand>
+      </compile>
+      <dbx_gdbdebugger version="1">
+        <gdb_pathmaps>
+        </gdb_pathmaps>
+        <gdb_interceptlist>
+          <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
+        </gdb_interceptlist>
+        <gdb_options>
+          <DebugOptions>
+          </DebugOptions>
+        </gdb_options>
+        <gdb_buildfirst gdb_buildfirst_overriden="false" gdb_buildfirst_old="false"/>
+      </dbx_gdbdebugger>
+      <nativedebugger version="1">
+        <engine>gdb</engine>
+      </nativedebugger>
+      <runprofile version="9">
+        <runcommandpicklist>
+          <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
+        </runcommandpicklist>
+        <runcommand>"${OUTPUT_PATH}"</runcommand>
+        <rundir>.</rundir>
+        <buildfirst>false</buildfirst>
+        <terminal-type>0</terminal-type>
+        <remove-instrumentation>0</remove-instrumentation>
+        <environment>
+        </environment>
+      </runprofile>
+    </conf>
+  </confs>
+</configurationDescriptor>

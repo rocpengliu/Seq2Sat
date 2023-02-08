@@ -156,7 +156,7 @@ std::pair<std::map<int, std::string>, bool> SsrScanner::doSimpleAlignment(Option
 
     }
     edlibFreeAlignResult(result);
-    if(indelSet.empty()){
+    if (indelSet.empty()) {
         return std::make_pair(snpsMap, true);
     } else {
         return std::make_pair(snpsMap, false);
@@ -770,12 +770,12 @@ void SsrScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
 
     for (auto & it : totalSexLocVec) {
         for (const auto & it2 : it["X"]) {
-            mOptions->isPaired() ? (seqMapX[it2.first] += it2.second * 2 ): (seqMapX[it2.first] += it2.second);
-            
+            mOptions->isPaired() ? (seqMapX[it2.first] += it2.second * 2) : (seqMapX[it2.first] += it2.second);
+
         }
 
         for (const auto & it2 : it["Y"]) {
-             mOptions->isPaired() ? (seqMapY[it2.first] += it2.second * 2) : seqMapY[it2.first] += it2.second;
+            mOptions->isPaired() ? (seqMapY[it2.first] += it2.second * 2) : seqMapY[it2.first] += it2.second;
         }
     }
 
@@ -839,10 +839,12 @@ void SsrScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
 std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> SsrScanner::report(Options * & mOptions, std::map<std::string, std::map<std::string, Genotype>> &allGenotypeMap) {
 
     std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMap;
-    std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMraMap;//marker, seq, geno
+    std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMraMap; //marker, seq, geno
     std::vector<std::map < std::string, std::vector<std::pair < std::string, Genotype>>>> sortedAllGenotypeMapVec
-    {sortedAllGenotypeMap, sortedAllGenotypeMraMap};
-    
+    {
+        sortedAllGenotypeMap, sortedAllGenotypeMraMap
+    };
+
     const char* target;
     int targetLength;
     const char* readSeq;
@@ -958,11 +960,11 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
     *fout << "#Sample\tLocus\tMicrosatellite\tMRABase\tMRAName\tMRASize\tAllele\tNumReads\tPutativeAllele\tFF\tMRA\tRF\tSnpsFF\tSnpsRF\n";
     for (auto & it : sortedAllGenotypeMapVec.at(1)) {//marker, seq, genotype
-        auto locVarIt = &(mOptions->mLocVars.refLocMap[it.first]);//marker
+        auto locVarIt = &(mOptions->mLocVars.refLocMap[it.first]); //marker
         std::map<int, int> genoReadsMap;
         std::map<int, int> genoReadsMap2;
         std::map<int, int> genoReadsMapT;
-        
+
         std::map<int, int> ffsnpMap;
         std::map<int, int> rfsnpMap;
         std::map<std::string, int> mraBaseMap;
@@ -973,7 +975,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
             if (!ffset.empty()) {
                 if (!it2.second.baseLocVar.snpsMapff.empty()) {
-                    for(const auto & snp : it2.second.baseLocVar.snpsMapff){
+                    for (const auto & snp : it2.second.baseLocVar.snpsMapff) {
                         ffsnpMap[snp.first]++;
                     }
                 }
@@ -989,25 +991,25 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                 }
             }
         }
-           
+
         if (genoReadsMap.size() == 1) {//only one peak;
             genoReadsMapT[genoReadsMap.begin()->first] = genoReadsMap.begin()->second;
         } else if (genoReadsMap.size() > 1) {// > 1 peak;
 
             std::pair<std::string, double> mraBaseRatio{"", 0};
             if (mraBaseMap.size() > 1) {
-                
+
                 std::set<std::string> keySet;
-                for(const auto & mit : mraBaseMap){
+                for (const auto & mit : mraBaseMap) {
                     keySet.insert(mit.first);
                 }
-                
+
                 std::map<std::string, double> keyRatioMap;
-                for(const auto & mkey : keySet){
+                for (const auto & mkey : keySet) {
                     int alle1 = 0;
                     int alle2 = 0;
-                    for(const auto & mit : mraBaseMap){
-                        if(mkey == mit.first){
+                    for (const auto & mit : mraBaseMap) {
+                        if (mkey == mit.first) {
                             alle1 += mit.second;
                         } else {
                             alle2 += mit.second;
@@ -1021,20 +1023,20 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                         }
                     }
                 }
-                if(!keyRatioMap.empty()){
+                if (!keyRatioMap.empty()) {
                     mraBaseRatio = getMinKeyValue(keyRatioMap);
                 }
             }
-            
-            
+
+
             //firstly analyze the genotype based on snps, which is more accurate, i guess
-            
-            std::pair<double, int> ratiofp{0, 0};//ratio, pos
+
+            std::pair<double, int> ratiofp{0, 0}; //ratio, pos
             std::pair<double, int> ratiorp{0, 0};
-            if(!ffsnpMap.empty()){
+            if (!ffsnpMap.empty()) {
                 double ratio = 0;
                 int pos = 0;
-                for(const auto & s : ffsnpMap){
+                for (const auto & s : ffsnpMap) {
                     auto geno1 = s.second;
                     if (geno1 != it.second.size()) {
                         auto geno2 = it.second.size() - geno1;
@@ -1052,8 +1054,8 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                         }
                     }
                 }
-                
-                if(ratio != 0) ratiofp = std::make_pair(ratio, pos);
+
+                if (ratio != 0) ratiofp = std::make_pair(ratio, pos);
             }
 
             if (!rfsnpMap.empty()) {
@@ -1083,45 +1085,45 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
 
             std::map<int, int> outMap1;
             std::map<int, int> outMap2;
-            
+
             bool analBase = false;
             bool analFF = false;
             bool analRF = false;
             if (mraBaseRatio.second == 0) {
-                 if (ratiofp.first != 0 && ratiorp.first != 0) {
-                     if(ratiofp.first < ratiorp.first){
-                         analFF = true;
-                     } else {
-                         analRF = true;
-                     }
-                 } else if (ratiofp.first != 0 && ratiorp.first == 0){
-                     analFF = true;
-                 } else if(ratiofp.first == 0 && ratiorp.first != 0){
-                     analRF = true;
-                 } else {
-                     
-                 }
+                if (ratiofp.first != 0 && ratiorp.first != 0) {
+                    if (ratiofp.first < ratiorp.first) {
+                        analFF = true;
+                    } else {
+                        analRF = true;
+                    }
+                } else if (ratiofp.first != 0 && ratiorp.first == 0) {
+                    analFF = true;
+                } else if (ratiofp.first == 0 && ratiorp.first != 0) {
+                    analRF = true;
+                } else {
+
+                }
             } else {
 
                 if (ratiofp.first != 0 && ratiorp.first != 0) {
                     double minRatio = std::min(mraBaseRatio.second, std::min(ratiofp.first, ratiorp.first));
-                    
-                    if(ratiofp.first == minRatio){
+
+                    if (ratiofp.first == minRatio) {
                         analFF = true;
-                    } else if(ratiorp.first == minRatio){
+                    } else if (ratiorp.first == minRatio) {
                         analRF = true;
                     } else {
                         analBase = true;
                     }
-                    
+
                 } else if (ratiofp.first != 0 && ratiorp.first == 0) {
-                    if(ratiofp.first <= mraBaseRatio.second){
+                    if (ratiofp.first <= mraBaseRatio.second) {
                         analFF = true;
                     } else {
                         analBase = true;
                     }
                 } else if (ratiofp.first == 0 && ratiorp.first != 0) {
-                    if(ratiorp.first <= mraBaseRatio.second){
+                    if (ratiorp.first <= mraBaseRatio.second) {
                         analRF = true;
                     } else {
                         analBase = true;
@@ -1170,28 +1172,28 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                         outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                     }
                 }
-            } else if(analBase){
+            } else if (analBase) {
                 for (const auto & it2 : it.second) {
-                    if(mraBaseRatio.first == it2.second.baseLocVar.mraBase){
+                    if (mraBaseRatio.first == it2.second.baseLocVar.mraBase) {
                         outMap1[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                     } else {
                         outMap2[it2.second.baseLocVar.effectiveLen] += it2.second.numReads;
                     }
                 }
             } else {
-                
+
             }
 
             bool shouldGo = false;
-            if(!outMap1.empty() && !outMap2.empty()) {
-                
+            if (!outMap1.empty() && !outMap2.empty()) {
+
                 auto p1 = getMaxKeyValue(outMap1, true);
                 outMap1.clear();
                 auto p2 = getMaxKeyValue(outMap2, true);
                 outMap2.clear();
-                if(p1.first == p2.first){
+                if (p1.first == p2.first) {
                     auto ra = (double) std::min(p1.second, p2.second) / std::max(p1.second, p2.second);
-                    if(ra >= mOptions->mLocVars.locVarOptions.heterRatio) {
+                    if (ra >= mOptions->mLocVars.locVarOptions.heterRatio) {
                         genoReadsMapT.insert(p1);
                         genoReadsMapT.insert(p2);
                         shouldGo = false;
@@ -1203,7 +1205,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     genoReadsMapT.insert(p2);
                     shouldGo = false;
                 }
-                        
+
             } else {
                 shouldGo = true;
             }
@@ -1238,9 +1240,143 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                     itg++;
                 }
 
-                if (gapVec.empty()) {
+                bool nogap = false;
+                if (!gapVec.empty()) {
+                    std::map<int, int> maxMap;
+                    std::map<int, int> outMap;
+                    auto range_pre = genoReadsMap.begin();
+                    for (const auto & itgv : gapVec) {
+                        auto range_cur = genoReadsMap.find(itgv);
+                        if (range_cur != genoReadsMap.end()) {
+                            outMap.insert(range_pre, range_cur);
+                            maxMap.insert(getMaxKeyValue(outMap, true));
+                            outMap.clear();
+                            range_pre = range_cur;
+                        }
+                    }
 
+                    if (range_pre != genoReadsMap.end()) {
+                        outMap.insert(range_pre, genoReadsMap.end());
+                        maxMap.insert(getMaxKeyValue(outMap, true));
+                        outMap.clear();
+                    }
 
+                    if (maxMap.size() > 2) {
+                        genoReadsMapT = getTop2MaxKeyValue(maxMap);
+                    } else {
+                        genoReadsMapT = maxMap;
+                    }
+                    maxMap.clear();
+                    int diff = genoReadsMapT.end()->first - genoReadsMapT.begin()->first;
+                    
+//                    if(locVarIt->name == "RT6"){
+//                        cCout("diff: ", diff, 'r');
+//                        for(const auto & i : genoReadsMapT){
+//                            cCout(i.first, i.second, 'g');
+//                        }
+//                    }
+                    if(genoReadsMapT.begin()->second >=  genoReadsMapT.end()->second) {
+                        double ratio = (double)(genoReadsMapT.end()->second) / genoReadsMapT.begin()->second;
+
+//                        if (locVarIt->name == "RT6") {
+//                            cCout("ratio1: ", ratio, 'r');
+//                        }
+                        
+                        if (locVarIt->repuitAllLen == 0 || locVarIt->repuitAllLen == locVarIt->repuit.length()) {
+                            if (diff <= locVarIt->repuit.length()) {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio1) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } else if (diff <= 2 * locVarIt->repuit.length()) {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } else if (diff <= 3 * locVarIt->repuit.length()) {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } else {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            }
+                        } else {
+                            if (diff <= locVarIt->repuit.length() || diff <= locVarIt->repuit2.length() || diff <= locVarIt->repuitAllLen) {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio1) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } else if (diff <= 2 * locVarIt->repuit.length() || 2 * diff <= locVarIt->repuit2.length() || diff <= 2 * locVarIt->repuitAllLen) {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } else if (diff <= 3 * locVarIt->repuit.length() || diff <= 3 * locVarIt->repuit2.length() || diff <= 3 * locVarIt->repuitAllLen) {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } else {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 4) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            }
+                        }
+
+                    } else {
+                        double ratio = (double)(genoReadsMapT.begin()->second) / genoReadsMapT.end()->second;
+
+//                        if (locVarIt->name == "RT6") {
+//                            cCout("ratio2: ", ratio, 'r');
+//                        }
+                        
+                        if (locVarIt->repuitAllLen == 0 || locVarIt->repuitAllLen == locVarIt->repuit.length()) {
+                            if (diff <= locVarIt->repuit.length()) {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio1) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } else if (diff <= 2 * locVarIt->repuit.length()) {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } else {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } 
+                        } else {
+                            if (diff <= locVarIt->repuit.length() || diff <= locVarIt->repuit2.length() || diff <= locVarIt->repuitAllLen) {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio1) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } else if (diff <= 2 * locVarIt->repuit.length() || 2 * diff <= locVarIt->repuit2.length() || diff <= 2 * locVarIt->repuitAllLen) {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            } else {
+                                if (ratio < mOptions->mLocVars.locVarOptions.hlRatio2 / 2) {
+                                    genoReadsMapT.clear();
+                                    nogap = true;
+                                }
+                            }
+                        } 
+                    }
+
+                } else {
+                    nogap = true;
+                }
+
+                if (nogap) {
                     //get the two trend;
                     int repul = locVarIt->repuit.mStr.length();
                     auto twoPeaksMap = get2Peaks(genoReadsMap, mOptions->mLocVars.locVarOptions.hlRatio1, mOptions->mLocVars.locVarOptions.hlRatio2);
@@ -1344,35 +1480,6 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
                             }
                         }
                     }
-
-                } else {
-
-                    std::map<int, int> maxMap;
-                    std::map<int, int> outMap;
-                    auto range_pre = genoReadsMap.begin();
-                    for (const auto & itgv : gapVec) {
-                        auto range_cur = genoReadsMap.find(itgv);
-                        if (range_cur != genoReadsMap.end()) {
-                            outMap.insert(range_pre, range_cur);
-                            maxMap.insert(getMaxKeyValue(outMap, true));
-                            outMap.clear();
-                            range_pre = range_cur;
-                        }
-                    }
-
-                    if (range_pre != genoReadsMap.end()) {
-                        outMap.insert(range_pre, genoReadsMap.end());
-                        maxMap.insert(getMaxKeyValue(outMap, true));
-                        outMap.clear();
-                    }
-
-                    if (maxMap.size() > 2) {
-                        genoReadsMapT = getTop2MaxKeyValue(maxMap);
-                    } else {
-                        genoReadsMapT = maxMap;
-                    }
-
-                    maxMap.clear();
                 }
             }
         }
@@ -1563,10 +1670,10 @@ std::size_t SsrScanner::mutationMatchFR(std::string target, std::string query, i
     std::size_t pos = 0;
     int misMtch = 0;
     if (rev) {
-        
+
         if (target.length() > query.length()) {
-            
-            if(edit_distance(target.substr(target.length() - query.length()), query) <= (uint32) mis){
+
+            if (edit_distance(target.substr(target.length() - query.length()), query) <= (uint32) mis) {
                 return static_cast<std::size_t> (target.length() - query.length());
             } else {
                 int p = 0;
@@ -1591,7 +1698,7 @@ std::size_t SsrScanner::mutationMatchFR(std::string target, std::string query, i
                 }
                 return 0;
             }
-            
+
         } else {
             int p = 0;
             for (int i = query.length() - 1; i > 0; i--) {
@@ -1617,8 +1724,8 @@ std::size_t SsrScanner::mutationMatchFR(std::string target, std::string query, i
         }
     } else {
         if (target.length() > query.length()) {
-            
-            if(edit_distance(target.substr(0, query.length()), query) <= (uint32) mis){
+
+            if (edit_distance(target.substr(0, query.length()), query) <= (uint32) mis) {
                 return 0;
             } else {
                 for (int i = 0; i != query.length(); i++) {
@@ -1641,7 +1748,7 @@ std::size_t SsrScanner::mutationMatchFR(std::string target, std::string query, i
                 }
                 return 1;
             }
-            
+
         } else {
             for (int i = 0; i != query.length(); i++) {
                 if (query[i] != target[i]) {
@@ -1798,7 +1905,7 @@ std::string SsrScanner::scanVar(Read* & r1) {
     checkLoci = true;
     if (mOptions->mSex.sexMarker.empty()) {
         checkLoci = true;
-    } else if(r1->length() < (mOptions->mSex.primerF.length() + mOptions->mSex.primerR.length())){
+    } else if (r1->length() < (mOptions->mSex.primerF.length() + mOptions->mSex.primerR.length())) {
         checkLoci = true;
     } else {
         int fpMismatches = (int) edit_distance(mOptions->mSex.primerF.mStr,
@@ -1901,19 +2008,19 @@ std::string SsrScanner::scanVar(Read* & r1) {
                         fpData = it.second.rp.mStr.c_str();
                         fpLength = it.second.rp.length();
                         auto endBool = doPrimerAlignment(fpData, fpLength, it.second.name, readSeq, readLength, r1->mName, true);
-                        if (get<2>(endBool) && get<1>(endBool) <= readLength){
+                        if (get<2>(endBool) && get<1>(endBool) <= readLength) {
                             locMap[it.second.name] = std::make_pair((fpMismatches + get<0>(endBool)), get<1>(endBool) - it.second.fp.mStr.length() - it.second.rp.mStr.length());
                         }
                     }
                 }
             }
         }
-        
-        if(locMap.empty()){
+
+        if (locMap.empty()) {
             returnedlocus = "_failed";
         } else {
             std::string locName = "";
-            
+
             if (locMap.size() == 1) {
                 locName = locMap.begin()->first;
             } else {
@@ -1938,13 +2045,13 @@ std::string SsrScanner::scanVar(Read* & r1) {
             r1->trimFront(locVarIt->fp.length());
             r1->resize(locMap[locName].second);
             locMap.clear();
-            minReadLen = std::max(locVarIt->ff.length(), locVarIt->rf.length()) + 
+            minReadLen = std::max(locVarIt->ff.length(), locVarIt->rf.length()) +
                     mOptions->mLocVars.locVarOptions.minNSSRUnit * (locVarIt->repuit.mStr.length() + locVarIt->repuit2.mStr.length());
-            if( r1->length() < minReadLen){
+            if (r1->length() < minReadLen) {
                 returnedlocus = locVarIt->name + "_failed";
-                return(returnedlocus);
+                return (returnedlocus);
             }
-            
+
             std::map<std::string, std::map < std::string, Genotype>>::iterator itGenotypeMap = tmpAllGenotypeMap.find(locVarIt->name);
             std::map<std::string, Genotype> tmpGenotypeMap;
             Genotype* tmpGenotype = new Genotype();
@@ -2303,23 +2410,23 @@ bool SsrScanner::simpleAnalyzeFlankingRegion(Read* & r1) {
         unsigned int edf = edit_distance(locVarIt->ff.mStr, r1->mSeq.mStr.substr(0, locVarIt->ff.length()));
         unsigned int edr = edit_distance(locVarIt->rf.mStr, r1->mSeq.mStr.substr((r1->mSeq.length() - locVarIt->rf.length())));
 
-        if(misF >= ((int) edf) && misR >= ((int) edr)){
+        if (misF >= ((int) edf) && misR >= ((int) edr)) {
             return true;
         } else {
             return false;
         }
     }
-    
+
 }
 
- std::tuple<int, int, bool> SsrScanner::doPrimerAlignment(const char* & qData, int qLength, const std::string & qName,
+std::tuple<int, int, bool> SsrScanner::doPrimerAlignment(const char* & qData, int qLength, const std::string & qName,
         const char* & tData, int tLength, const std::string & tName, bool printAlignment) {
-    
+
     EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
-                                edlibNewAlignConfig(-1, EDLIB_MODE_HW, EDLIB_TASK_PATH, NULL, 0));
+            edlibNewAlignConfig(-1, EDLIB_MODE_HW, EDLIB_TASK_PATH, NULL, 0));
 
     if (result.status == EDLIB_STATUS_OK) {
-        
+
         std::set<int> snpsSet;
         std::set<int> indelSet;
         for (int i = 0; i < result.alignmentLength; i++) {
@@ -2334,20 +2441,20 @@ bool SsrScanner::simpleAnalyzeFlankingRegion(Read* & r1) {
                 indelSet.insert(i);
             }
         }
-//
-//         printf("aaaaaaaaaaaaa\n");
-//        printAlignment2(qData, tData, result.alignment, result.alignmentLength, *(result.endLocations), EDLIB_MODE_HW);
-//
-//        int endPos = *(result.endLocations) + 1;
-//        printf("%s\n", qData);
-//        printf("%s\n", tData);
-//        printf("%ld -> %ld\n", snpsSet.size(), indelSet.size());
-//        printf("%d\n", endPos);
-//        printf("bbbbbbbbbbbbb\n");
-        
+        //
+        //         printf("aaaaaaaaaaaaa\n");
+        //        printAlignment2(qData, tData, result.alignment, result.alignmentLength, *(result.endLocations), EDLIB_MODE_HW);
+        //
+        //        int endPos = *(result.endLocations) + 1;
+        //        printf("%s\n", qData);
+        //        printf("%s\n", tData);
+        //        printf("%ld -> %ld\n", snpsSet.size(), indelSet.size());
+        //        printf("%d\n", endPos);
+        //        printf("bbbbbbbbbbbbb\n");
+
         int endPos = *(result.endLocations) + 1;
         edlibFreeAlignResult(result);
-        if(indelSet.empty() && snpsSet.size() <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq){
+        if (indelSet.empty() && snpsSet.size() <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
             return std::make_tuple(snpsSet.size(), endPos, true);
         } else {
             return std::make_tuple(0, 0, false);
@@ -2359,8 +2466,8 @@ bool SsrScanner::simpleAnalyzeFlankingRegion(Read* & r1) {
 }
 
 void SsrScanner::printAlignment2(const char* query, const char* target,
-                    const unsigned char* alignment, const int alignmentLength,
-                    const int position, const EdlibAlignMode modeCode) {
+        const unsigned char* alignment, const int alignmentLength,
+        const int position, const EdlibAlignMode modeCode) {
     int tIdx = -1;
     int qIdx = -1;
     if (modeCode == EDLIB_MODE_HW) {
