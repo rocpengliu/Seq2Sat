@@ -91,9 +91,9 @@ cat sample.txt| while read i j k ; do ../seq2sat --prefix ${i} -i ${j} --loc loc
 #### 2. [loci file](https://github.com/ecogenomicscanada/Seq2Sat/tree/master/testdata/loc.txt)
 loci file provides the sequence and other informations about locus name, primer squences, flanking regions and microsatellite repeat array region.
 A loci file must have 8 columns seperated by tab. 
-They are 1. locus name, 2. forward primer sequence, 3. reverse complementary reverse primer sequence, 4. forward flanking region, 5. reverse flanking region, 6. microsatellite repeat unit, 7. number of repeat, 8. MRA region.
+They are 1. locus name, 2. forward primer sequence, 3. reverse complementary reverse primer sequence (or reverse primer), 4. forward flanking region, 5. reverse flanking region, 6. microsatellite repeat unit, 7. number of repeat, 8. MRA region.
 
-using --loc loc.txt to specify loc file
+using --loc loc.txt to specify loc file (or --revCom if your reverse primer sequence is not reverse complentary reverse primer sequence)
 ```
 BM4513  AAGTGGTGTAGGCTGTACGC  ACTTGCGCTGCTGATCTCAT  TCCACCCCGCAATCAACTCAGCAATTCAGTACAGCACCC  CCAGAGAAGGGAGGGACTGGAGAGGGGTTCCTGAAACTAGAAGGAAAAGTGCCTGAGGAA  GT  21  GTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGT
 BM6438	GATTCAGCAGTGTCCTCGGG  GCAGAAGGGGTAGTACCAGC  GCACAAGGCTCCTTCATGCTTCTGCTCTGCCCTCTTTAGTGATAGGATTT  CGCCCCCCAGTCTGTGTCTGTGTTCAAGCAGGAAGAAGCC  AC  13  ACACACACACACACACACACACACAC
