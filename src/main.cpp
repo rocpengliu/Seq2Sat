@@ -37,7 +37,7 @@ int main(int argc, char* argv[]){
     cmd.add<string>("out2", 'O', "file name to store read2 with on-target sequences", false, "");
     
     cmd.add<string>("loc", 0, "loci file containing loci names, 5'primer sequence, reverse complement of 3'primer sequence, 5'flank region, 3'flank region, repeat unit and reference microsatellite repeat array, separated by '\t", false, "");
-    cmd.add("revCom", 0, "if your reverse primer sequence in the loc file is not reverse complentary, please specify id");
+    cmd.add("revCom", 0, "if your reverse primer sequence in the loc file is not reverse complentary, please specify it");
     cmd.add<int>("maxMismatchesPSeq", 0, "maximum mismatches for primer sequences 2", false, 2);
     cmd.add<double>("maxMismatchesPer4FR", 0, "maximum percentage mismatches for the forward and reverse flanking regions, default 0.3 (30%) ", false, 0.1);
     cmd.add<int>("minSeqs", 0, "minimum number of reads for a genotype, default: 5", false, 5);
