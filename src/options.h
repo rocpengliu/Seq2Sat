@@ -448,6 +448,7 @@ public:
     bool verbose;
     // the length of KMER, default is 25
     bool debug;
+    bool revCom;
     varType mVarType;
     std::string var;
     std::string sampleTable;

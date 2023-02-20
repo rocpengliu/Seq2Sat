@@ -38,6 +38,7 @@ Options::Options(){
     sampleTable = "";
     samples.clear();
     minAmpliconEffectiveLen = 6;
+    revCom = false;
 }
 
 void Options::init() {
@@ -401,7 +402,7 @@ void Options::readLocFile(){
                 LocVar tmpLocVar;
                 tmpLocVar.name = splitVec[0];
                 tmpLocVar.fp = splitVec[1];
-                tmpLocVar.rp = splitVec[2];
+                tmpLocVar.rp = revCom ? Sequence(splitVec[2]).reverseComplement().mStr : splitVec[2];
                 if (splitVec[3] != "NA") {
                     tmpLocVar.ff = splitVec[3];
                 } else {
