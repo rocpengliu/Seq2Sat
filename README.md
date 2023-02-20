@@ -122,6 +122,7 @@ options:
   -o, --out1                          file name to store read1 with on-target sequences (string [=])
   -O, --out2                          file name to store read2 with on-target sequences (string [=])
       --loc                           loci file containing loci names, 5'primer sequence, reverse complement of 3'primer sequence, 5'flank region, 3'flank region, repeat unit and reference microsatellite repeat array, separated by '	 (string [=])
+      --revCom                        if your reverse primer sequence in the loc file is not reverse complementary, please specify it
       --maxMismatchesPSeq             maximum mismatches for primer sequences 2 (int [=2])
       --maxMismatchesPer4FR           maximum percentage mismatches for the forward and reverse flanking regions, default 0.3 (30%)  (double [=0.1])
       --minSeqs                       minimum number of reads for a genotype, default: 5 (int [=5])
@@ -220,6 +221,7 @@ options:
 To inform us of any bugs or requests, please open a new issue or send an email to peng.liu@ec.gc.ca
 
 ## Seq2Sate History & Updates
+02/20/2023 - added function to support reverse complmentary reverse primer sequence  
 01/20/2023 - added example data  
 12/20/2022 - first version released  
 10/11/2022 - added functions to generate 3d plot  
