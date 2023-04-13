@@ -29,7 +29,7 @@ We have tested Seq2Sat on Ubuntu (16.04 LTS and above) and macOS Catalina.
 ```
 git clone https://github.com/ecogenomicscanada/Seq2Sat
 cd Seq2Sat
-make
+make clean && make
 ```
 
 ### Step 2. Run a small test 
