@@ -42,7 +42,7 @@ or for a single sample:
 ../seq2sat --prefix 49090_S9 -i 49090_S9_L001_R1_001.fastq.gz -I 49090_S9_L001_R2_001.fastq.gz --loc loc.txt --sex sexLoc.txt --var ssr -w 8 -V;
 ```
 
-### View the [result folder](https://www.dropbox.com/scl/fo/w7wh2m8znd22efo8iqnov/h?dl=0&rlkey=okpt21x4qsrkhx8bs85i6v2n1) or one [HTML report](https://www.dropbox.com/s/hq9exmm9qgr3cwu/49090_S9.html?dl=0) 
+### View the [result folder](https://www.dropbox.com/scl/fo/rra64i62m1nwsgeuz8xu0/h?dl=0&rlkey=bn6q6fll7n3wa48b2e40zgpct) or one [HTML report](https://www.dropbox.com/s/hq9exmm9qgr3cwu/49090_S9.html?dl=0) 
 ```
 Seq2Sat generates multiple result files including genotype tables, sex identification files, and html report containing tables figures.
 ```
