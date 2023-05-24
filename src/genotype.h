@@ -91,6 +91,22 @@ public:
     std::vector<std::string> effectiveSeqVec;
 };
 
+struct SimGeno{
+    std::string geno;
+    int read1;
+    int read2;
+    double ratio;
+    bool tORf;
+};
+
+class UnitedLocSnp {
+public:
+    UnitedLocSnp();
+public:
+    std::map<int, std::map<char, int>> preGenoMap; //pos, base ACGT, num reads;
+    std::map<int, SimGeno> snpGenoMap; //pos, genotype, reads ratio;
+};
+
 class LocSnp{
 public:
     LocSnp();
@@ -101,10 +117,21 @@ public:
     Sequence rp;
     Sequence ref;
     std::set<int> snpPosSet;
+    std::set<int> refSnpPosSet;
     std::map<int, std::pair<Sequence, Sequence>> snpsMap;
     int numReads;
+    double readsRatio;
+    std::string genotype;
+    bool puGeno;
     void print();
     std::string getGenotype();
+    UnitedLocSnp uGeno;
+};
+
+struct ComparatorSnp {
+    bool operator()( LocSnp& a,  LocSnp& b) const {
+        return a.getGenotype() < b.getGenotype();
+    }
 };
 
 class Sex{

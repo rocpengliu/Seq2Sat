@@ -10,6 +10,7 @@
 #include <vector>
 #include <utility>
 #include <set>
+#include <algorithm>
 #include "options.h"
 #include "stats.h"
 #include "filterresult.h"
@@ -17,6 +18,12 @@
 #include "genotype.h"
 
 using namespace std;
+
+struct Comparator {
+    bool operator()(const LocSnp& a, const LocSnp& b) const {
+        return a.snpPosSet < b.snpPosSet;
+    }
+};
 
 class HtmlReporter{
 public:
@@ -31,12 +38,14 @@ public:
     static void outputRow(ofstream& ofs, string key, long value);
     static void outputRow(ofstream& ofs, string key, string value);
     static void outputRow(ofstream& ofs, std::string & marker, std::vector<std::pair<std::string, Genotype>> & outGenotype, Options*& mOptions);
-    static void outputRow(ofstream& ofs, std::string & marker, std::map<std::string, LocSnp> & snpsMap);
+    static void outputRow(ofstream& ofs, std::string & marker, std::map<std::string, LocSnp> & snpsMap, int & totReads, std::set<int> & refSet);
+    static void outputRow(ofstream& ofs, std::map<int, SimGeno> & snpGenoMap, std::set<int> & refSet, int & totReads);
     static string formatNumber(long number);
     static string getPercents(long numerator, long denominator);
     static std::string highligher(std::string & str, std::map<int, std::string> & snpsMap);
     static std::string highligher(std::string & str, std::set<int> & snpsSet);
-    static std::string highligher(LocSnp & locSnp, bool ref = false);
+    static std::string highligher(LocSnp & locSnp, bool ref, std::set<int> & refSet);
+    
 private:
     const string getCurrentSystemTime();
     void printHeader(ofstream& ofs);
@@ -57,13 +66,12 @@ private:
                             std::vector<double> & barmra_width_vec, 
                             std::vector<std::pair<std::string, Genotype>> & outGenotypeMra);
     void reportEachSnpGenotype(ofstream& ofs, std::string marker, std::map<std::string, LocSnp> & snpsMap,
-            std::vector<std::string> & x_vec, std::vector<int> & y_vec, std::vector<double> & bar_width_vec);
+            std::vector<std::string> & x_vec, std::vector<int> & y_vec, std::vector<double> & bar_width_vec, 
+            std::vector<std::string> & x_vec_2, std::vector<int> & y_vec_2, std::vector<double> & bar_width_vec_2,
+            int & totReads, bool & twoTrace);
+    void reportSnpAlignmentTable(ofstream& ofs, std::string marker, std::map<std::string, LocSnp> & snpsMap, int & totReads);
+    void reportSnpTablePlot(ofstream& ofs, std::string marker, std::string & divName, int & totReads);
     void reportSex(ofstream & ofs);
-//    void printDetectionResult(ofstream& ofs, Kmer* kmer);
-//    void printGenomeCoverage(ofstream& ofs, Genomes* g);
-//    void reportKmerHits(ofstream& ofs, Kmer* kmer);
-//    void reportKmerCollection(ofstream& ofs, KmerCollection* kc);
-    
     
 private:
     Options* mOptions;

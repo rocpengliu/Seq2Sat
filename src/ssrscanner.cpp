@@ -70,7 +70,7 @@ int SsrScanner::doSubStrAlignment(const char* & pData, int pLength, const char* 
 
         if (rev) {
 
-            if (*result.endLocations - *result.startLocations >= pLength - mOptions->mLocVars.locVarOptions.maxDeletionRPrimer) {
+            if (*result.endLocations - *result.startLocations >= pLength - mOptions->mEdOptions.maxDeletionRPrimer) {
 
                 for (int i = 0; i < result.alignmentLength; i++) {
                     auto j = static_cast<unsigned> (result.alignment[i]);
@@ -83,23 +83,23 @@ int SsrScanner::doSubStrAlignment(const char* & pData, int pLength, const char* 
                     }
                 }
 
-                if (numMismaches <= mOptions->mLocVars.locVarOptions.maxMismatchesRPrimer &&
-                        numDeletions <= mOptions->mLocVars.locVarOptions.maxDeletionRPrimer &&
-                        numInsertions <= mOptions->mLocVars.locVarOptions.maxInsertionRPrimer) {
+                if (numMismaches <= mOptions->mEdOptions.maxMismatchesRPrimer &&
+                        numDeletions <= mOptions->mEdOptions.maxDeletionRPrimer &&
+                        numInsertions <= mOptions->mEdOptions.maxInsertionRPrimer) {
 
                     trimPos = rLength - (*result.endLocations + 1);
-                    if (mOptions->mLocVars.locVarOptions.printRes) {
+                    if (mOptions->mEdOptions.printRes) {
                         ss << "rev_RPrimer: " << pData << " (" << pLength << " residues) against rev_read " << readName << ": (" << rLength << " residues)" << ": score = " << result.editDistance << "\n";
                         //cCout();
-                        printAlignment(pData, rData, result.alignment, result.alignmentLength, *(result.endLocations), mOptions->mLocVars.locVarOptions.modeCode);
+                        printAlignment(pData, rData, result.alignment, result.alignmentLength, *(result.endLocations), mOptions->mEdOptions.modeCode);
                     }
                 }
 
             }
 
         } else {
-            if (*result.endLocations - *result.startLocations <= pLength + mOptions->mLocVars.locVarOptions.maxDeletionRPrimer &&
-                    rLength - mOptions->mLocVars.locVarOptions.maxDeletionRPrimer <= *result.endLocations &&
+            if (*result.endLocations - *result.startLocations <= pLength + mOptions->mEdOptions.maxDeletionRPrimer &&
+                    rLength - mOptions->mEdOptions.maxDeletionRPrimer <= *result.endLocations &&
                     *result.endLocations < rLength) {
 
                 for (int i = 0; i < result.alignmentLength; i++) {
@@ -113,16 +113,16 @@ int SsrScanner::doSubStrAlignment(const char* & pData, int pLength, const char* 
                     }
                 }
 
-                if (numMismaches <= mOptions->mLocVars.locVarOptions.maxMismatchesRPrimer &&
-                        numDeletions <= mOptions->mLocVars.locVarOptions.maxDeletionRPrimer &&
-                        numInsertions <= mOptions->mLocVars.locVarOptions.maxInsertionRPrimer) {
+                if (numMismaches <= mOptions->mEdOptions.maxMismatchesRPrimer &&
+                        numDeletions <= mOptions->mEdOptions.maxDeletionRPrimer &&
+                        numInsertions <= mOptions->mEdOptions.maxInsertionRPrimer) {
                     trimPos = *result.startLocations;
                 }
 
-                if (mOptions->mLocVars.locVarOptions.printRes) {
+                if (mOptions->mEdOptions.printRes) {
                     ss << "RPrimer: " << pData << " (" << pLength << " residues) against read " << readName << ": (" << rLength << " residues)" << ": score = " << result.editDistance << "\n";
                     //cCout();
-                    printAlignment(pData, rData, result.alignment, result.alignmentLength, *(result.endLocations), mOptions->mLocVars.locVarOptions.modeCode);
+                    printAlignment(pData, rData, result.alignment, result.alignmentLength, *(result.endLocations), mOptions->mEdOptions.modeCode);
                 }
             }
         }
@@ -134,8 +134,8 @@ int SsrScanner::doSubStrAlignment(const char* & pData, int pLength, const char* 
 std::pair<std::map<int, std::string>, bool> SsrScanner::doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength) {
     EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
             edlibNewAlignConfig(mOptions->mLocVars.locVarOptions.maxScorePrimer,
-            mOptions->mLocVars.locVarOptions.modeCode,
-            mOptions->mLocVars.locVarOptions.alignTask,
+            mOptions->mEdOptions.modeCode,
+            mOptions->mEdOptions.alignTask,
             NULL, 0));
 
     std::map<int, std::string> snpsMap;
@@ -216,14 +216,14 @@ int SsrScanner::doAlignment(const char* & qData, int qLength, const std::string 
     int endPos = 0;
     EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
             edlibNewAlignConfig(mOptions->mLocVars.locVarOptions.maxScorePrimer,
-            mOptions->mLocVars.locVarOptions.modeCode,
-            mOptions->mLocVars.locVarOptions.alignTask,
+            mOptions->mEdOptions.modeCode,
+            mOptions->mEdOptions.alignTask,
             NULL, 0));
 
     if (result.status == EDLIB_STATUS_OK) {
         endPos = *(result.endLocations);
         doScanVariance(result, variance, qData, tData, *(result.endLocations));
-        if (mOptions->mLocVars.locVarOptions.printRes && printAlignment) {
+        if (mOptions->mEdOptions.printRes && printAlignment) {
             printVariance(result, variance, qData, qName, tData, tName, *(result.endLocations));
         }
     }
@@ -238,11 +238,11 @@ void SsrScanner::doScanVariance(EdlibAlignResult & result, Variance & variance,
     std::string inStr, deStr, snpStr;
 
     if (result.alignmentLength < 2) {
-        if (mOptions->mLocVars.locVarOptions.printRes) ss << "You must have at least 2 bp!\n";
+        if (mOptions->mEdOptions.printRes) ss << "You must have at least 2 bp!\n";
         return;
     }
 
-    if (mOptions->mLocVars.locVarOptions.modeCode == EDLIB_MODE_HW) {
+    if (mOptions->mEdOptions.modeCode == EDLIB_MODE_HW) {
         ti = position;
         for (int i = 0; i < result.alignmentLength; i++) {
             if (result.alignment[i] != EDLIB_EDOP_INSERT) {
@@ -370,20 +370,20 @@ void SsrScanner::doScanVariance(EdlibAlignResult & result, Variance & variance,
 void SsrScanner::printVariance(EdlibAlignResult & result, Variance & variance,
         const char* & qData, const std::string & qName, const char* & tData, const std::string & tName, const int position) {
 
-    if (mOptions->mLocVars.locVarOptions.printRes) {
+    if (mOptions->mEdOptions.printRes) {
         ss << "End location: " << *result.endLocations << " -> alignmentLength: " << result.alignmentLength << " with alignment distance: " << result.editDistance << "\n";
         ss << "Ref: " << tName << " -> Query: " << qName << "\n";
         ss << "Repeat seq: " << locVarIt->mra.mStr << " | " << locVarIt->mra.reverseComplement().mStr << "\n";
     }
     for (int i = 0; i < result.alignmentLength; i++) {
-        if (mOptions->mLocVars.locVarOptions.printRes) ss << static_cast<unsigned> (result.alignment[i]);
+        if (mOptions->mEdOptions.printRes) ss << static_cast<unsigned> (result.alignment[i]);
     }
-    if (mOptions->mLocVars.locVarOptions.printRes) ss << "\n";
+    if (mOptions->mEdOptions.printRes) ss << "\n";
 
 
     for (const auto & it : variance.subMap) {
         //std::string str = "snp: " + std::to_string(it.first) + " -> " + it.second;
-        if (mOptions->mLocVars.locVarOptions.printRes) ss << "snp: " << it.first << " -> " << it.second << "\n";
+        if (mOptions->mEdOptions.printRes) ss << "snp: " << it.first << " -> " << it.second << "\n";
     }
 
     //get<0>(*vTuple).clear();
@@ -391,7 +391,7 @@ void SsrScanner::printVariance(EdlibAlignResult & result, Variance & variance,
 
     for (const auto & it : variance.insMap) {
         //std::string str = "insertion: " + std::to_string(it.first) + " -> " + it.second;
-        if (mOptions->mLocVars.locVarOptions.printRes) ss << "insertion: " << it.first << " -> " << it.second << "\n";
+        if (mOptions->mEdOptions.printRes) ss << "insertion: " << it.first << " -> " << it.second << "\n";
     }
 
     //get<1>(*vTuple).clear();
@@ -399,7 +399,7 @@ void SsrScanner::printVariance(EdlibAlignResult & result, Variance & variance,
 
     for (const auto & it : variance.delMap) {
         //std::string str = "deletion: " + std::to_string(it.first) + " -> " + it.second;
-        if (mOptions->mLocVars.locVarOptions.printRes) ss << "deletion: " << it.first << " -> " << it.second << "\n";
+        if (mOptions->mEdOptions.printRes) ss << "deletion: " << it.first << " -> " << it.second << "\n";
     }
 
     //get<2>(*vTuple).clear();
@@ -408,7 +408,7 @@ void SsrScanner::printVariance(EdlibAlignResult & result, Variance & variance,
 
     int tIdx = -1;
     int qIdx = -1;
-    if (mOptions->mLocVars.locVarOptions.modeCode == EDLIB_MODE_HW) {
+    if (mOptions->mEdOptions.modeCode == EDLIB_MODE_HW) {
         tIdx = *(result.endLocations);
         for (int i = 0; i < result.alignmentLength; i++) {
             if (result.alignment[i] != EDLIB_EDOP_INSERT) {
@@ -420,50 +420,50 @@ void SsrScanner::printVariance(EdlibAlignResult & result, Variance & variance,
     for (int start = 0; start < result.alignmentLength; start += 150) {
         // target
         //printf("T: ");
-        if (mOptions->mLocVars.locVarOptions.printRes) ss << "T: ";
+        if (mOptions->mEdOptions.printRes) ss << "T: ";
         int startTIdx = -1;
         for (int j = start; j < start + 150 && j < result.alignmentLength; j++) {
             if (result.alignment[j] == EDLIB_EDOP_INSERT) {
                 //printf("-");
-                if (mOptions->mLocVars.locVarOptions.printRes) ss << "-";
+                if (mOptions->mEdOptions.printRes) ss << "-";
             } else {
                 //printf("%c", target[++tIdx]);
-                if (mOptions->mLocVars.locVarOptions.printRes) ss << tData[++tIdx];
+                if (mOptions->mEdOptions.printRes) ss << tData[++tIdx];
             }
             if (j == start) {
                 startTIdx = tIdx;
             }
         }
         //printf(" (%d - %d)\n", max(startTIdx, 0), tIdx);
-        if (mOptions->mLocVars.locVarOptions.printRes) {
+        if (mOptions->mEdOptions.printRes) {
             ss << " (" << max(startTIdx, 0) << " - " << tIdx << ")\n";
             ss << "   ";
         }
         for (int j = start; j < start + 150 && j < result.alignmentLength; j++) {
             //printf(alignment[j] == EDLIB_EDOP_MATCH ? "|" : " ");
-            if (mOptions->mLocVars.locVarOptions.printRes) ss << (result.alignment[j] == EDLIB_EDOP_MATCH ? "|" : " ");
+            if (mOptions->mEdOptions.printRes) ss << (result.alignment[j] == EDLIB_EDOP_MATCH ? "|" : " ");
         }
         //printf("\n");
-        if (mOptions->mLocVars.locVarOptions.printRes) ss << "\n";
+        if (mOptions->mEdOptions.printRes) ss << "\n";
 
         // query
         //printf("Q: ");
-        if (mOptions->mLocVars.locVarOptions.printRes) ss << "Q: ";
+        if (mOptions->mEdOptions.printRes) ss << "Q: ";
         int startQIdx = qIdx;
         for (int j = start; j < start + 150 && j < result.alignmentLength; j++) {
             if (result.alignment[j] == EDLIB_EDOP_DELETE) {
                 //printf("-");
-                if (mOptions->mLocVars.locVarOptions.printRes) ss << "-";
+                if (mOptions->mEdOptions.printRes) ss << "-";
             } else {
                 //printf("%c", query[++qIdx]);
-                if (mOptions->mLocVars.locVarOptions.printRes) ss << qData[++qIdx];
+                if (mOptions->mEdOptions.printRes) ss << qData[++qIdx];
             }
             if (j == start) {
                 startQIdx = qIdx;
             }
         }
         //printf(" (%d - %d)\n\n", max(startQIdx, 0), qIdx);
-        if (mOptions->mLocVars.locVarOptions.printRes) ss << " (" << max(startQIdx, 0) << " - " << qIdx << ")\n";
+        if (mOptions->mEdOptions.printRes) ss << " (" << max(startQIdx, 0) << " - " << qIdx << ")\n";
     }
 }
 
@@ -643,7 +643,7 @@ std::pair<size_t, int> SsrScanner::analyzeMRA(std::string rawStr, //rawStr must 
     posMapFil.clear();
     posVec.clear();
 
-    if (mOptions->mLocVars.locVarOptions.printRes) {
+    if (mOptions->mEdOptions.printRes) {
         std::string msg = "rawStr: " + rawStr;
         ss << msg << "\n";
         //cCout(msg, 'r');
@@ -2084,7 +2084,7 @@ void SsrScanner::preAnalyze(Read* & r1, std::size_t & ffpos, std::size_t & rfpos
     }
 }
 
-std::string SsrScanner::scanVar(Read* & r1) {
+std::string SsrScanner::scanVar (Read* & r1) {
     ss.str("");
     readSeq = r1->mSeq.mStr.c_str();
     readLength = r1->mSeq.length();
@@ -2250,7 +2250,7 @@ std::string SsrScanner::scanVar(Read* & r1) {
                     tmpGenotypeMap[r1->mSeq.mStr] = *tmpGenotype;
                     tmpAllGenotypeMap[locVarIt->name] = tmpGenotypeMap;
                     returnedlocus = locVarIt->name + "_true";
-                    if (mOptions->mLocVars.locVarOptions.printRes) {
+                    if (mOptions->mEdOptions.printRes) {
                         //ss << "Genotype: " << tmpGenotype.numReads << " : " << tmpGenotype.baseLocVar.mra.mStr << "\n";
                     }
                 } else {
@@ -2269,7 +2269,7 @@ std::string SsrScanner::scanVar(Read* & r1) {
                             tmpGenotype->numReads++;
                             tmpGenotypeMap[r1->mSeq.mStr] = *tmpGenotype;
                             tmpAllGenotypeMap[locVarIt->name] = tmpGenotypeMap;
-                            if (mOptions->mLocVars.locVarOptions.printRes) {
+                            if (mOptions->mEdOptions.printRes) {
                                 //ss << "Genotype: " << tmpGenotype.numReads << " : " << tmpGenotype.baseLocVar.mra.mStr << "\n";
                             }
                             returnedlocus = locVarIt->name + "_true";
@@ -2284,7 +2284,7 @@ std::string SsrScanner::scanVar(Read* & r1) {
                         returnedlocus = locVarIt->name + "_true";
                     }
 
-                    if (mOptions->mLocVars.locVarOptions.printRes) {
+                    if (mOptions->mEdOptions.printRes) {
                         // cCout(ss.str(), 'y');
                     }
                 }
@@ -2298,7 +2298,7 @@ std::string SsrScanner::scanVar(Read* & r1) {
                         tmpGenotype->baseLocVar = *locVarIt;
                         tmpGenotype->numReads++;
                         itGenotypeMap->second[r1->mSeq.mStr] = *tmpGenotype;
-                        if (mOptions->mLocVars.locVarOptions.printRes) {
+                        if (mOptions->mEdOptions.printRes) {
                             //ss << "Genotype: " << tmpGenotype.numReads << " : " << tmpGenotype.baseLocVar.mra.mStr << "\n";
                         }
                         returnedlocus = locVarIt->name + "_true";
@@ -2314,7 +2314,7 @@ std::string SsrScanner::scanVar(Read* & r1) {
                                 tmpGenotype->baseLocVar = LocVar(r1->mSeq.mStr, mraPosLenReadF, locVarIt->repuit.mStr);
                                 tmpGenotype->numReads++;
                                 itGenotypeMap->second[r1->mSeq.mStr] = *tmpGenotype;
-                                if (mOptions->mLocVars.locVarOptions.printRes) {
+                                if (mOptions->mEdOptions.printRes) {
                                     //ss << "Genotype: " << tmpGenotype.numReads << " : " << tmpGenotype.baseLocVar.mra.mStr << "\n";
                                 }
                                 returnedlocus = locVarIt->name + "_true";
@@ -2327,7 +2327,7 @@ std::string SsrScanner::scanVar(Read* & r1) {
                             itGenotypeMap->second[r1->mSeq.mStr] = *tmpGenotype;
                             returnedlocus = locVarIt->name + "_true";
                         }
-                        if (mOptions->mLocVars.locVarOptions.printRes) {
+                        if (mOptions->mEdOptions.printRes) {
                             //cCout(ss.str(), 'y');
                         }
                     }

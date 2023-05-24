@@ -38,14 +38,9 @@ int main(int argc, char* argv[]){
     
     cmd.add<string>("loc", 0, "loci file containing loci names, 5'primer sequence, reverse complement of 3'primer sequence, 5'flank region, 3'flank region, repeat unit and reference microsatellite repeat array, separated by '\t", false, "");
     cmd.add("revCom", 0, "if your reverse primer sequence in the loc file is not reverse complentary, please specify it");
-    cmd.add<int>("maxMismatchesPSeq", 0, "maximum mismatches for primer sequences 2", false, 2);
-    cmd.add<double>("maxMismatchesPer4FR", 0, "maximum percentage mismatches for the forward and reverse flanking regions, default 0.3 (30%) ", false, 0.1);
     cmd.add<int>("minSeqs", 0, "minimum number of reads for a genotype, default: 5", false, 5);
-    cmd.add<int>("minWarningSeqs", 0, "minimum number of reads for warning a genotype, default: 50", false, 50);
-    cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%)", false, 5);
-    cmd.add<double>("hlRatio1", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.4", false, 0.4);
-    cmd.add<double>("hlRatio2", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 0.2", false, 0.2);
-    cmd.add<double>("maxVarRatio", 0, "ratio of two heter alleles based on variations either in flanking regions or MRA, the ideal is 1, default: 1.5", false, 1.5);
+    cmd.add<int>("maxMismatchesPSeq", 0, "maximum mismatches for primer sequences 2", false, 2);
+    
     cmd.add<string>("mode", 0, "specify the sequence alignment mode: NW (default) | HW | SHW", false, "NW");
     cmd.add<int>("maxScore", 0, "specify the maximum score of sequence alignment with sore > maxScore will be discarded, default value is -1, and no sequence will be discarded.",false, -1);
     cmd.add<int>("numBestSeqs", 0, "Score will be calculated only for N best sequences (best = with smallest score). If N = 0 then all sequences will be calculated.", 0);
@@ -55,6 +50,18 @@ int main(int argc, char* argv[]){
     cmd.add<int>("core", 0, "Core part of calculation will be repeated N times. This is useful only for performance measurement, when single execution is too short to measure.", false, 1);
     cmd.add("silentAlignment", 0, "If specified, there will be no score or alignment output");
     cmd.add("printResults", 0, "If specified, alignment results will be printed but with only 1 thread");
+    
+    //for ssr;
+    cmd.add<double>("maxMismatchesPer4FR", 0, "maximum percentage mismatches for the forward and reverse flanking regions, default 0.3 (30%) ", false, 0.1);
+    cmd.add<int>("minWarningSeqs", 0, "minimum number of reads for warning a genotype, default: 50", false, 50);
+    cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%)", false, 5);
+    cmd.add<double>("hlRatio1", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.4", false, 0.4);
+    cmd.add<double>("hlRatio2", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 0.2", false, 0.2);
+    cmd.add<double>("maxVarRatio", 0, "ratio of two heter alleles based on variations either in flanking regions or MRA, the ideal is 1, default: 1.5", false, 1.5);
+    
+    //for snp;
+    cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 10 means the percentage of reads with SNPs to total reads are from 40 - 60 %, must be coupled with hmPer, default: 10", false, 10);
+    cmd.add<int>("hmPer", 0, "allele is considered as homo when its reads to total reads is > 90 %, must be coupled with htJetter default: 90", false, 90);
     
     cmd.add<string>("sex", 0, "sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by '\t", false, "");
     cmd.add<unsigned int>("maxMismatchesSexPSeq", 0, "maximum number of mismatches for sex primers, default: 2", false, 2);
@@ -173,24 +180,30 @@ int main(int argc, char* argv[]){
     
     // I/O
     opt->var = cmd.get<string>("var");
-    opt->mLocVars.locVarOptions.maxMismatchesPSeq = cmd.get<int>("maxMismatchesPSeq");
-    opt->mLocVars.locVarOptions.maxMismatchesPer4FR = cmd.get<double>("maxMismatchesPer4FR");
-    opt->mLocVars.locVarOptions.minSeqs = cmd.get<int>("minSeqs");
-    opt->mLocVars.locVarOptions.minWarningSeqs = cmd.get<int>("minWarningSeqs");
-    opt->mLocVars.locVarOptions.minSeqsPer = cmd.get<int>("minSeqsPercentage");
-    opt->mLocVars.locVarOptions.hlRatio1 = cmd.get<double>("hlRatio1");
-    opt->mLocVars.locVarOptions.hlRatio2 = cmd.get<double>("hlRatio2");
-    opt->mLocVars.locVarOptions.varRatio = cmd.get<double>("maxVarRatio");
-    opt->mLocVars.locVarOptions.maxScore = cmd.get<int>("maxScore");
-    opt->mLocVars.locVarOptions.numBestSeqs = cmd.get<int>("numBestSeqs");
-    opt->mLocVars.locVarOptions.coreRep = cmd.get<int>("core");
-    
-    opt->mLocVars.locVarOptions.mode = cmd.get<string>("mode");
-    opt->mLocVars.locVarOptions.findAlignment = !cmd.exist("notFindAlignment");
-    opt->mLocVars.locVarOptions.findStartLocation = cmd.exist("findStartLocation");
-    opt->mLocVars.locVarOptions.silent = cmd.exist("silentAlignment");
-    opt->mLocVars.locVarOptions.printRes = cmd.exist("printResults");
-    opt->mLocVars.locVarOptions.format = cmd.get<string>("format");
+    opt->mEdOptions.mode = cmd.get<string>("mode");
+    opt->mEdOptions.findAlignment = !cmd.exist("notFindAlignment");
+    opt->mEdOptions.findStartLocation = cmd.exist("findStartLocation");
+    opt->mEdOptions.silent = cmd.exist("silentAlignment");
+    opt->mEdOptions.printRes = cmd.exist("printResults");
+    opt->mEdOptions.format = cmd.get<string>("format");
+        
+    if (opt->var == "ssr") {
+        opt->mLocVars.locVarOptions.maxMismatchesPSeq = cmd.get<int>("maxMismatchesPSeq");
+        opt->mLocVars.locVarOptions.maxMismatchesPer4FR = cmd.get<double>("maxMismatchesPer4FR");
+        opt->mLocVars.locVarOptions.minSeqs = cmd.get<int>("minSeqs");
+        opt->mLocVars.locVarOptions.minWarningSeqs = cmd.get<int>("minWarningSeqs");
+        opt->mLocVars.locVarOptions.minSeqsPer = cmd.get<int>("minSeqsPercentage");
+        opt->mLocVars.locVarOptions.hlRatio1 = cmd.get<double>("hlRatio1");
+        opt->mLocVars.locVarOptions.hlRatio2 = cmd.get<double>("hlRatio2");
+        opt->mLocVars.locVarOptions.varRatio = cmd.get<double>("maxVarRatio");
+        opt->mLocVars.locVarOptions.maxScore = cmd.get<int>("maxScore");
+        opt->mLocVars.locVarOptions.numBestSeqs = cmd.get<int>("numBestSeqs");
+        opt->mLocVars.locVarOptions.coreRep = cmd.get<int>("core");
+    } else {
+        opt->mLocVars.locVarOptions.minSeqs = cmd.get<int>("minSeqs");
+        opt->mLocSnps.mLocSnpOptions.htJetter = (double) cmd.get<int>("htJetter") / 100.00;
+        opt->mLocSnps.mLocSnpOptions.hmPer = (double) cmd.get<int>("hmPer") / 100.00;
+    }
     opt->locFile = cmd.get<string>("loc");
     opt->revCom = cmd.exist("revCom");
     

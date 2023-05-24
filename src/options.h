@@ -218,52 +218,23 @@ public:
     int maxLength;
 };
 
-class LocVarOptions{
+class EdOptions{
 public:
-    LocVarOptions(){
-        maxMismatchesPSeq = 2;
-        minSeqs = 5;
-        minSeqsPer = 5;
-        minWarningSeqs = 50;
-        minMatchesFR = 6;
-        maxMismatchesPer4FR = 0.1;
-        maxScore = -1;
-        maxScorePrimer = -1;
-        numBestSeqs = 0;
-        coreRep = 1;
-        minNSSRUnit = 3;
-        mode = "HW";
-        silent = false;
-        printRes = true;
-        format = "NICE";
-        findAlignment = false;
-        findStartLocation = false;
-        modeCode = EDLIB_MODE_NW;
-        alignTask = EDLIB_TASK_DISTANCE;
-        maxDeletionRPrimer = 4;
-        maxInsertionRPrimer = 4;
-        maxMismatchesRPrimer = 4;
-        hlRatio1 = 0.4;
-        hlRatio2 = 0.2;
-        varRatio = 1.5;
-        heterRatio = 0.3;
+    EdOptions(){
+    mode = "HW";
+    silent = false;
+    printRes = true;
+    format = "NICE";
+    findAlignment = false;
+    findStartLocation = false;
+    modeCode = EDLIB_MODE_NW;
+    alignTask = EDLIB_TASK_DISTANCE;
+    maxDeletionRPrimer = 4;
+    maxInsertionRPrimer = 4;
+    maxMismatchesRPrimer = 4;
     };
+    
 public:
-    int maxMismatchesPSeq;
-    int minSeqs;
-    int minWarningSeqs;
-    int minSeqsPer;//against largest peak; 5/%
-    int minMatchesFR;//minimum matches bps for both flanking regions
-    double maxMismatchesPer4FR;//percentage for minimum matches bps for both flanking regions;
-    int maxScore;
-    int maxScorePrimer;
-    int numBestSeqs;
-    int coreRep;
-    int minNSSRUnit;
-    double hlRatio1; //if two locus size is 1 ssr unit;
-    double hlRatio2; //if two locus size is 2 ssr unit;
-    double varRatio; //if there are variations in mra, flanking regions, the n of one allele against the other, the ideal should be 1, but default one is 1.5
-    double heterRatio;//how to determine variations in mra, flanking regions are true, and if two max peak size are same, if it > heterratio, the variation based genotype is true
     std::string mode;
     bool findAlignment;
     bool findStartLocation;
@@ -286,21 +257,57 @@ public:
     //Q: GGACTCCAGGCTTGCACTG (0 - 18)primer
 };
 
+class LocVarOptions{
+public:
+    LocVarOptions(){
+        maxMismatchesPSeq = 2;
+        minSeqs = 5;
+        minSeqsPer = 5;
+        minWarningSeqs = 50;
+        minMatchesFR = 6;
+        maxMismatchesPer4FR = 0.1;
+        maxScore = -1;
+        maxScorePrimer = -1;
+        numBestSeqs = 0;
+        coreRep = 1;
+        minNSSRUnit = 3;
+        hlRatio1 = 0.4;
+        hlRatio2 = 0.2;
+        varRatio = 1.5;
+        heterRatio = 0.3;
+    };
+public:
+    int maxMismatchesPSeq;
+    int minSeqs;
+    int minWarningSeqs;
+    int minSeqsPer;//against largest peak; 5/%
+    int minMatchesFR;//minimum matches bps for both flanking regions
+    double maxMismatchesPer4FR;//percentage for minimum matches bps for both flanking regions;
+    int maxScore;
+    int maxScorePrimer;
+    int numBestSeqs;
+    int coreRep;
+    int minNSSRUnit;
+    double hlRatio1; //if two locus size is 1 ssr unit;
+    double hlRatio2; //if two locus size is 2 ssr unit;
+    double varRatio; //if there are variations in mra, flanking regions, the n of one allele against the other, the ideal should be 1, but default one is 1.5
+    double heterRatio;//how to determine variations in mra, flanking regions are true, and if two max peak size are same, if it > heterratio, the variation based genotype is true
+};
+
 class LocSnpOptions{
 public:
     LocSnpOptions(){
         maxMismatchesPSeq = 2;
         maxScorePrimer = -1;
-        modeCode = EDLIB_MODE_NW;
-        alignTask = EDLIB_TASK_PATH;
         minSeqs = 5;
+        hmPer = 0.8;
+        htJetter = 0.15;
     };
 public:
-    int maxMismatchesPSeq;
-    int maxScorePrimer;
-    EdlibAlignMode modeCode;
-    EdlibAlignTask alignTask;
-    int minSeqs;
+    uint32 maxMismatchesPSeq;
+    uint32 maxScorePrimer;
+    uint32 minSeqs;
+    double hmPer, htJetter;
 };
 
 class MultiLocVars{
@@ -456,6 +463,7 @@ public:
     int minAmpliconEffectiveLen;//length without primers for both sex and nonsex loci
     MultiLocVars mLocVars;
     MultiLocSnps mLocSnps;
+    EdOptions mEdOptions;
     string prefix;
     std::string locFile;//loci name, forward primer, reverse primer (RC), forward flanking region, reverse flanking region, ssr repeat unit, number of repeat, mra; must be separated by tab;
     std::string sexFile;//sex id name, forward primer, reverse primer (reverse complement), x ref, y ref; must separated by tab;

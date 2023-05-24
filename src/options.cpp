@@ -304,30 +304,30 @@ bool Options::validate() {
         check_file_valid(locFile);
     }
 
-    if(mLocVars.locVarOptions.mode == "HW"){
-        mLocVars.locVarOptions.modeCode == EDLIB_MODE_HW;
-    } else if(mLocVars.locVarOptions.mode == "SHW"){
-        mLocVars.locVarOptions.modeCode == EDLIB_MODE_SHW;
-    } else if(mLocVars.locVarOptions.mode == "NW"){
-        mLocVars.locVarOptions.modeCode == EDLIB_MODE_NW;
+    if (var == "ssr") {
+        mVarType = ssr;
+    } else if (var == "snp") {
+        mVarType = snp;
+    } else {
+        error_exit("Invalid variance type, please specify a variance type using --var");
+    }
+
+    if(mEdOptions.mode == "HW"){
+        mEdOptions.modeCode = EDLIB_MODE_HW;
+    } else if(mEdOptions.mode == "SHW"){
+        mEdOptions.modeCode = EDLIB_MODE_SHW;
+    } else if(mEdOptions.mode == "NW"){
+        mEdOptions.modeCode = EDLIB_MODE_NW;
     } else {
         error_exit("Invalid mode, please specify a mode using --mode");
     }
     
-    if(mLocVars.locVarOptions.findStartLocation) {
-        mLocVars.locVarOptions.alignTask = EDLIB_TASK_LOC;
-    } else if (mLocVars.locVarOptions.findAlignment){
-        mLocVars.locVarOptions.alignTask = EDLIB_TASK_PATH;
+    if(mEdOptions.findStartLocation) {
+        mEdOptions.alignTask = EDLIB_TASK_LOC;
+    } else if (mEdOptions.findAlignment){
+        mEdOptions.alignTask = EDLIB_TASK_PATH;
     } else {
-        mLocVars.locVarOptions.alignTask = EDLIB_TASK_DISTANCE;
-    }
-    
-    if(var == "ssr"){
-        mVarType = ssr;
-    } else if(var == "snp"){
-        mVarType = snp;
-    } else {
-        error_exit("Invalid variance type, please specify a variance type using --var");
+        mEdOptions.alignTask = EDLIB_TASK_DISTANCE;
     }
     
     return true;
@@ -454,9 +454,10 @@ void Options::readLocFile(){
             }
             splitVec.clear();
         } 
-    } else {
+    } else if(mVarType == snp) {
         mLocSnps.refLocMap.clear();
-        splitVec.reserve(6);
+        splitVec.reserve(5);
+        std::vector<std::string> posVec;
         std::vector<std::string> tmpSnpsVec;
         Sequence rp("");
         while(fileIn.getline(line, maxLine)) {
@@ -469,26 +470,23 @@ void Options::readLocFile(){
             }
             lineStr = std::string(line);
             splitStr(lineStr, splitVec);
-            if(splitVec.size() == 6){
+            if(splitVec.size() == 5){
                 LocSnp tmpLocSnp;
                 tmpLocSnp.name = splitVec[0];
-                if(splitVec[2].find("|") != std::string::npos){
-                    tmpSnpsVec.clear();
-                    splitStr(splitVec[2], tmpSnpsVec, "|");
-                    tmpLocSnp.snpsMap[stoi(splitVec[1]) - 1] = std::make_pair(Sequence(tmpSnpsVec[0]), Sequence(tmpSnpsVec[1]));
-                    tmpSnpsVec.clear();
-                } else {
-                    error_exit("Can not identify snps in ref: " + tmpLocSnp.name);
+                tmpLocSnp.fp = splitVec[1];
+                tmpLocSnp.rp = revCom ? Sequence(splitVec[2]).reverseComplement().mStr : splitVec[2];
+                splitStr(splitVec[3], posVec, "|");
+                for(auto & itt : posVec){
+                    tmpLocSnp.refSnpPosSet.insert(std::stoi(itt));
                 }
-                tmpLocSnp.fp = splitVec[3];
-                rp.mStr = splitVec[4];
-                tmpLocSnp.rp = rp.reverseComplement();
-                tmpLocSnp.ref = splitVec[5];
+                tmpLocSnp.ref = splitVec[4];
                 mLocSnps.refLocMap[tmpLocSnp.name] = tmpLocSnp;
                 //tmpLocSnp.print();
             }
             splitVec.clear();
         }
+    } else {
+        error_exit("You have to use --var to specify ssr or snp");
     }
     
     fileIn.close();

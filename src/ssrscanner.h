@@ -35,10 +35,10 @@ public:
     static std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> report(Options * & mOptions, std::map<std::string, std::map<std::string, Genotype>> & allGenotypeMap);
     static std::map<std::string, std::map<std::string, Genotype>> merge(std::vector<std::map<std::string, std::map<std::string, Genotype>>> & totalGenotypeSsrMapVec);
     void static merge(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions);
-    inline std::map<std::string, std::map< std::string, Genotype>> getGenotypeMap() {return tmpAllGenotypeMap;};
+    inline std::map<std::string, std::map< std::string, Genotype>> getGenotypeMap() const {return tmpAllGenotypeMap;};
     static std::pair<std::map<int, std::string>, bool>  doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength);
     //inline std::map<std::string, std::vector<std::pair<std::string, Genotype>>> getSortedGenotypeMap() {return sortedAllGenotypeMap;};
-    inline std::map<std::string, std::map<std::string, int>> getSexLoc(){return tmpSexMap;};
+    inline std::map<std::string, std::map<std::string, int>> getSexLoc() const {return tmpSexMap;};
     
 private:
     

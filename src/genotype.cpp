@@ -143,8 +143,14 @@ LocSnp::LocSnp(){
     this->rp = Sequence("");
     this->ref = Sequence("");
     this->snpPosSet.clear();
+    this->refSnpPosSet.clear();
     this->numReads = 0;
     this->snpsMap.clear();
+    this->readsRatio = 0;
+    this->genotype = "";
+    this->puGeno = false;
+    this->uGeno.preGenoMap.clear();
+    this->uGeno.snpGenoMap.clear();
 }
 
 void LocSnp::print(){
@@ -155,8 +161,10 @@ void LocSnp::print(){
     msg += ref.mStr + " :" + std::to_string(ref.mStr.length()) + "\n";
     cCout(msg, 'r');
     msg = "";
-    for(const auto & it : snpsMap){
-        msg += std::to_string(it.first) + " : " + it.second.first.mStr + "|" + it.second.second.mStr + "\n";
+    if (!snpsMap.empty()) {
+        for (const auto & it : snpsMap) {
+            msg += std::to_string(it.first) + " : " + it.second.first.mStr + "|" + it.second.second.mStr + "\n";
+        }
     }
     cCout(msg, 'b');
 }
@@ -170,6 +178,11 @@ std::string LocSnp::getGenotype(){
         msg += std::to_string(it.first) + "(" + it.second.first.mStr + "|" + it.second.second.mStr + ")";
     }
     return msg;
+}
+
+UnitedLocSnp::UnitedLocSnp(){
+    this->preGenoMap.clear();
+    this->snpGenoMap.clear();
 }
 
 Sex::Sex(){

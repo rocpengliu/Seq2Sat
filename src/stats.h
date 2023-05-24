@@ -40,7 +40,9 @@ public:
 public:
     static string list2string(double* list, int size);
     static string list2string(std::vector<int> & x_vec, int top);
+    static string list2string2(std::vector<int> & x_vec, int top);
     static string list2string(std::vector<double> & x_vec, int top);
+    static string list2string2(std::vector<double> & x_vec, int top);
     static string list2string(std::vector<std::string> & x_vec, int top);
     static string list2string(std::map< std::string, std::vector<int>> & stackMap, int top);
     static string list2string(double* list, int size, long* coords);

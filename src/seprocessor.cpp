@@ -126,16 +126,14 @@ bool SingleEndProcessor::process(){
     vector<Stats*> postStats;
     vector<FilterResult*> filterResults;
     std::vector<std::map<std::string, std::map < std::string, Genotype>>> totalGenotypeSsrMapVec;
-    totalGenotypeSsrMapVec.reserve(mOptions->thread);
-    std::vector<std::map<std::string, std::map < std::string, LocSnp>>> totalGenotypeSnpMapVec;
-    totalGenotypeSnpMapVec.reserve(mOptions->thread);
+    std::vector<std::map<std::string, std::map < std::string, uint32>>> totalSnpSeqMapVec;
     std::vector<std::map<std::string, std::map<std::string, int>>> totalSexLocVec;
     totalSexLocVec.reserve(mOptions->thread);
 
     if (mOptions->mVarType == ssr) {
         totalGenotypeSsrMapVec.reserve(mOptions->thread);
     } else if (mOptions->mVarType == snp) {
-        totalGenotypeSnpMapVec.reserve(mOptions->thread);
+        totalSnpSeqMapVec.reserve(mOptions->thread);
     }
     
     for(int t=0; t<mOptions->thread; t++){
@@ -147,7 +145,7 @@ bool SingleEndProcessor::process(){
             totalGenotypeSsrMapVec.push_back(configs[t]->getSsrScanner()->getGenotypeMap());
             totalSexLocVec.emplace_back(configs[t]->getSsrScanner()->getSexLoc());
         } else if (mOptions->mVarType == snp) {
-            totalGenotypeSnpMapVec.push_back(configs[t]->getSnpScanner()->getSubGenotypeMap());
+            totalSnpSeqMapVec.push_back(configs[t]->getSnpScanner()->getSubSeqsMap());
             //totalSexLocVec.emplace_back(configs[t]->getSnpScanner()->getSexLoc());
         }
     }
@@ -176,7 +174,7 @@ bool SingleEndProcessor::process(){
             }
         }
     } else if (mOptions->mVarType == snp) {
-        allSnpsMap = SnpScanner::merge(mOptions, totalGenotypeSnpMapVec);
+        allSnpsMap = SnpScanner::merge(mOptions, totalSnpSeqMapVec);
     }
 
     int* dupHist = NULL;

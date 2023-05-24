@@ -435,6 +435,17 @@ string Stats::list2string(std::vector<int> & x_vec, int top) {
     return ss.str();
 }
 
+string Stats::list2string2(std::vector<int> & x_vec, int top) {
+    stringstream ss;
+    for(int i = 0; i < top; i++){
+        ss << x_vec[i];
+        if(i < top - 1){
+            ss << ",";
+        }
+    }
+    return ss.str();
+}
+
 string Stats::list2string(std::map< std::string, std::vector<int>> & stackMap, int top) {
     
     std::vector<std::string> v;
@@ -468,6 +479,17 @@ string Stats::list2string(std::vector<double> & x_vec, int top) {
     stringstream ss;
     for(int i = 0; i < top; i++){
         ss << "'" << x_vec[i] << "'";
+        if(i < top - 1){
+            ss << ",";
+        }
+    }
+    return ss.str();
+}
+
+string Stats::list2string2(std::vector<double> & x_vec, int top) {
+    stringstream ss;
+    for(int i = 0; i < top; i++){
+        ss << x_vec[i];
         if(i < top - 1){
             ss << ",";
         }

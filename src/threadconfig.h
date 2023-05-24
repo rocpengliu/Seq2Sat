@@ -18,15 +18,15 @@ class ThreadConfig{
 public:
     ThreadConfig(Options* opt, int threadId, bool paired = false);
     ~ThreadConfig();
-    inline Stats* getPreStats1() {return mPreStats1;}
-    inline Stats* getPostStats1() {return mPostStats1;}
-    inline Stats* getPreStats2() {return mPreStats2;}
-    inline Stats* getPostStats2() {return mPostStats2;}
-    inline Writer* getWriter1() {return mWriter1;}
-    inline Writer* getWriter2() {return mWriter2;}
-    inline FilterResult* getFilterResult() {return mFilterResult;}
-    inline SsrScanner* getSsrScanner(){return mSsrScanner;}
-    inline SnpScanner* getSnpScanner(){return mSnpScanner;};
+    inline Stats* getPreStats1() {return mPreStats1;};
+    inline Stats* getPostStats1() {return mPostStats1;};
+    inline Stats* getPreStats2() {return mPreStats2;};
+    inline Stats* getPostStats2() {return mPostStats2;};
+    inline Writer* getWriter1() {return mWriter1;};
+    inline Writer* getWriter2() {return mWriter2;};
+    inline FilterResult* getFilterResult() {return mFilterResult;};
+    inline SsrScanner* getSsrScanner() const {return mSsrScanner;};
+    inline SnpScanner* getSnpScanner() const {return mSnpScanner;};
 
     void initWriter(string filename1);
     void initWriter(string filename1, string filename2);

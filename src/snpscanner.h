@@ -19,6 +19,7 @@
 #include "edlib.h"
 #include "common.h"
 #include "editdistance.h"
+#include "sequence.h"
 
 using namespace std;
 
@@ -28,23 +29,27 @@ public:
     SnpScanner(const SnpScanner& orig);
     virtual ~SnpScanner();
     
-    bool scanVar(Read* & r1);
+    std::string scanVar(Read* & r1);
     bool scanVar(Read* & r1, Read* & r2);
-    inline std::map<std::string, std::map<std::string, LocSnp>> getSubGenotypeMap(){return subGenotypeMap;};
-    static std::map<std::string, std::map<std::string, LocSnp>> merge(Options * & mOptions, std::vector<std::map<std::string, std::map < std::string, LocSnp>>> & totalGenotypeSnpMapVec);
+    //inline std::map<std::string, std::map<std::string, LocSnp>> getSubGenotypeMap(){return subGenotypeMap;};
+    inline std::map<std::string, std::map<std::string, uint32>> getSubSeqsMap(){return subSeqsMap;};
+    static std::map<std::string, std::map<std::string, LocSnp>> merge(Options * & mOptions, std::vector<std::map<std::string, std::map < std::string, uint32>>> & totalSnpSeqMapVec);
+    static std::map<int, std::pair<Sequence, Sequence>> doAlignment(Options * & mOptions, std::string readName, const char* & qData, int qLength, std::string & targetName, const char* & tData, int tLength);
+    static void doScanVariance(Options * & mOptions, EdlibAlignResult & result, Variance & variance, const char* & qData, const char* & tData, const int position);
+    static void printVariance(Options * & mOptions, EdlibAlignResult & result, Variance & variance,
+            const char* & qData, const std::string & qName, const char* & tData, const std::string & tName, const int position);
     inline Sex getSexLoc(){return *tmpSex;};
     
 private:
-    std::map<int, std::pair<Sequence, Sequence>> doAlignment(const char* & qData, int qLength, const char* & tData, int tLength);
-    void doScanVariance(EdlibAlignResult & result, Variance & variance, const char* & qData, const char* & tData, const int position);
-
-    void printVariance(EdlibAlignResult & result, Variance & variance,
-            const char* & qData, const std::string & qName, const char* & tData, const std::string & tName, const int position);
+    std::tuple<int, int, bool> doPrimerAlignment(const char* & qData, int qLength, const std::string & qName,
+                     const char* & tData, int tLength, const std::string & tName, 
+                     bool printAlignment);
     
 private:
     Options* mOptions;
-    std::map<std::string, std::map<std::string, LocSnp>> subGenotypeMap;
-    LocSnp locSnpIt;
+    //std::map<std::string, std::map<std::string, LocSnp>> subGenotypeMap;
+    std::map<std::string, std::map<std::string, uint32>> subSeqsMap;
+    LocSnp* locSnpIt;
     const char* fpData;
     int fpLength;
     const char* rpData;
@@ -56,6 +61,7 @@ private:
     std::string readName;
     std::stringstream ss;
     Sex* tmpSex;
+    std::string returnedlocus;
 };
 
 #endif /* SNPSCANNER_H */

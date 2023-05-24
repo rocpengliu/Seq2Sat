@@ -124,17 +124,17 @@ bool PairEndProcessor::process(){
     vector<Stats*> preStats2;
     vector<Stats*> postStats2;
     vector<FilterResult*> filterResults;
-    std::vector<std::map<std::string, std::map < std::string, Genotype>>> totalGenotypeSsrMapVec;
-    totalGenotypeSsrMapVec.reserve(mOptions->thread);
-    std::vector<std::map<std::string, std::map < std::string, LocSnp>>> totalGenotypeSnpMapVec;
-    totalGenotypeSnpMapVec.reserve(mOptions->thread);
+    std::vector<std::map<std::string, std::map<std::string, Genotype>>> totalGenotypeSsrMapVec;
+    
+    std::vector<std::map<std::string, std::map<std::string, uint32>>> totalSnpSeqMapVec;
+    
     std::vector<std::map<std::string, std::map<std::string, int>>> totalSexLocVec;
     totalSexLocVec.reserve(mOptions->thread);
     
     if (mOptions->mVarType == ssr) {
         totalGenotypeSsrMapVec.reserve(mOptions->thread);
     } else if (mOptions->mVarType == snp) {
-        totalGenotypeSnpMapVec.reserve(mOptions->thread);
+        totalSnpSeqMapVec.reserve(mOptions->thread);
     }
     for(int t=0; t<mOptions->thread; t++){
         preStats1.push_back(configs[t]->getPreStats1());
@@ -146,7 +146,7 @@ bool PairEndProcessor::process(){
             totalGenotypeSsrMapVec.push_back(configs[t]->getSsrScanner()->getGenotypeMap());
             totalSexLocVec.emplace_back(configs[t]->getSsrScanner()->getSexLoc());
         } else if(mOptions->mVarType == snp){
-            totalGenotypeSnpMapVec.push_back(configs[t]->getSnpScanner()->getSubGenotypeMap());
+            totalSnpSeqMapVec.push_back(configs[t]->getSnpScanner()->getSubSeqsMap());
             //totalSexLocVec.emplace_back(configs[t]->getSnpScanner()->getSexLoc());
         }
     }
@@ -176,7 +176,7 @@ bool PairEndProcessor::process(){
              }
          }
     } else if (mOptions->mVarType == snp) {
-        allSnpsMap = SnpScanner::merge(mOptions, totalGenotypeSnpMapVec);
+        allSnpsMap = SnpScanner::merge(mOptions, totalSnpSeqMapVec);
     }
 
     int* dupHist = NULL;
@@ -373,11 +373,11 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                             }
                             
                         } else {
-                            config->getSnpScanner()->scanVar(merged);
+                            locus = config->getSnpScanner()->scanVar(merged);
                         }
 
                         if (locus.empty()) {
-                            failedOutput += merged->toStringWithTag(locus);
+                            failedOutput += merged->toStringWithTag(locus);//bug here
                         } else {
                             outstr1 += r1->toString();
                             outstr2 += r2->toString();
@@ -392,16 +392,6 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
             if (analysisEachRead) {
                 //config->getVariationScanner()->scanVar(r1, r2);
             }
-            
-            
-//            if(found) {
-//                if(mOptions->outputToSTDOUT) {
-//                    singleOutput += r1->toString() + r2->toString();
-//                } else {
-//                    outstr1 += r1->toString();
-//                    outstr2 += r2->toString();
-//                }
-//            }
 
             // stats the read after filtering
             config->getPostStats1()->statRead(r1);
