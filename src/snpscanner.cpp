@@ -578,14 +578,14 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                     tSGeno.geno = std::string() + top2.at(0).first + '|' + top2.at(1).first;
                     tSGeno.read1 = top2.at(0).second;
                     tSGeno.read2 = top2.at(1).second;
-                    tSGeno.ratio = (double) top2.at(0).second / (top2.at(0).second + top2.at(1).second);
                 } else {
                     tSGeno.geno = std::string() + top2.at(1).first + '|' + top2.at(0).first;
                     tSGeno.read1 = top2.at(1).second;
                     tSGeno.read2 = top2.at(0).second;
-                    tSGeno.ratio = (double) top2.at(1).second / (top2.at(1).second + top2.at(0).second);
                 }
 
+                tSGeno.ratio = (double) std::max(top2.at(0).second, top2.at(1).second) / (top2.at(0).second + top2.at(1).second);
+                
                 if (tSGeno.ratio >= (0.5 - mOptions->mLocSnps.mLocSnpOptions.htJetter) && tSGeno.ratio <= (0.5 + mOptions->mLocSnps.mLocSnpOptions.htJetter)) {
                     tSGeno.tORf = true;
                     tmpULocSnp.heter = true;
