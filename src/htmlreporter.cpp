@@ -52,7 +52,7 @@ void HtmlReporter::outputRow(ofstream& ofs, std::string & marker, std::vector<st
     }
 }
 
-void HtmlReporter::outputRow(ofstream& ofs, std::string & marker, std::map<std::string, LocSnp> & snpsMap, int & totReads, std::set<int> & refSet) {
+void HtmlReporter::outputRow(ofstream& ofs, std::string & marker, std::map<std::string, LocSnp> & snpsMap, std::vector<std::tuple<std::string, std::string, int>> & haploVec, int & totReads, std::set<int> & refSet) {
 
 //    std::vector<std::pair<std::string, LocSnp>> tmpVec(snpsMap.size());
 //    for(const auto & it : refSet){
@@ -83,11 +83,25 @@ void HtmlReporter::outputRow(ofstream& ofs, std::string & marker, std::map<std::
 //    }
 
      //std::multimap<std::string, LocSnp, ComparatorSnp> sortedSnpsMap(snpsMap.begin(), snpsMap.end());
+
+    std::string operand1 = std::string(get<1>(haploVec[0]));
+    std::string operand2 = std::string(get<1>(haploVec[1]));
     
     for (auto & it : snpsMap) {
+        std::string hap = "NA";
+        std::string fc = "black";
+        if (it.second.ref.mStr == get<0>(haploVec[0])) {
+            hap = get<1>(haploVec[0]);
+            fc = "blue";
+        } else if (it.second.ref.mStr == get<0>(haploVec[1])) {
+            hap = get<1>(haploVec[1]);
+            fc = "green";
+        }
+        
         ofs << "<tr>";
         ofs << "<td>" + marker + "</td>" +
                 "<td>" + it.second.getGenotype() + "</td>" +
+                "<td> <font color='" + fc + "'>" + hap + "</font></td>" +
                 "<td>" + std::to_string(it.second.numReads) + "</td>" +
                 "<td>" + std::to_string((double) it.second.numReads / totReads) + "</td>" +
                 "<td>" + std::to_string(it.first.length()) + "</td>" +
@@ -610,40 +624,65 @@ void HtmlReporter::reportAllSnps(ofstream& ofs, std::map<std::string, std::map<s
         //ofs << "<div class='subsection_title'><a title='click to hide/show' onclick=showOrHide('" + divName + "')>" + subsection + "</a></div>\n";
         ofs << "<div id='" + divName + "'>\n";
         ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
-        ofs << "<div class='sub_section_tips'>Reads mean and thresholds for homo are in white while threshold for homo loci is in red .</div>\n";
 
-        ofs << "<div class='figure' id='plot_" + divName + "'></div>\n";
-
-        ofs << "<div class='sub_section_tips'><font color='red'>Target heter SNPs are highlighted with red, </font> <font color='green'>while target homo SNPs are highlighted with green, </font> <font color='orange'>new SNPs are in orange!</font></div>\n";
-        ofs << "<div class='sub_section_tips'><font color='red'>Caution:</font> Position starts with <font color='red'>0</font>!</div>\n";
-
-        reportSnpAlignmentTable(ofs, it.first, it.second, totReads);
+        reportSnpAlignmentTable(ofs, it.first, divName, it.second, totReads);
+        
         reportSnpTablePlot(ofs, it.first, divName, totReads);
         ofs << "</div>\n";
 
     }
 }
 
-void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string marker, std::map<std::string, LocSnp> & snpsMap, int & totReads) {
+void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string marker, std::string & divName, std::map<std::string, LocSnp> & snpsMap, int & totReads) {
 
-    ofs << "<pre overflow: scroll>\n";
-    ofs << "<table class='summary_table' style='width:100%'>\n";
-    ofs << "<tr style='background:#cccccc'> <td>Marker</td><td>SNPs</td><td>N. of Reads</td><td>Reads(%)</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
     auto it = mOptions->mLocSnps.refLocMap.find(marker);
     if (it != mOptions->mLocSnps.refLocMap.end()) {
+        ofs << "<div class='figure' id='plot_h" + divName + "'></div>\n";
+
+        ofs << "<div class='sub_section_tips'><font color='red'>Target heter SNPs are highlighted with red, </font> <font color='green'>while target homo SNPs are highlighted with green, </font> <font color='orange'>new SNPs are in orange!</font></div>\n";
+        ofs << "<pre overflow: scroll>\n";
+        ofs << "<table class='summary_table' style='width:100%'>\n";
+        ofs << "<tr style='background:#cccccc'> <td>Marker</td><td>SNPs</td><td>Haplotype</td><td>N. of Reads</td><td>Reads(%)</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
+        
         ofs << "<tr style='color:blue'>";
         ofs << "<td>Reference</td>" <<
                 "<td>" + it->second.getGenotype() + "</td>" <<
                 "<td>N.A.</td>" <<
                 "<td>N.A.</td>" <<
+                "<td>N.A.</td>" <<
                 "<td>" + std::to_string(it->second.ref.mStr.length()) + "</td>" <<
                 "<td align='center'>" + highligher(it->second, true, it->second.refSnpPosSet) + "</td>";
         ofs << "</tr>\n";
-        outputRow(ofs, marker, snpsMap, totReads, it->second.refSnpPosSet);
-    }
+        outputRow(ofs, marker, snpsMap, it->second.haploVec, totReads, it->second.refSnpPosSet);
 
-    ofs << "</table>\n";
-    ofs << "</pre>\n";
+        ofs << "</table>\n";
+        ofs << "</pre>\n";
+
+        ofs << "\n<script type=\"text/javascript\">" << endl;
+
+        string json_str = "var data=[{";
+        json_str += "x:['" + get<1>(it->second.haploVec[0]) + "_allele1', '" + get<1>(it->second.haploVec[1]) + "_allele2'],";
+        json_str += "y:[" + std::to_string(get<2>(it->second.haploVec[0])) + ", " + std::to_string(get<2>(it->second.haploVec[1])) + "],";
+        json_str += "text: ['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],";
+        json_str += "width: [0.5, 0.5],";
+        json_str += "type:'bar', textposition: 'auto', ";
+        std::string operand1 = std::string(get<1>(it->second.haploVec[0]));
+        std::string operand2 = std::string(get<1>(it->second.haploVec[1]));
+
+        if(operand1 == operand2){
+            json_str += "marker:{color: ['blue', 'blue']}";
+        } else {
+            json_str += "marker:{color: ['blue', 'green']}";
+        }
+        
+        json_str += "}];\n";
+        json_str += "var layout = {xaxis:{tickmode: 'array', tickvals:['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],  title:'" + "Haplotype" + "', automargin: true},";
+        json_str += "yaxis:{title:'Number of reads', automargin: true}, ";
+        json_str += "barmode: 'grouped'};\n";
+        json_str += "Plotly.newPlot('plot_h" + divName + "', data, layout);\n";
+        ofs << json_str;
+        ofs << "</script>" << endl;
+    }
 }
 
 void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::string & divName, int & totReads){
@@ -720,9 +759,12 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
         i++;
     }
 
+    ofs << "<div class='sub_section_tips'>Reads mean and thresholds for heter are in white and purple while threshold for homo loci is in yellow .</div>\n";
+    ofs << "<div class='sub_section_tips'><font color='red'>Caution:</font> Position starts with <font color='red'>0</font>!</div>\n";
+
+    ofs << "<div class='figure' id='plot_" + divName + "'></div>\n";
     
     ofs << "<div class='sub_section_tips'><font color='red'> Heter target loci are in red</font>, <font color='green'> homo target loci are in green</font>, <font color='orange'> while new heter loci are in orange</font></div>\n";
-
     ofs << "<pre overflow: scroll>\n";
     ofs << "<table class='summary_table' style='width:40%'>\n";
     ofs <<  "<tr style='background:#cccccc'> <td>ID</td><td>Position</td><td>Genotype</td><td>Putative Genotype</td><td>N. of reads1</td><td>N. of reads2</td><td>Reads ratio</td><td>Total reads</td></tr>\n";
@@ -731,7 +773,6 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
 
     ofs << "</table>\n";
     ofs << "</pre>\n";
-    
     
     ofs << "\n<script type=\"text/javascript\">" << endl;
     
@@ -1171,7 +1212,7 @@ void HtmlReporter::printCSS(ofstream& ofs) {
 }
 
 void HtmlReporter::printJS(ofstream& ofs) {
-    ofs << "<script src='https://www.seq2fun.ca/resources/javascript/plotly-1.2.0.min.js'></script>" << endl;
+    ofs << "<script src='https://cdn.plot.ly/plotly-2.23.2.min.js' charset='utf-8'></script>" << endl;
     ofs << "\n<script type=\"text/javascript\">" << endl;
     ofs << "    function showOrHide(divname) {" << endl;
     ofs << "        div = document.getElementById(divname);" << endl;

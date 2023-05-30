@@ -19,12 +19,6 @@
 
 using namespace std;
 
-struct Comparator {
-    bool operator()(const LocSnp& a, const LocSnp& b) const {
-        return a.snpPosSet < b.snpPosSet;
-    }
-};
-
 class HtmlReporter{
 public:
     HtmlReporter(Options* opt);
@@ -38,7 +32,7 @@ public:
     static void outputRow(ofstream& ofs, string key, long value);
     static void outputRow(ofstream& ofs, string key, string value);
     static void outputRow(ofstream& ofs, std::string & marker, std::vector<std::pair<std::string, Genotype>> & outGenotype, Options*& mOptions);
-    static void outputRow(ofstream& ofs, std::string & marker, std::map<std::string, LocSnp> & snpsMap, int & totReads, std::set<int> & refSet);
+    static void outputRow(ofstream& ofs, std::string & marker, std::map<std::string, LocSnp> & snpsMap, std::vector<std::tuple<std::string, std::string, int>> & haploVec, int & totReads, std::set<int> & refSet);
     static void outputRow(ofstream& ofs, std::map<int, SimGeno> & snpGenoMap, std::set<int> & refSet, int & totReads);
     static string formatNumber(long number);
     static string getPercents(long numerator, long denominator);
@@ -69,7 +63,7 @@ private:
             std::vector<std::string> & x_vec, std::vector<int> & y_vec, std::vector<double> & bar_width_vec, 
             std::vector<std::string> & x_vec_2, std::vector<int> & y_vec_2, std::vector<double> & bar_width_vec_2,
             int & totReads, bool & twoTrace);
-    void reportSnpAlignmentTable(ofstream& ofs, std::string marker, std::map<std::string, LocSnp> & snpsMap, int & totReads);
+    void reportSnpAlignmentTable(ofstream& ofs, std::string marker, std::string & divName, std::map<std::string, LocSnp> & snpsMap, int & totReads);
     void reportSnpTablePlot(ofstream& ofs, std::string marker, std::string & divName, int & totReads);
     void reportSex(ofstream & ofs);
     

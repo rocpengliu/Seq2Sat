@@ -145,12 +145,15 @@ LocSnp::LocSnp(){
     this->snpPosSet.clear();
     this->refSnpPosSet.clear();
     this->numReads = 0;
+    this->totReads = 0;
     this->snpsMap.clear();
     this->readsRatio = 0;
     this->genotype = "";
     this->puGeno = false;
     this->uGeno.preGenoMap.clear();
     this->uGeno.snpGenoMap.clear();
+    this->haploVec.clear();
+    this->isHaplotype = false;
 }
 
 void LocSnp::print(){
@@ -183,6 +186,7 @@ std::string LocSnp::getGenotype(){
 UnitedLocSnp::UnitedLocSnp(){
     this->preGenoMap.clear();
     this->snpGenoMap.clear();
+    heter = false;
 }
 
 Sex::Sex(){

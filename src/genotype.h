@@ -105,6 +105,7 @@ public:
 public:
     std::map<int, std::map<char, int>> preGenoMap; //pos, base ACGT, num reads;
     std::map<int, SimGeno> snpGenoMap; //pos, genotype, reads ratio;
+    bool heter;//for haplotype
 };
 
 class LocSnp{
@@ -116,16 +117,19 @@ public:
     Sequence fp;
     Sequence rp;
     Sequence ref;
-    std::set<int> snpPosSet;
-    std::set<int> refSnpPosSet;
+    std::set<int> snpPosSet;//actually snps including new snps
+    std::set<int> refSnpPosSet;//reference target snps
     std::map<int, std::pair<Sequence, Sequence>> snpsMap;
     int numReads;
+    int totReads;
     double readsRatio;
     std::string genotype;
     bool puGeno;
     void print();
     std::string getGenotype();
     UnitedLocSnp uGeno;
+    std::vector<std::tuple<std::string, std::string, int>> haploVec;//seq, haplotype, num reads;
+    bool isHaplotype;
 };
 
 struct ComparatorSnp {
