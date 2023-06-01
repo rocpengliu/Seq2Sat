@@ -531,8 +531,6 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
     ofs << "<h1 style='text-align:left;'><a href='https://github.com/seq2sat' target='_blank' style='color:#009900;text-decoration:none;'>Seq2Sat Report</a </h1>" << endl;
     ofs << "<div style='font-size:12px;font-weight:normal;text-align:left;color:#666666;padding:5px;'>" << "Sample: " << basename(mOptions->prefix) << "</div>" << endl;
 
-cCout("bbbbbbbbbbbbbbbbbbbbbbb00000000000000000");
-
     if (mOptions->mVarType == ssr) {
         if (!mOptions->mSex.sexMarker.empty()) {
             ofs << "<div class='section_div'>\n";
@@ -550,7 +548,6 @@ cCout("bbbbbbbbbbbbbbbbbbbbbbb00000000000000000");
     ofs << "<div class='section_title' onclick=showOrHide('genotype')><a name='genotype'>All genotypes <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
     ofs << "<div id='genotype'  style='display:none'>\n";
 
-    cCout("bbbbbbbbbbbbbbbbbbbbbbb11111111111111");
     if (mOptions->mVarType == ssr) {
         reportAllGenotype(ofs, sortedAllGenotypeMapVec);
     } else {
@@ -559,7 +556,6 @@ cCout("bbbbbbbbbbbbbbbbbbbbbbb00000000000000000");
         }
     }
 
-    cCout("bbbbbbbbbbbbbbbbbbbbbbb2222222222222222");
     ofs << "</div>\n";
     ofs << "</div>\n";
 
