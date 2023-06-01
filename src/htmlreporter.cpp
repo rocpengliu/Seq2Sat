@@ -607,8 +607,6 @@ void HtmlReporter::reportAllSnps(ofstream& ofs, std::map<std::string, std::map<s
         int totReads = 0;
         int maxReads = 0;
         for (auto & it2 : it.second) {
-            cCout(it.first, it2.first);
-            cCout(it2.first, it2.second.numReads);
             totReads += it2.second.numReads;
             if (it2.second.numReads > maxReads) {
                 maxReads = it2.second.numReads;
