@@ -531,7 +531,7 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
     ofs << "<h1 style='text-align:left;'><a href='https://github.com/seq2sat' target='_blank' style='color:#009900;text-decoration:none;'>Seq2Sat Report</a </h1>" << endl;
     ofs << "<div style='font-size:12px;font-weight:normal;text-align:left;color:#666666;padding:5px;'>" << "Sample: " << basename(mOptions->prefix) << "</div>" << endl;
 
-
+cCout("bbbbbbbbbbbbbbbbbbbbbbb00000000000000000");
 
     if (mOptions->mVarType == ssr) {
         if (!mOptions->mSex.sexMarker.empty()) {
@@ -550,12 +550,16 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
     ofs << "<div class='section_title' onclick=showOrHide('genotype')><a name='genotype'>All genotypes <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
     ofs << "<div id='genotype'  style='display:none'>\n";
 
+    cCout("bbbbbbbbbbbbbbbbbbbbbbb11111111111111");
     if (mOptions->mVarType == ssr) {
         reportAllGenotype(ofs, sortedAllGenotypeMapVec);
     } else {
-        reportAllSnps(ofs, allSnpsMap);
+        if(!allSnpsMap.empty()){
+            reportAllSnps(ofs, allSnpsMap);
+        }
     }
 
+    cCout("bbbbbbbbbbbbbbbbbbbbbbb2222222222222222");
     ofs << "</div>\n";
     ofs << "</div>\n";
 
@@ -599,23 +603,18 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
 void HtmlReporter::reportAllSnps(ofstream& ofs, std::map<std::string, std::map<std::string, LocSnp>> & allSnpsMap) {
     for (auto & it : allSnpsMap) {
 
-        bool twoTrace = false;
+        if(it.second.empty()) continue;
         int totReads = 0;
         int maxReads = 0;
         for (auto & it2 : it.second) {
+            cCout(it.first, it2.first);
+            cCout(it2.first, it2.second.numReads);
             totReads += it2.second.numReads;
             if (it2.second.numReads > maxReads) {
                 maxReads = it2.second.numReads;
             }
-            if (!it2.second.snpsMap.empty()) {
-                twoTrace = true;
-            }
         }
-
-        if (maxReads == totReads) {
-            twoTrace = false;
-        }
-
+        
         std::string subsection = "Marker: " + it.first;
         std::string divName = replace(subsection, " ", "_");
         divName = replace(divName, ":", "_");

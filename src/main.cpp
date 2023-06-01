@@ -63,6 +63,7 @@ int main(int argc, char* argv[]){
     cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 10 means the percentage of reads with SNPs to total reads are from 40 - 60 %, must be coupled with hmPer, default: 10", false, 10);
     cmd.add<int>("hmPer", 0, "allele is considered as homo when its reads to total reads is > 90 %, must be coupled with htJetter default: 90", false, 90);
     
+    //for sex
     cmd.add<string>("sex", 0, "sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by '\t", false, "");
     cmd.add<unsigned int>("maxMismatchesSexPSeq", 0, "maximum number of mismatches for sex primers, default: 2", false, 2);
     cmd.add<unsigned int>("maxMismatchesSexRefSeq", 0, "maximum number of mismatches for sex reference sequences, default: 2", false, 2);

@@ -79,6 +79,8 @@ std::string SnpScanner::scanVar(Read* & r1) {
         locSnpIt = &(mOptions->mLocSnps.refLocMap[locName]);
         //locSnpIt->print();
         
+        if(readLength != locSnpIt->ref.length()) return returnedlocus;
+        
         locMap.clear();
         
         if(mOptions->debug) cCout("detected marker: " + locSnpIt->name, 'r');
@@ -480,7 +482,7 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
 
     if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
     if (mOptions->verbose) loginfo("Starting to write genotype table!");
-    *fout << "#Locus\tPosition\tGenotype\tNumReads\tReadsRatio\tNewSnp\n";
+    *fout << "#Locus\tPosition\tGenotype\tNumReads\tReadsRatio\tTotalReads\tNewSnp\n";
 
     std::string foutName2 = mOptions->prefix + "_snps_haplotype.txt";
     std::ofstream * fout2 = new std::ofstream();
@@ -488,7 +490,7 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
 
     if (!fout2->is_open()) error_exit("Can not open output file: " + foutName2);
     if (mOptions->verbose) loginfo("Starting to write haplotype table!");
-    *fout2 << "#Locus\tHaplotype\tNumReads\tReadsRatio\tSeq\n";
+    *fout2 << "#Locus\tHaplotype\tNumReads\tReadsRatio\tTotalReads\tSeq\n";
     
     for(const auto & it : tmpSnpSeqsMap){
         if(mOptions->mLocSnps.refLocMap.find(it.first) == mOptions->mLocSnps.refLocMap.end()){
@@ -568,7 +570,7 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                 tSGeno.ratio = (double) top2.at(0).second / totReads;
                 if (tSGeno.ratio >= mOptions->mLocSnps.mLocSnpOptions.hmPer) {
                     tSGeno.tORf = true;
-                    *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << top2.at(0).second << "|" << totReads << "\t" << tSGeno.ratio << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
+                    *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << top2.at(0).second << "|" << totReads << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
                 } else {
                     tSGeno.tORf = false;
                 }
@@ -589,7 +591,7 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                 if (tSGeno.ratio >= (0.5 - mOptions->mLocSnps.mLocSnpOptions.htJetter) && tSGeno.ratio <= (0.5 + mOptions->mLocSnps.mLocSnpOptions.htJetter)) {
                     tSGeno.tORf = true;
                     tmpULocSnp.heter = true;
-                    *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << top2.at(0).second << "|" << top2.at(1).second << "\t" << tSGeno.ratio << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
+                    *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << top2.at(0).second << "|" << top2.at(1).second << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
                 } else {
                     tSGeno.tORf = false;
                 }
@@ -658,8 +660,8 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
         locSnpIt->haploVec.push_back(std::make_tuple(haploSeq1, haploStr1, haploReads1));
         locSnpIt->haploVec.push_back(std::make_tuple(haploSeq2, haploStr2, haploReads2));
 
-        *fout2 << it.first << "\t" << haploStr1 << "\t" << haploReads1 << "\t" << ((double) haploReads1 / totReads) << "\t" << haploSeq1 << "\n";
-        *fout2 << it.first << "\t" << haploStr2 << "\t" << haploReads2 << "\t" << ((double) haploReads2 / totReads) << "\t" << haploSeq2 << "\n";
+        *fout2 << it.first << "\t" << haploStr1 << "\t" << haploReads1 << "\t" << ((double) haploReads1 / totReads) << "\t" << totReads << "\t" << haploSeq1 << "\n";
+        *fout2 << it.first << "\t" << haploStr2 << "\t" << haploReads2 << "\t" << ((double) haploReads2 / totReads) << "\t" << totReads << "\t" << haploSeq2 << "\n";
     }
     
     tmpSnpSeqsMap.clear();
