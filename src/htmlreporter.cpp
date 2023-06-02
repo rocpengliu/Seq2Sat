@@ -654,7 +654,8 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string marker, st
         ofs << "\n<script type=\"text/javascript\">" << endl;
 
         string json_str = "var data=[{";
-        json_str += "x:['" + get<1>(it->second.haploVec[0]) + "_allele1', '" + get<1>(it->second.haploVec[1]) + "_allele2'],";
+        //json_str += "x:['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],";
+        json_str += "x:['Allele', 'Allele'],";
         json_str += "y:[" + std::to_string(get<2>(it->second.haploVec[0])) + ", " + std::to_string(get<2>(it->second.haploVec[1])) + "],";
         json_str += "text: ['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],";
         json_str += "width: [0.5, 0.5],";
@@ -663,15 +664,15 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string marker, st
         std::string operand2 = std::string(get<1>(it->second.haploVec[1]));
 
         if(operand1 == operand2){
-            json_str += "marker:{color: ['blue', 'blue']}";
+            json_str += "marker:{color: ['blue', 'blue'], line: {color: 'white', width: 1.5}}";
         } else {
-            json_str += "marker:{color: ['blue', 'green']}";
+            json_str += "marker:{color: ['blue', 'green'], line: {color: 'white', width: 1.5}}";
         }
         
         json_str += "}];\n";
         json_str += "var layout = {xaxis:{tickmode: 'array', tickvals:['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],  title:'" + "Haplotype" + "', automargin: true},";
         json_str += "yaxis:{title:'Number of reads', automargin: true}, ";
-        json_str += "barmode: 'grouped'};\n";
+        json_str += "barmode: 'stack'};\n";
         json_str += "Plotly.newPlot('plot_h" + divName + "', data, layout);\n";
         ofs << json_str;
         ofs << "</script>" << endl;
