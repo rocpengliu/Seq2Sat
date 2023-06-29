@@ -594,7 +594,7 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                     tSGeno.tORf = true;
                     tmpULocSnp.heter = true;
                     tSGeno.geno = tSGeno.oGeno;
-                    *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << top2.at(0).second << "|" << top2.at(1).second << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
+                    *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << tSGeno.oGeno << "\t" << top2.at(0).second << "|" << top2.at(1).second << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
                 } else if(tSGeno.ratio >= mOptions->mLocSnps.mLocSnpOptions.hmPer){
 
                     if (bas[it2.first] == top2.at(0).first) {
