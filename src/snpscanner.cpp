@@ -611,6 +611,7 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                         *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << tSGeno.oGeno << "\t" << top2.at(0).second << "|" << top2.at(1).second << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
                     }
                 } else {
+                    tSGeno.geno = tSGeno.oGeno;//for the ambiguous genotype but need to show in html report
                     tSGeno.tORf = false;
                 }
                 
