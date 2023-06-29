@@ -92,10 +92,11 @@ public:
 };
 
 struct SimGeno{
-    std::string geno;
+    std::string geno;// true genotype, see below;
+    std::string oGeno;//original genotype, including error, this is for the homo but has errors eg, 0.93 A vs 0.07 C, so the oGeno is A|C, but the genotype is A|A
     int read1;
     int read2;
-    double ratio;
+    double ratio;//reads/total reads
     bool tORf;
 };
 
@@ -122,7 +123,7 @@ public:
     std::map<int, std::pair<Sequence, Sequence>> snpsMap;
     int numReads;
     int totReads;
-    double readsRatio;
+    double readsRatio;//reads/(total reads - reads);
     std::string genotype;
     bool puGeno;
     void print();

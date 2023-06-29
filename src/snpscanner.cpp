@@ -482,7 +482,7 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
 
     if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
     if (mOptions->verbose) loginfo("Starting to write genotype table!");
-    *fout << "#Locus\tPosition\tGenotype\tNumReads\tReadsRatio\tTotalReads\tNewSnp\n";
+    *fout << "#Locus\tPosition\tGenotype\tOriGenotype\tNumReads\tReadsRatio\tTotalReads\tNewSnp\n";
 
     std::string foutName2 = mOptions->prefix + "_snps_haplotype.txt";
     std::ofstream * fout2 = new std::ofstream();
@@ -501,6 +501,7 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
         std::set<int> posSet;
         int totReads = 0, maxReads = 0;
         
+        //get total and max reads
         for(const auto & it2 : it.second){
             if(it2.second >= mOptions->mLocSnps.mLocSnpOptions.minSeqs){
                 totReads += it2.second;
@@ -565,23 +566,24 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
             SimGeno tSGeno;
             if (top2.at(1).second == 0) {
                 tSGeno.geno = std::string() + top2.at(0).first + '|' + top2.at(0).first;
+                tSGeno.oGeno = tSGeno.geno;
                 tSGeno.read1 = top2.at(0).second;
                 tSGeno.read2 = totReads - top2.at(0).second;
                 tSGeno.ratio = (double) top2.at(0).second / totReads;
                 if (tSGeno.ratio >= mOptions->mLocSnps.mLocSnpOptions.hmPer) {
                     tSGeno.tORf = true;
-                    *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << top2.at(0).second << "|" << totReads << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
+                    *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << tSGeno.oGeno << "\t" << top2.at(0).second << "|" << totReads << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
                 } else {
                     tSGeno.tORf = false;
                 }
             } else {
                 std::string bas = locSnpIt->ref.mStr;
                 if( bas[it2.first] == top2.at(0).first) {
-                    tSGeno.geno = std::string() + top2.at(0).first + '|' + top2.at(1).first;
+                    tSGeno.oGeno = std::string() + top2.at(0).first + '|' + top2.at(1).first;
                     tSGeno.read1 = top2.at(0).second;
                     tSGeno.read2 = top2.at(1).second;
                 } else {
-                    tSGeno.geno = std::string() + top2.at(1).first + '|' + top2.at(0).first;
+                    tSGeno.oGeno = std::string() + top2.at(1).first + '|' + top2.at(0).first;
                     tSGeno.read1 = top2.at(1).second;
                     tSGeno.read2 = top2.at(0).second;
                 }
@@ -591,7 +593,23 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                 if (tSGeno.ratio >= (0.5 - mOptions->mLocSnps.mLocSnpOptions.htJetter) && tSGeno.ratio <= (0.5 + mOptions->mLocSnps.mLocSnpOptions.htJetter)) {
                     tSGeno.tORf = true;
                     tmpULocSnp.heter = true;
+                    tSGeno.geno = tSGeno.oGeno;
                     *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << top2.at(0).second << "|" << top2.at(1).second << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
+                } else if(tSGeno.ratio >= mOptions->mLocSnps.mLocSnpOptions.hmPer){
+
+                    if (bas[it2.first] == top2.at(0).first) {
+                        tSGeno.geno = std::string() + top2.at(0).first + '|' + top2.at(0).first;
+                    } else {
+                        tSGeno.geno = std::string() + top2.at(1).first + '|' + top2.at(1).first;
+                    }
+                    
+                    //tmpULocSnp.heter = false;
+                    if(locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end()){
+                        tSGeno.tORf = false;
+                    } else {
+                        tSGeno.tORf = true;
+                        *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << tSGeno.oGeno << "\t" << top2.at(0).second << "|" << top2.at(1).second << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
+                    }
                 } else {
                     tSGeno.tORf = false;
                 }

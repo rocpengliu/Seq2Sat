@@ -113,14 +113,30 @@ void HtmlReporter::outputRow(ofstream& ofs, std::string & marker, std::map<std::
 void HtmlReporter::outputRow(ofstream& ofs, std::map<int, SimGeno> & snpGenoMap, std::set<int> & refSet, int & totReads) {
     int i = 1;
     for (auto & it : snpGenoMap) {
-        std::string bgcol = (refSet.find(it.first) == refSet.end()) ? "orange" : ((it.second.geno[0] == it.second.geno[2]) ? "green" : "red");
+        
+        std::string bgcol = "white";
+        if(refSet.find(it.first) == refSet.end()){
+            if(it.second.geno[0] == it.second.geno[2]){
+                bgcol = "orange";
+            }
+        } else {
+            if(it.second.geno[0] == it.second.geno[2]){
+                bgcol = "green";
+            } else {
+                bgcol = "red";
+            }
+        }
+        
+        //std::string bgcol = (refSet.find(it.first) == refSet.end()) ? "orange" : ((it.second.geno[0] == it.second.geno[2]) ? "green" : "red");
         ofs << "<tr>";
-        ofs << "<td>" + std::to_string(i) + "</td>" +
-                "<td>" + std::to_string(it.first) + "</td>" +
-                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" +
+        ofs << "<td>" + std::to_string(i) + "</td>" +//ID
+                "<td>" + std::to_string(it.first) + "</td>" +//Position
+                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" +//Genotype
                 "<font color='" + (it.second.tORf ? "white" : "black") +  "'>" + it.second.geno + "</font></td>" +
-                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" +
+                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" +//Putative Genotype
                 "<font color='" + (it.second.tORf ? "white" : "black") +  "'>" + (it.second.tORf ? "yes" : "no") + "</font></td>" +
+                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" + //original Genotype
+                "<font color='" + (it.second.tORf ? "white" : "black") + "'>" + it.second.oGeno + "</font></td>" +
                 "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.read1) + "</font></td>" +
                 "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.read2) + "</font></td>" +
                 "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.ratio) + "</font></td>" + 
@@ -632,7 +648,7 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string marker, st
     if (it != mOptions->mLocSnps.refLocMap.end()) {
         ofs << "<div class='figure' id='plot_h" + divName + "'></div>\n";
 
-        ofs << "<div class='sub_section_tips'><font color='red'>Target heter SNPs are highlighted with red, </font> <font color='green'>while target homo SNPs are highlighted with green, </font> <font color='orange'>new SNPs are in orange!</font></div>\n";
+        ofs << "<div class='sub_section_tips'><font color='red'>Target heter SNPs are highlighted with red, </font> <font color='green'>while target homo SNPs are highlighted with green, </font> <font color='orange'>new potential SNPs are in orange!</font></div>\n";
         ofs << "<pre overflow: scroll>\n";
         ofs << "<table class='summary_table' style='width:100%'>\n";
         ofs << "<tr style='background:#cccccc'> <td>Marker</td><td>SNPs</td><td>Haplotype</td><td>N. of Reads</td><td>Reads(%)</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
@@ -719,34 +735,34 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
         x_vec_3[i] = (std::to_string(it2.first) + it2.second.geno);
         x_vec_4[i] = (std::to_string(it2.first) + it2.second.geno);
         
-        if(it2.second.geno[0] == it2.second.geno[2]){
-            if(it2.second.geno[0] == 'A') {
+        if(it2.second.oGeno[0] == it2.second.oGeno[2]){
+            if(it2.second.oGeno[0] == 'A') {
                 y_vec[i] = it2.second.read1;
-            } else if(it2.second.geno[0] == 'C'){
+            } else if(it2.second.oGeno[0] == 'C'){
                 y_vec_2[i] = it2.second.read1;
-            } else if(it2.second.geno[0] == 'G'){
+            } else if(it2.second.oGeno[0] == 'G'){
                 y_vec_3[i] = it2.second.read1;
             } else {
                 y_vec_4[i] = it2.second.read1;
             }
         } else {
-            if (it2.second.geno[0] == 'A') {
+            if (it2.second.oGeno[0] == 'A') {
                 y_vec.at(i) = it2.second.read1;
-            } else if (it2.second.geno[0] == 'C') {
+            } else if (it2.second.oGeno[0] == 'C') {
                 y_vec_2.at(i) = it2.second.read1;
-            } else if (it2.second.geno[0] == 'G') {
+            } else if (it2.second.oGeno[0] == 'G') {
                 y_vec_3.at(i) = it2.second.read1;
-            } else if(it2.second.geno[0] == 'T'){
+            } else if(it2.second.oGeno[0] == 'T'){
                 y_vec_4.at(i) = it2.second.read1;
             }
 
-            if (it2.second.geno[2] == 'A') {
+            if (it2.second.oGeno[2] == 'A') {
                 y_vec.at(i) = it2.second.read2;
-            } else if (it2.second.geno[2] == 'C') {
+            } else if (it2.second.oGeno[2] == 'C') {
                 y_vec_2.at(i) = it2.second.read2;
-            } else if (it2.second.geno[2] == 'G') {
+            } else if (it2.second.oGeno[2] == 'G') {
                 y_vec_3.at(i) = it2.second.read2;
-            } else if(it2.second.geno[2] == 'T'){
+            } else if(it2.second.oGeno[2] == 'T'){
                 y_vec_4.at(i) = it2.second.read2;
             }
         }
@@ -761,7 +777,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
     ofs << "<div class='sub_section_tips'><font color='red'> Heter target loci are in red</font>, <font color='green'> homo target loci are in green</font>, <font color='orange'> while new heter loci are in orange</font></div>\n";
     ofs << "<pre overflow: scroll>\n";
     ofs << "<table class='summary_table' style='width:40%'>\n";
-    ofs <<  "<tr style='background:#cccccc'> <td>ID</td><td>Position</td><td>Genotype</td><td>Putative Genotype</td><td>N. of reads1</td><td>N. of reads2</td><td>Reads ratio</td><td>Total reads</td></tr>\n";
+    ofs <<  "<tr style='background:#cccccc'> <td>ID</td><td>Position</td><td>Genotype</td><td>Putative Genotype</td><td>Original Genotype</td><td>N. of reads1</td><td>N. of reads2</td><td>Reads ratio</td><td>Total reads</td></tr>\n";
     
     outputRow(ofs, locSnpIt->uGeno.snpGenoMap, locSnpIt->refSnpPosSet, totReads);
 
@@ -845,6 +861,14 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
         json_str += "y0: " + std::to_string((double) totReads * mOptions->mLocSnps.mLocSnpOptions.hmPer) + ", ";
         json_str += "x1: 1, ";
         json_str += "y1: " + std::to_string((double) totReads * mOptions->mLocSnps.mLocSnpOptions.hmPer) + ", ";
+        json_str += "line:{color: 'yellow', width: 4, dash: 'line'}";
+        json_str += "},\n";
+
+        json_str += "{ type: 'line', xref: 'paper', ";
+        json_str += "x0: 0, ";
+        json_str += "y0: " + std::to_string((double) totReads * (1 - mOptions->mLocSnps.mLocSnpOptions.hmPer)) + ", ";
+        json_str += "x1: 1, ";
+        json_str += "y1: " + std::to_string((double) totReads * (1 - mOptions->mLocSnps.mLocSnpOptions.hmPer)) + ", ";
         json_str += "line:{color: 'yellow', width: 4, dash: 'line'}";
         json_str += "}\n";
         
