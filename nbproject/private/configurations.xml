@@ -130,10 +130,18 @@
       </nativedebugger>
       <runprofile version="9">
         <runcommandpicklist>
+          <runcommandpicklistitem> -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var snp</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
+          <runcommandpicklistitem>-i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var snp</runcommandpicklistitem>
+          <runcommandpicklistitem>/home/eccc/NetBeansProjects/ssr/snp/GTseq_LP -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var snp</runcommandpicklistitem>
+          <runcommandpicklistitem>~/NetBeansProjects/ssr/Seq2Sat/seq2sat -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var snp</runcommandpicklistitem>
+          <runcommandpicklistitem>~/NetBeansProjects/ssr/Seq2Sat/seq2sat -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var </runcommandpicklistitem>
+          <runcommandpicklistitem> -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var</runcommandpicklistitem>
+          <runcommandpicklistitem>seq2sat -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var</runcommandpicklistitem>
+          <runcommandpicklistitem>seq2sat -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var snp</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}"</runcommand>
-        <rundir>.</rundir>
+        <runcommand>seq2sat -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var snp</runcommand>
+        <rundir>/home/eccc/NetBeansProjects/ssr/Seq2Sat/</rundir>
         <buildfirst>false</buildfirst>
         <terminal-type>0</terminal-type>
         <remove-instrumentation>0</remove-instrumentation>

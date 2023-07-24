@@ -475,13 +475,20 @@ void Options::readLocFile(){
                 tmpLocSnp.name = splitVec[0];
                 tmpLocSnp.fp = splitVec[1];
                 tmpLocSnp.rp = revCom ? Sequence(splitVec[2]).reverseComplement().mStr : splitVec[2];
-                splitStr(splitVec[3], posVec, "|");
+                 if (splitVec[3].find("|") != std::string::npos) {
+                     splitStr(splitVec[3], posVec, "|");
+                 } else {
+                     posVec.push_back(splitVec[3]);
+                     cCout(splitVec[3], 'g');
+                 }
+                
                 for(auto & itt : posVec){
                     tmpLocSnp.refSnpPosSet.insert(std::stoi(itt));
                 }
+                posVec.clear();
                 tmpLocSnp.ref = splitVec[4];
                 mLocSnps.refLocMap[tmpLocSnp.name] = tmpLocSnp;
-                //tmpLocSnp.print();
+                tmpLocSnp.print();
             }
             splitVec.clear();
         }

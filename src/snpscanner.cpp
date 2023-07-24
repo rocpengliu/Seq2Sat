@@ -79,7 +79,11 @@ std::string SnpScanner::scanVar(Read* & r1) {
         locSnpIt = &(mOptions->mLocSnps.refLocMap[locName]);
         //locSnpIt->print();
         
-        if(readLength != locSnpIt->ref.length()) return returnedlocus;
+        if(readLength < locSnpIt->ref.length()){
+            return returnedlocus;
+        } else if(readLength > locSnpIt->ref.length()) {
+            r1->resize(locSnpIt->ref.length());
+        }
         
         locMap.clear();
         
@@ -87,57 +91,6 @@ std::string SnpScanner::scanVar(Read* & r1) {
         
         subSeqsMap[locSnpIt->name][r1->mSeq.mStr]++;
         returnedlocus = locName;
-        
-//        if (r1->mSeq.mStr.length() == locSnpIt->ref.mStr.length()) {
-//
-//            target = locSnpIt->ref.mStr.c_str();
-//            targetLength = locSnpIt->ref.mStr.length();
-//
-//            std::map<std::string, std::map<std::string, LocSnp>>::iterator itGenotypeMap = subGenotypeMap.find(locSnpIt->name);//marker 
-//            std::map<std::string, LocSnp> tmpGenotypeMap;
-//            LocSnp* tmpGenotype = new LocSnp();
-//
-//            if (itGenotypeMap == subGenotypeMap.end()) {
-//                if (r1->mSeq.mStr == locSnpIt->ref.mStr) {
-//                    tmpGenotype->ref = locSnpIt->ref.mStr;
-//                    if(mOptions->debug) cCout("identical to ref1", 'r');
-//                } else {
-//                    ss << "doing alignment: \n" << "read: " << r1->mSeq.mStr << "\n" << "target: " << locSnpIt->ref.mStr << "\n";
-//                    tmpGenotype->snpsMap = doAlignment(readSeq, readLength, target, targetLength);
-//                    tmpGenotype->ref = r1->mSeq.mStr;
-//                }
-//
-//                tmpGenotype->name = locSnpIt->name;
-//                tmpGenotype->numReads++;
-//                tmpGenotypeMap[r1->mSeq.mStr] = *tmpGenotype;
-//                subGenotypeMap[locSnpIt->name] = tmpGenotypeMap;
-//            } else {
-//                std::map<std::string, LocSnp>::iterator tmpGenotypeMapIt = itGenotypeMap->second.find(r1->mSeq.mStr);
-//                if (tmpGenotypeMapIt == itGenotypeMap->second.end()) {
-//                    if (r1->mSeq.mStr == locSnpIt->ref.mStr) {
-//                        tmpGenotype->ref = locSnpIt->ref.mStr;
-//                        if(mOptions->debug) cCout("identical to ref2", 'r');
-//                    } else {
-//                           ss << "doing alignment: \n" << "read: " << r1->mSeq.mStr << "\n" << "target: " << locSnpIt->ref.mStr << "\n";
-//                    
-//                        tmpGenotype->snpsMap = doAlignment(readSeq, readLength, target, targetLength);
-//                        tmpGenotype->ref = r1->mSeq.mStr;
-//                        
-//                    }
-//                    tmpGenotype->name = locSnpIt->name;
-//                    tmpGenotype->numReads++;
-//                    itGenotypeMap->second[r1->mSeq.mStr] = *tmpGenotype;
-//                } else {
-//                    tmpGenotypeMapIt->second.numReads++;
-//                }
-//            }
-//            
-//            if(tmpGenotype){
-//                delete tmpGenotype;
-//                tmpGenotype = nullptr;
-//            }
-//            returnedlocus = locName;
-//        }
         
         if(mOptions->mEdOptions.printRes){
             cCout(ss.str(), 'g');

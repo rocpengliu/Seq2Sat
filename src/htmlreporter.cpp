@@ -116,9 +116,9 @@ void HtmlReporter::outputRow(ofstream& ofs, std::map<int, SimGeno> & snpGenoMap,
         
         std::string bgcol = "white";
         if(refSet.find(it.first) == refSet.end()){
-            if(it.second.geno[0] == it.second.geno[2]){
+            //if(it.second.geno[0] == it.second.geno[2]){
                 bgcol = "orange";
-            }
+           // }
         } else {
             if(it.second.geno[0] == it.second.geno[2]){
                 bgcol = "green";
@@ -127,7 +127,6 @@ void HtmlReporter::outputRow(ofstream& ofs, std::map<int, SimGeno> & snpGenoMap,
             }
         }
         
-        //std::string bgcol = (refSet.find(it.first) == refSet.end()) ? "orange" : ((it.second.geno[0] == it.second.geno[2]) ? "green" : "red");
         ofs << "<tr>";
         ofs << "<td>" + std::to_string(i) + "</td>" +//ID
                 "<td>" + std::to_string(it.first) + "</td>" +//Position
@@ -513,9 +512,9 @@ void HtmlReporter::reportSex(ofstream & ofs) {
     string json_str = "var data=[";
     json_str += "{";
     json_str += "x:[" + Stats::list2string(x_vec, x_vec.size()) + "],";
-    json_str += "y:[" + Stats::list2string(y_vec, y_vec.size()) + "],";
-    json_str += "text: [" + Stats::list2string(x_vec, x_vec.size()) + "],";
-    json_str += "width: [" + Stats::list2string(bar_width_vec, bar_width_vec.size()) + "],";
+    json_str += "y:[" + Stats::list2string2(y_vec, y_vec.size()) + "],";
+    //json_str += "text: [" + Stats::list2string(x_vec, x_vec.size()) + "],";
+    //json_str += "width: [" + Stats::list2string(bar_width_vec, bar_width_vec.size()) + "],";
     json_str += "type:'bar', textposition: 'auto'";
     json_str += "}";
     json_str += "];\n";
@@ -613,8 +612,8 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
 }
 
 void HtmlReporter::reportAllSnps(ofstream& ofs, std::map<std::string, std::map<std::string, LocSnp>> & allSnpsMap) {
+    
     for (auto & it : allSnpsMap) {
-
         if(it.second.empty()) continue;
         int totReads = 0;
         int maxReads = 0;
@@ -634,9 +633,11 @@ void HtmlReporter::reportAllSnps(ofstream& ofs, std::map<std::string, std::map<s
         ofs << "<div id='" + divName + "'>\n";
         ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
 
+        cCout("marker:", it.first);
         reportSnpAlignmentTable(ofs, it.first, divName, it.second, totReads);
-        
+        cCout("bbbbbbbbbbbbbbbbb");
         reportSnpTablePlot(ofs, it.first, divName, totReads);
+        cCout("ccccccccccccccccccccc");
         ofs << "</div>\n";
 
     }
@@ -774,7 +775,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
 
     ofs << "<div class='figure' id='plot_" + divName + "'></div>\n";
     
-    ofs << "<div class='sub_section_tips'><font color='red'> Heter target loci are in red</font>, <font color='green'> homo target loci are in green</font>, <font color='orange'> while new heter loci are in orange</font></div>\n";
+    ofs << "<div class='sub_section_tips'><font color='red'> Heter target loci are in red</font>, <font color='green'> homo target loci are in green</font>, <font color='orange'> while new heter (including homo against reference) loci are in orange</font></div>\n";
     ofs << "<pre overflow: scroll>\n";
     ofs << "<table class='summary_table' style='width:40%'>\n";
     ofs <<  "<tr style='background:#cccccc'> <td>ID</td><td>Position</td><td>Genotype</td><td>Putative Genotype</td><td>Original Genotype</td><td>N. of reads1</td><td>N. of reads2</td><td>Reads ratio</td><td>Total reads</td></tr>\n";
@@ -1086,9 +1087,9 @@ void HtmlReporter::reportEachGenotype(ofstream& ofs, std::string marker,
         auto itt = stackYlabMap.find(it.first);
         json_str += "var " + it.first + " = {";
         json_str += "x:[" + Stats::list2string(x_vec, x_vec.size()) + "],";
-        json_str += "y:[" + Stats::list2string(it.second, it.second.size()) + "],";
-        json_str += "text: [" + Stats::list2string(itt->second, itt->second.size()) + "],";
-        json_str += "width: [" + Stats::list2string(barmra_width_vec, barmra_width_vec.size()) + "],";
+        json_str += "y:[" + Stats::list2string2(it.second, it.second.size()) + "],";
+        //json_str += "text: [" + Stats::list2string(itt->second, itt->second.size()) + "],";
+        //json_str += "width: [" + Stats::list2string2(barmra_width_vec, barmra_width_vec.size()) + "],";
         json_str += "type:'bar', textposition: 'auto',";
         json_str += "};\n";
     }
@@ -1104,9 +1105,9 @@ void HtmlReporter::reportEachGenotype(ofstream& ofs, std::string marker,
         auto itt = stackYLabMMap.find(it.first);
         json_str += "var " + it.first + " = {";
         json_str += "x:[" + Stats::list2string(xmra_vec, xmra_vec.size()) + "],";
-        json_str += "y:[" + Stats::list2string(it.second, it.second.size()) + "],";
-        json_str += "text: [" + Stats::list2string(itt->second, itt->second.size()) + "],";
-        json_str += "width: [" + Stats::list2string(barmra_width_vec, barmra_width_vec.size()) + "],";
+        json_str += "y:[" + Stats::list2string2(it.second, it.second.size()) + "],";
+        //json_str += "text: [" + Stats::list2string(itt->second, itt->second.size()) + "],";
+        //json_str += "width: [" + Stats::list2string(barmra_width_vec, barmra_width_vec.size()) + "],";
         json_str += "type:'bar', textposition: 'auto',";
         json_str += "};\n";
     }
