@@ -159,7 +159,11 @@ std::pair<std::map<int, std::string>, bool> SsrScanner::doSimpleAlignment(Option
     if (indelSet.empty()) {
         return std::make_pair(snpsMap, true);
     } else {
-        return std::make_pair(snpsMap, false);
+        if(qLength == tLength){
+            return std::make_pair(snpsMap, true);
+        } else {
+            return std::make_pair(snpsMap, false);
+        }
     }
 }
 
@@ -837,7 +841,7 @@ void SsrScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
 }
 
 std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> SsrScanner::report(Options * & mOptions, std::map<std::string, std::map<std::string, Genotype>> &allGenotypeMap) {
-
+  
     std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMap;
     std::map<std::string, std::vector<std::pair < std::string, Genotype>>> sortedAllGenotypeMraMap; //marker, seq, geno
     std::vector<std::map < std::string, std::vector<std::pair < std::string, Genotype>>>> sortedAllGenotypeMapVec
@@ -885,22 +889,20 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
             if (it2.second.numReads >= mOptions->mLocVars.locVarOptions.minSeqs &&
                     (it2.second.numReads * 100 / maxReads) >= mOptions->mLocVars.locVarOptions.minSeqsPer &&
                     it2.second.baseLocVar.mra.mStr.length() >= (it2.second.baseLocVar.repuit.mStr.length() + it2.second.baseLocVar.repuit2.mStr.length()) * mOptions->mLocVars.locVarOptions.minNSSRUnit) {
-
+      
                 auto tmpGeno = getGenotype(it2.second.baseLocVar.mra.mStr, locVarIt->repuit.mStr, locVarIt->repuit2.mStr);
                 auto maxNRep = getMaxNumRep(tmpGeno);
-                if (maxNRep >= mOptions->mLocVars.locVarOptions.minNSSRUnit) {
+                if (maxNRep >= mOptions->mLocVars.locVarOptions.minNSSRUnit) {                                   
                     target = locVarIt->ff.mStr.c_str();
                     targetLength = locVarIt->ff.mStr.length();
                     readSeq = it2.second.baseLocVar.ff.mStr.c_str();
-                    readLength = it2.second.baseLocVar.ff.mStr.length();
+                    readLength = it2.second.baseLocVar.ff.mStr.length();                    
                     auto mapSetff = SsrScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
                     if (mapSetff.second) {
                         it2.second.baseLocVar.snpsMapff = mapSetff.first;
-
                         for (auto & it3 : it2.second.baseLocVar.snpsMapff) {
                             ffSet.insert(it3.first);
                         }
-
                         target = locVarIt->rf.mStr.c_str();
                         targetLength = locVarIt->rf.mStr.length();
                         readSeq = it2.second.baseLocVar.rf.mStr.c_str();
@@ -2239,7 +2241,7 @@ std::string SsrScanner::scanVar (Read* & r1) {
                 returnedlocus = locVarIt->name + "_failed";
                 return (returnedlocus);
             }
-
+          
             std::map<std::string, std::map < std::string, Genotype>>::iterator itGenotypeMap = tmpAllGenotypeMap.find(locVarIt->name);
             std::map<std::string, Genotype> tmpGenotypeMap;
             Genotype* tmpGenotype = new Genotype();
@@ -2293,7 +2295,7 @@ std::string SsrScanner::scanVar (Read* & r1) {
                 std::map<std::string, Genotype>::iterator tmpGenotypeMapIT = itGenotypeMap->second.find(r1->mSeq.mStr);
 
                 if (tmpGenotypeMapIT == itGenotypeMap->second.end()) {
-
+                    
                     if (r1->mSeq.mStr == locVarIt->effectiveSeq.mStr) {//identical seq with ref
                         tmpGenotype->baseLocVar = *locVarIt;
                         tmpGenotype->numReads++;

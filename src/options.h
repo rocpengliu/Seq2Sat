@@ -265,7 +265,7 @@ public:
         minSeqsPer = 5;
         minWarningSeqs = 50;
         minMatchesFR = 6;
-        maxMismatchesPer4FR = 0.1;
+        maxMismatchesPer4FR = 0.3;
         maxScore = -1;
         maxScorePrimer = -1;
         numBestSeqs = 0;

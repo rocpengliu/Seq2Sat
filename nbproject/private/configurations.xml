@@ -139,8 +139,9 @@
           <runcommandpicklistitem> -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var</runcommandpicklistitem>
           <runcommandpicklistitem>seq2sat -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var</runcommandpicklistitem>
           <runcommandpicklistitem>seq2sat -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var snp</runcommandpicklistitem>
+          <runcommandpicklistitem>seq2sat -i /home/eccc/Downloads/49091_S10_L001_R1_001.fastq.gz -I /home/eccc/Downloads/49091_S10_L001_R2_001.fastq.gz --loc /home/eccc/Downloads/loc.txt --prefix /home/eccc/Downloads/bb --var ssr</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>seq2sat -i /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/F4S4_01.fq.gz --loc /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/snp_loc.txt --prefix /home/eccc/NetBeansProjects/ssr/snp/GTseq_LP/aa --var snp</runcommand>
+        <runcommand>seq2sat -i /home/eccc/Downloads/49091_S10_L001_R1_001.fastq.gz -I /home/eccc/Downloads/49091_S10_L001_R2_001.fastq.gz --loc /home/eccc/Downloads/loc.txt --prefix /home/eccc/Downloads/bb --var ssr</runcommand>
         <rundir>/home/eccc/NetBeansProjects/ssr/Seq2Sat/</rundir>
         <buildfirst>false</buildfirst>
         <terminal-type>0</terminal-type>

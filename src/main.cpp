@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
     cmd.add("printResults", 0, "If specified, alignment results will be printed but with only 1 thread");
     
     //for ssr;
-    cmd.add<double>("maxMismatchesPer4FR", 0, "maximum percentage mismatches for the forward and reverse flanking regions, default 0.3 (30%) ", false, 0.1);
+    cmd.add<double>("maxMismatchesPer4FR", 0, "maximum percentage mismatches for the forward and reverse flanking regions, default 0.3 (30%) ", false, 0.3);
     cmd.add<int>("minWarningSeqs", 0, "minimum number of reads for warning a genotype, default: 50", false, 50);
     cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%)", false, 5);
     cmd.add<double>("hlRatio1", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.4", false, 0.4);
