@@ -60,7 +60,7 @@ int main(int argc, char* argv[]){
     cmd.add<double>("maxVarRatio", 0, "ratio of two heter alleles based on variations either in flanking regions or MRA, the ideal is 1, default: 1.5", false, 1.5);
     
     //for snp;
-    cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 10 means the percentage of reads with SNPs to total reads are from 40 - 60 %, must be coupled with hmPer, default: 10", false, 10);
+    cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 15 means the percentage of reads with SNPs to total reads are from 40 - 60 %, must be coupled with hmPer, default: 15", false, 15);
     cmd.add<int>("hmPer", 0, "allele is considered as homo when its reads to total reads is > 90 %, must be coupled with htJetter default: 90", false, 90);
     
     //for sex

@@ -479,16 +479,16 @@ void Options::readLocFile(){
                      splitStr(splitVec[3], posVec, "|");
                  } else {
                      posVec.push_back(splitVec[3]);
-                     cCout(splitVec[3], 'g');
                  }
                 
                 for(auto & itt : posVec){
+                    if(itt == "NA") break;
                     tmpLocSnp.refSnpPosSet.insert(std::stoi(itt));
                 }
                 posVec.clear();
                 tmpLocSnp.ref = splitVec[4];
                 mLocSnps.refLocMap[tmpLocSnp.name] = tmpLocSnp;
-                tmpLocSnp.print();
+                //tmpLocSnp.print();
             }
             splitVec.clear();
         }

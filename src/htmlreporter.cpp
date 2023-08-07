@@ -218,7 +218,7 @@ void HtmlReporter::printSummary(ofstream& ofs, FilterResult* result, Stats* preS
     ofs << endl;
     ofs << "<div class='section_div'>\n";
     ofs << "<div class='section_title' onclick=showOrHide('summary')><a name='summary'>Data QC summary <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
-    ofs << "<div id='summary'>\n";
+    ofs << "<div id='summary' style='display:none'>\n";
 
     ofs << "<div class='subsection_title' onclick=showOrHide('general')>General</div>\n";
     ofs << "<div id='general'>\n";
@@ -561,7 +561,7 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
 
     ofs << "<div class='section_div'>\n";
     ofs << "<div class='section_title' onclick=showOrHide('genotype')><a name='genotype'>All genotypes <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
-    ofs << "<div id='genotype'  style='display:none'>\n";
+    ofs << "<div id='genotype' >\n";
 
     if (mOptions->mVarType == ssr) {
         reportAllGenotype(ofs, sortedAllGenotypeMapVec);
@@ -633,11 +633,8 @@ void HtmlReporter::reportAllSnps(ofstream& ofs, std::map<std::string, std::map<s
         ofs << "<div id='" + divName + "'>\n";
         ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
 
-        cCout("marker:", it.first);
         reportSnpAlignmentTable(ofs, it.first, divName, it.second, totReads);
-        cCout("bbbbbbbbbbbbbbbbb");
         reportSnpTablePlot(ofs, it.first, divName, totReads);
-        cCout("ccccccccccccccccccccc");
         ofs << "</div>\n";
 
     }
@@ -647,7 +644,7 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string marker, st
 
     auto it = mOptions->mLocSnps.refLocMap.find(marker);
     if (it != mOptions->mLocSnps.refLocMap.end()) {
-        ofs << "<div class='figure' id='plot_h" + divName + "'></div>\n";
+        ofs << "<div class='figurehalf' id='plot_h" + divName + "'></div>\n";
 
         ofs << "<div class='sub_section_tips'><font color='red'>Target heter SNPs are highlighted with red, </font> <font color='green'>while target homo SNPs are highlighted with green, </font> <font color='orange'>new potential SNPs are in orange!</font></div>\n";
         ofs << "<pre overflow: scroll>\n";
@@ -681,9 +678,9 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string marker, st
         std::string operand2 = std::string(get<1>(it->second.haploVec[1]));
 
         if(operand1 == operand2){
-            json_str += "marker:{color: ['blue', 'blue'], line: {color: 'white', width: 1.5}}";
+            json_str += "marker:{color: ['darkgreen', 'darkgreen'], line: {color: 'white', width: 1.5}}";
         } else {
-            json_str += "marker:{color: ['blue', 'green'], line: {color: 'white', width: 1.5}}";
+            json_str += "marker:{color: ['goldenrod', 'darkgreen'], line: {color: 'white', width: 1.5}}";
         }
         
         json_str += "}];\n";
@@ -721,7 +718,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
     std::vector<double> bar_width_vec_3(locSnpIt->uGeno.snpGenoMap.size(), 0.5);
     //bar_width_vec_3.reserve(locSnpIt->uGeno.snpGenoMap.size());
 
-    std::vector<std::string> x_vec_4(locSnpIt->uGeno.snpGenoMap.size(), "");//G
+    std::vector<std::string> x_vec_4(locSnpIt->uGeno.snpGenoMap.size(), "");//T
     //x_vec_4.reserve(locSnpIt->uGeno.snpGenoMap.size());
     std::vector<int> y_vec_4(locSnpIt->uGeno.snpGenoMap.size(), 0);
     //y_vec_24reserve(locSnpIt->uGeno.snpGenoMap.size());
@@ -759,12 +756,125 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
 
             if (it2.second.oGeno[2] == 'A') {
                 y_vec.at(i) = it2.second.read2;
+                
+                if(it2.second.oGeno.length() == 4){
+                    if(it2.second.oGeno[3] == 'C'){
+                        y_vec_2.at(i) = it2.second.read3;
+                    } else if(it2.second.oGeno[3] == 'G'){
+                        y_vec_3.at(i) = it2.second.read3;
+                    } else if(it2.second.oGeno[3] == 'T'){
+                        y_vec_4.at(i) = it2.second.read3;
+                    }
+                } else if(it2.second.oGeno.length() == 5){
+
+                    if (it2.second.oGeno[3] == 'C') {
+                        y_vec_2.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'G') {
+                        y_vec_3.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'T') {
+                        y_vec_4.at(i) = it2.second.read3;
+                    }
+
+                    if (it2.second.oGeno[4] == 'C') {
+                        y_vec_2.at(i) = it2.second.read4;
+                    } else if (it2.second.oGeno[4] == 'G') {
+                        y_vec_3.at(i) = it2.second.read4;
+                    } else if (it2.second.oGeno[4] == 'T') {
+                        y_vec_4.at(i) = it2.second.read4;
+                    }
+                } 
+                
             } else if (it2.second.oGeno[2] == 'C') {
                 y_vec_2.at(i) = it2.second.read2;
+
+                if (it2.second.oGeno.length() == 4) {
+                    if (it2.second.oGeno[3] == 'A') {
+                        y_vec.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'G') {
+                        y_vec_3.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'T') {
+                        y_vec_4.at(i) = it2.second.read3;
+                    }
+                } else if (it2.second.oGeno.length() == 5) {
+
+                    if (it2.second.oGeno[3] == 'A') {
+                        y_vec.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'G') {
+                        y_vec_3.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'T') {
+                        y_vec_4.at(i) = it2.second.read3;
+                    }
+
+                    if (it2.second.oGeno[4] == 'A') {
+                        y_vec.at(i) = it2.second.read4;
+                    } else if (it2.second.oGeno[4] == 'G') {
+                        y_vec_3.at(i) = it2.second.read4;
+                    } else if (it2.second.oGeno[4] == 'T') {
+                        y_vec_4.at(i) = it2.second.read4;
+                    }
+                } 
+                
             } else if (it2.second.oGeno[2] == 'G') {
                 y_vec_3.at(i) = it2.second.read2;
+
+                if (it2.second.oGeno.length() == 4) {
+                    if (it2.second.oGeno[3] == 'A') {
+                        y_vec.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'C') {
+                        y_vec_2.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'T') {
+                        y_vec_4.at(i) = it2.second.read3;
+                    }
+                } else if (it2.second.oGeno.length() == 5) {
+
+                    if (it2.second.oGeno[3] == 'A') {
+                        y_vec.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'C') {
+                        y_vec_2.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'T') {
+                        y_vec_4.at(i) = it2.second.read3;
+                    }
+
+                    if (it2.second.oGeno[4] == 'A') {
+                        y_vec.at(i) = it2.second.read4;
+                    } else if (it2.second.oGeno[4] == 'C') {
+                        y_vec_2.at(i) = it2.second.read4;
+                    } else if (it2.second.oGeno[4] == 'T') {
+                        y_vec_4.at(i) = it2.second.read4;
+                    }
+                }
+                
+                
             } else if(it2.second.oGeno[2] == 'T'){
                 y_vec_4.at(i) = it2.second.read2;
+
+                if (it2.second.oGeno.length() == 4) {
+                    if (it2.second.oGeno[3] == 'A') {
+                        y_vec.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'C') {
+                        y_vec_2.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'G') {
+                        y_vec_3.at(i) = it2.second.read3;
+                    }
+                } else if (it2.second.oGeno.length() == 5) {
+
+                    if (it2.second.oGeno[3] == 'A') {
+                        y_vec.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'C') {
+                        y_vec_2.at(i) = it2.second.read3;
+                    } else if (it2.second.oGeno[3] == 'G') {
+                        y_vec_3.at(i) = it2.second.read3;
+                    }
+
+                    if (it2.second.oGeno[4] == 'A') {
+                        y_vec.at(i) = it2.second.read4;
+                    } else if (it2.second.oGeno[4] == 'C') {
+                        y_vec_2.at(i) = it2.second.read4;
+                    } else if (it2.second.oGeno[4] == 'G') {
+                        y_vec_3.at(i) = it2.second.read4;
+                    }
+                }
+                
             }
         }
         i++;
@@ -773,7 +883,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
     ofs << "<div class='sub_section_tips'>Reads mean and thresholds for heter are in white and purple while threshold for homo loci is in yellow .</div>\n";
     ofs << "<div class='sub_section_tips'><font color='red'>Caution:</font> Position starts with <font color='red'>0</font>!</div>\n";
 
-    ofs << "<div class='figure' id='plot_" + divName + "'></div>\n";
+    ofs << "<div class='figurefull' id='plot_" + divName + "'></div>\n";
     
     ofs << "<div class='sub_section_tips'><font color='red'> Heter target loci are in red</font>, <font color='green'> homo target loci are in green</font>, <font color='orange'> while new heter (including homo against reference) loci are in orange</font></div>\n";
     ofs << "<pre overflow: scroll>\n";
@@ -792,9 +902,9 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
     json_str += "x:[" + Stats::list2string(x_vec, x_vec.size()) + "],";
     json_str += "y:[" + Stats::list2string2(y_vec, y_vec.size()) + "],";
     json_str += "text: [" + Stats::list2string(x_vec, x_vec.size()) + "],";
-    json_str += "width: [" + Stats::list2string2(bar_width_vec, bar_width_vec.size()) + "],";
+    //json_str += "width: [" + Stats::list2string2(bar_width_vec, bar_width_vec.size()) + "],";
     json_str += "name: 'A',";
-    json_str += "marker:{color:'blue'},";
+    json_str += "marker:{color:'darkgreen'},";
     json_str += "type:'bar', textposition: 'auto'";
     json_str += "},\n";
 
@@ -802,9 +912,9 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
     json_str += "x:[" + Stats::list2string(x_vec_2, x_vec_2.size()) + "],";
     json_str += "y:[" + Stats::list2string2(y_vec_2, y_vec_2.size()) + "],";
     json_str += "text: [" + Stats::list2string(x_vec_2, x_vec_2.size()) + "],";
-    json_str += "width: [" + Stats::list2string2(bar_width_vec_2, bar_width_vec_2.size()) + "],";
+    //json_str += "width: [" + Stats::list2string2(bar_width_vec_2, bar_width_vec_2.size()) + "],";
     json_str += "name: 'C',";
-    json_str += "marker:{color:'red'},";
+    json_str += "marker:{color:'darkred'},";
     json_str += "type:'bar', textposition: 'auto'";
     json_str += "}, \n";
 
@@ -812,9 +922,9 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
     json_str += "x:[" + Stats::list2string(x_vec_3, x_vec_3.size()) + "],";
     json_str += "y:[" + Stats::list2string2(y_vec_3, y_vec_3.size()) + "],";
     json_str += "text: [" + Stats::list2string(x_vec_3, x_vec_3.size()) + "],";
-    json_str += "width: [" + Stats::list2string2(bar_width_vec_3, bar_width_vec_3.size()) + "],";
+    //json_str += "width: [" + Stats::list2string2(bar_width_vec_3, bar_width_vec_3.size()) + "],";
     json_str += "name: 'G',";
-    json_str += "marker:{color:'green'},";
+    json_str += "marker:{color:'grey'},";
     json_str += "type:'bar', textposition: 'auto'";
     json_str += "}, \n";
 
@@ -822,14 +932,14 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
     json_str += "x:[" + Stats::list2string(x_vec_4, x_vec_4.size()) + "],";
     json_str += "y:[" + Stats::list2string2(y_vec_4, y_vec_4.size()) + "],";
     json_str += "text: [" + Stats::list2string(x_vec_4, x_vec_4.size()) + "],";
-    json_str += "width: [" + Stats::list2string2(bar_width_vec_4, bar_width_vec_4.size()) + "],";
+    //json_str += "width: [" + Stats::list2string2(bar_width_vec_4, bar_width_vec_4.size()) + "],";
     json_str += "name: 'T',";
-    json_str += "marker:{color:'orange'},";
+    json_str += "marker:{color:'darkblue'},";
     json_str += "type:'bar', textposition: 'auto'";
     json_str += "}";
 
     json_str += "];\n";
-    json_str += "var layout={title:'" + marker + "',";
+    json_str += "var layout={autosize: true, title:'" + marker + "',";
     
         json_str += "shapes: [";
         
@@ -846,7 +956,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
         json_str += "y0: " + std::to_string((double) totReads / 2 - ((double) totReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
         json_str += "x1: 1, ";
         json_str += "y1: " + std::to_string((double) totReads / 2 - ((double) totReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
-        json_str += "line:{color: 'purple', width: 2, dash: 'line'}";
+        json_str += "line:{color: 'magenta', width: 2, dash: 'line'}";
         json_str += "},\n";
 
         json_str += "{ type: 'line', xref: 'paper', ";
@@ -854,7 +964,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
         json_str += "y0: " + std::to_string((double) totReads / 2 + ((double) totReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
         json_str += "x1: 1, ";
         json_str += "y1: " + std::to_string((double) totReads  / 2+ ((double) totReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
-        json_str += "line:{color: 'purple', width: 2, dash: 'line'}";
+        json_str += "line:{color: 'magenta', width: 2, dash: 'line'}";
         json_str += "},\n";
         
         json_str += "{ type: 'line', xref: 'paper', ";
@@ -862,7 +972,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
         json_str += "y0: " + std::to_string((double) totReads * mOptions->mLocSnps.mLocSnpOptions.hmPer) + ", ";
         json_str += "x1: 1, ";
         json_str += "y1: " + std::to_string((double) totReads * mOptions->mLocSnps.mLocSnpOptions.hmPer) + ", ";
-        json_str += "line:{color: 'yellow', width: 4, dash: 'line'}";
+        json_str += "line:{color: 'goldenrod', width: 4, dash: 'line'}";
         json_str += "},\n";
 
         json_str += "{ type: 'line', xref: 'paper', ";
@@ -870,7 +980,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
         json_str += "y0: " + std::to_string((double) totReads * (1 - mOptions->mLocSnps.mLocSnpOptions.hmPer)) + ", ";
         json_str += "x1: 1, ";
         json_str += "y1: " + std::to_string((double) totReads * (1 - mOptions->mLocSnps.mLocSnpOptions.hmPer)) + ", ";
-        json_str += "line:{color: 'yellow', width: 4, dash: 'line'}";
+        json_str += "line:{color: 'goldenrod', width: 4, dash: 'line'}";
         json_str += "}\n";
         
         json_str += "],\n";
@@ -879,7 +989,8 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
     json_str += "xaxis:{tickmode: 'array', tickvals:[" + Stats::list2string(x_vec, x_vec.size()) + "],  title:'" + "SNP" + "', automargin: true},";
     json_str += "yaxis:{title:'Number of reads', automargin: true}, ";
     json_str += "barmode: 'stack'};\n";
-    json_str += "Plotly.newPlot('plot_" + divName + "', data, layout);\n";
+    json_str += "var config = {responsive: true};\n";
+    json_str += "Plotly.newPlot('plot_" + divName + "', data, layout, config);\n";
     ofs << json_str;
     ofs << "</script>" << endl;
     
@@ -1207,7 +1318,8 @@ void HtmlReporter::printCSS(ofstream& ofs) {
     ofs << ".alignleft {text-align:left;}" << endl;
     ofs << ".alignright {text-align:right;}" << endl;
     ofs << ".figure {width:auto; height:auto;}" << endl;
-    //ofs << ".figure {width:100%; height:100%;}" << endl;
+    ofs << ".figurefull {width:80%; height:auto;}" << endl;
+    ofs << ".figurehalf {width:50%; height:auto;}" << endl;
     //ofs << ".figure {width:800px;height:600px;}" << endl;
     ofs << ".header {color:#ffffff;padding:1px;height:20px;background:#000000;}" << endl;
     ofs << ".sub_section_div {font-size:13px;padding-left:10px;text-align:left; margin-top:10px;}" << endl;
@@ -1239,7 +1351,7 @@ void HtmlReporter::printJS(ofstream& ofs) {
     ofs << "            div.style.display = 'block';" << endl;
     ofs << "        else" << endl;
     ofs << "            div.style.display = 'none';" << endl;
-    ofs << "    }" << endl;
+    ofs << "    };\n);" << endl;
     ofs << "</script>" << endl;
 }
 

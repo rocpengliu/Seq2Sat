@@ -96,8 +96,23 @@ struct SimGeno{
     std::string oGeno;//original genotype, including error, this is for the homo but has errors eg, 0.93 A vs 0.07 C, so the oGeno is A|C, but the genotype is A|A
     int read1;
     int read2;
+    int read3;
+    int read4;
     double ratio;//reads/total reads
     bool tORf;
+    bool revGeno;
+    
+    SimGeno(){
+        geno = "";
+        oGeno = "";
+        read1 = 0;
+        read2 = 0;
+        read3 = 0;
+        read4 = 0;
+        ratio = 0;
+        tORf = false;
+        revGeno = false;
+    }
 };
 
 class UnitedLocSnp {
