@@ -518,12 +518,8 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                         return l.second > r.second;
                     }); 
             
-                    for(const auto v : top4){
-                        cCout(v.first, v.second, 'g');
-                    }
             SimGeno tSGeno;
             if (top4.at(1).second == 0) {/// ref A, snp is AA or CC
-                cCout("aaaaaaaaaaaaaaaaaaa");
                 tSGeno.geno = std::string() + top4.at(0).first + '|' + top4.at(0).first;
                 tSGeno.oGeno = tSGeno.geno;
                 tSGeno.read1 = top4.at(0).second;
@@ -541,7 +537,6 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
             } else {
                 std::string bas = locSnpIt->ref.mStr;
                 if( bas[it2.first] == top4.at(0).first) {// ref is A, snp is AG;
-                    cCout("bbbbbbbbbbbbbbb");
                     tSGeno.revGeno = false;
                     if(top4.at(2).second == 0){
                         tSGeno.oGeno = std::string() + top4.at(0).first + '|' + top4.at(1).first;
@@ -559,7 +554,6 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                     tSGeno.read4 = top4.at(3).second;
                 } else {
                     if (bas[it2.first] == top4.at(1).first) {// ref is A, snp is GA;
-                        cCout("cccccccccccccccccccc");
                         tSGeno.revGeno = true;
                         tSGeno.read1 = top4.at(1).second;
                         tSGeno.read2 = top4.at(0).second;
@@ -574,7 +568,6 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                             }
                         }
                     } else {//ref is A; snp is TG;
-                         cCout("ccccccccccccccccccccddddddddddddddd");
                         tSGeno.revGeno = false;
                         tSGeno.read1 = top4.at(0).second;
                         tSGeno.read2 = top4.at(1).second;
@@ -600,36 +593,29 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
       
                 //cCout(tSGeno.ratio, mOptions->mLocSnps.mLocSnpOptions.htJetter, 'g');
                 if (std::abs(0.5 - tSGeno.ratio) <= mOptions->mLocSnps.mLocSnpOptions.htJetter) {
-                    cCout("dddddddddddddddddddddd");
                     tSGeno.tORf = true;
                     tmpULocSnp.heter = true;
                     tSGeno.geno = tSGeno.oGeno;
-                    cCout(tSGeno.geno, tSGeno.oGeno, 'r');
                     *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << tSGeno.oGeno << "\t" << top4.at(0).second << "|" << (totReads - top4.at(0).second) << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
                 } else if(tSGeno.ratio >= mOptions->mLocSnps.mLocSnpOptions.hmPer){
                       
                     tSGeno.geno = std::string() + top4.at(0).first + '|' + top4.at(0).first;//ref is A; snp is GA -> GG;
                     
                     if(locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end()){
-                        cCout("eeeeeeeeeeeeeeeeeeeeeeeeeee");
                         if(bas[it2.first] != top4.at(0).first) {
-                            cCout("ffffffffffffffffffffff");
                             tSGeno.tORf = true;
                             //tmpULocSnp.heter = true;
                             *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << tSGeno.oGeno << "\t" << top4.at(0).second << "|" << (totReads - top4.at(0).second) << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
                         } else {
-                            cCout("ggggggggggggg");
                           tSGeno.tORf = false;  
                         }
                         
                     } else {
-                        cCout("hhhhhhhhhhhhhhhhh");
                         tSGeno.tORf = true;
                         *fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << tSGeno.oGeno << "\t" << top4.at(0).second << "|" << (totReads - top4.at(0).second) << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
                         //*fout << it.first << "\t" << it2.first << "\t" << tSGeno.geno << "\t" << tSGeno.oGeno << "\t" << top4.at(0).second << "|" << top4.at(1).second << "\t" << tSGeno.ratio << "\t" << totReads << "\t" << (locSnpIt->refSnpPosSet.find(it2.first) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
                     }
                 } else {
-                    cCout("iiiiiiiiiiiiiiiiiii");
                     tSGeno.geno = tSGeno.oGeno;//for the ambiguous genotype but need to show in html report
                     tSGeno.tORf = false;
                 }
@@ -651,15 +637,7 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
         int haploReads2 = 0;
         
         
-        for(const auto & mm : allGenotypeSnpMap){
-            for(const auto & mm2 : mm.second){
-                std::cout << "aaaaabbbb" << " " << mm.first << " " << mm2.first << " " << mm2.second.numReads << "\n";
-            }
-        }
-        
-        
         if (tmpULocSnp.heter) {
-            cCout("jjjjjjjjjjjjjjjjjj");
             std::vector<std::pair<std::string, int>> top2Vec;
             
             struct CompareDesc {
@@ -697,29 +675,10 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                     }
                 }
                 
-//                if (it3.second.numReads == haploReads1) {
-//                    it3.second.isHaplotype = true;
-//                    haploSeq1 = it3.first;
-//                    for (auto & it4 : locSnpIt->uGeno.snpGenoMap) {
-//                        if (it4.second.tORf) {
-//                            haploStr1.push_back(haploSeq1[it4.first]);
-//                        }
-//                    }
-//
-//                } else if (it3.second.numReads == haploReads2) {
-//                    it3.second.isHaplotype = true;
-//                    haploSeq2 = it3.first;
-//                    for (auto & it4 : locSnpIt->uGeno.snpGenoMap) {
-//                        if (it4.second.tORf) {
-//                            haploStr2.push_back(haploSeq2[it4.first]);
-//                        }
-//                    }
-//                }
                 
             }
 
         } else {
-            cCout("kkkkkkkkkkkkkkkkkkk");
             for (auto & it3 : allGenotypeSnpMap[it.first]) {
                 if (it3.second.numReads == maxReads) {
                     it3.second.isHaplotype = true;
@@ -737,10 +696,6 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
 
         locSnpIt->haploVec.push_back(std::make_tuple(haploSeq1, haploStr1, haploReads1));
         locSnpIt->haploVec.push_back(std::make_tuple(haploSeq2, haploStr2, haploReads2));
-        
-
-            cCout(it.first, haploStr1, 'r');
-            cCout(it.first, haploStr2, 'g');
 
         *fout2 << it.first << "\t" << haploStr1 << "\t" << haploReads1 << "\t" << ((double) haploReads1 / totReads) << "\t" << totReads << "\t" << haploSeq1 << "\n";
         *fout2 << it.first << "\t" << haploStr2 << "\t" << haploReads2 << "\t" << ((double) haploReads2 / totReads) << "\t" << totReads << "\t" << haploSeq2 << "\n";
