@@ -620,8 +620,6 @@ std::map<std::string, std::map<std::string, LocSnp>> SnpScanner::merge(Options *
                     tSGeno.tORf = false;
                 }
                 
-                cCout(tSGeno.geno, tSGeno.oGeno, 'b');
-                
             }
             tmpULocSnp.snpGenoMap[it2.first] = tSGeno;
         }
