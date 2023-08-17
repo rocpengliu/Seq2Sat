@@ -2210,11 +2210,10 @@ std::string SsrScanner::scanVar (Read* & r1) {
             returnedlocus = "_failed";
         } else {
             std::string locName = "";
-
             if (locMap.size() == 1) {
                 locName = locMap.begin()->first;
             } else {
-                std::vector<int> seqScoreVec();
+                std::vector<int> seqScoreVec;
                 for (const auto & it : locMap) {
                     seqScoreVec.push_back(it.second.first);
                 }
@@ -2295,7 +2294,6 @@ std::string SsrScanner::scanVar (Read* & r1) {
                 std::map<std::string, Genotype>::iterator tmpGenotypeMapIT = itGenotypeMap->second.find(r1->mSeq.mStr);
 
                 if (tmpGenotypeMapIT == itGenotypeMap->second.end()) {
-                    
                     if (r1->mSeq.mStr == locVarIt->effectiveSeq.mStr) {//identical seq with ref
                         tmpGenotype->baseLocVar = *locVarIt;
                         tmpGenotype->numReads++;
@@ -2338,6 +2336,7 @@ std::string SsrScanner::scanVar (Read* & r1) {
                     returnedlocus = locVarIt->name + "_true";
                 }
             }
+
 
             if (tmpGenotype) {
                 delete tmpGenotype;
