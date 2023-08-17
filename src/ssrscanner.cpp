@@ -2214,7 +2214,7 @@ std::string SsrScanner::scanVar (Read* & r1) {
             if (locMap.size() == 1) {
                 locName = locMap.begin()->first;
             } else {
-                std::vector<int> seqScoreVec(locMap.size());
+                std::vector<int> seqScoreVec();
                 for (const auto & it : locMap) {
                     seqScoreVec.push_back(it.second.first);
                 }
