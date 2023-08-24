@@ -75,7 +75,7 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true) 
                     "<td bgcolor='" + bc + "'>" + //Genotype
                     "<font color='" + fc + "'>" + hap + "</font></td>" +
                     "<td>" + std::to_string(it.second.numReads) + "</td>" +
-                    "<td>" + std::to_string((double) it.second.numReads / locSnp.totReads) + "</td>" +
+                    "<td>" + std::to_string((double) it.second.numReads * 100 / locSnp.totReads) + "</td>" +
                     "<td>" + std::to_string(locSnp.totReads) + "</td>" +
                     "<td>" + std::to_string(it.first.length()) + "</td>" +
                     "<td align='center'>" + highligher(locSnp, false, locSnp.ref.mStr, it.first, it.second.snpPosSet) + "</td>";

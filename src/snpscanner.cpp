@@ -511,7 +511,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
                         go = false;
                     }
                 } else {
-                    if(it2.second >= mOptions->mLocSnps.mLocSnpOptions.minSeqsPer * locSnpIt->maxReads){//5%
+                    if(it2.second >= mOptions->mLocSnps.mLocSnpOptions.minSeqsPer * locSnpIt->maxReads){//10%
                         go = true;
                     } else {
                         go = false;
@@ -680,7 +680,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
 
             locSnpIt->snpsMap[it2] = tmpSimSnp;
             
-            if(isPrint) *fout << it.first << "\t" << it2 << "\t" << tmpSimSnp.snp1 << "|" << tmpSimSnp.snp2  << "\t" << tmpSimSnp.reads1 << "|" << tmpSimSnp.reads2  << "\t" << tmpSimSnp.ratio << (tmpSimSnp.reads1 + tmpSimSnp.reads2) << "\t" << (locSnpIt->refSnpPosSet.find(it2) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
+            if(isPrint) *fout << it.first << "\t" << it2 << "\t" << tmpSimSnp.snp1 << "|" << tmpSimSnp.snp2  << "\t" << tmpSimSnp.reads1 << "|" << tmpSimSnp.reads2  << "\t" << tmpSimSnp.ratio << "\t" << (tmpSimSnp.reads1 + tmpSimSnp.reads2) << "\t" << (locSnpIt->refSnpPosSet.find(it2) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
         }
 
         if (twoPeaks.size() == 1) {
