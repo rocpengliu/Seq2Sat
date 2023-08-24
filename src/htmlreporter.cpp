@@ -1250,7 +1250,7 @@ void HtmlReporter::printJS(ofstream& ofs) {
     ofs << "            div.style.display = 'block';" << endl;
     ofs << "        else" << endl;
     ofs << "            div.style.display = 'none';" << endl;
-    ofs << "    };\n);" << endl;
+    ofs << "    }\n" << endl;
     ofs << "</script>" << endl;
 }
 
