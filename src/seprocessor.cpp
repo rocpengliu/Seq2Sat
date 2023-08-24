@@ -157,7 +157,7 @@ bool SingleEndProcessor::process(){
     std::map<std::string, std::map < std::string, Genotype>> allGenotypeMap; //marker, seq, geno
     std::vector<std::map < std::string, std::vector<std::pair < std::string, Genotype>>>> sortedAllGenotypeMapVec;
     std::map<std::string, std::map < std::string, LocSnp>> allSnpsMap;
-    std::vector<std::map < std::string, std::vector<std::pair < std::string, LocSnp>>>> sortedAllSnpsMapVec;
+    //std::vector<std::map < std::string, std::vector<std::pair < std::string, LocSnp>>>> sortedAllSnpsMapVec;
 
     if (mOptions->mVarType == ssr) {
         allGenotypeMap = SsrScanner::merge(totalGenotypeSsrMapVec);
@@ -174,7 +174,7 @@ bool SingleEndProcessor::process(){
             }
         }
     } else if (mOptions->mVarType == snp) {
-        allSnpsMap = SnpScanner::merge(mOptions, totalSnpSeqMapVec);
+         SnpScanner::merge(mOptions, totalSnpSeqMapVec);
     }
 
     int* dupHist = NULL;
@@ -193,12 +193,12 @@ bool SingleEndProcessor::process(){
 
     JsonReporter jr(mOptions);
     jr.setDupHist(dupHist, dupMeanGC, dupRate);
-    jr.report(sortedAllGenotypeMapVec, allSnpsMap, finalFilterResult, finalPreStats, finalPostStats);
+    jr.report(sortedAllGenotypeMapVec, finalFilterResult, finalPreStats, finalPostStats);
     cerr << "Finished Json report" << endl;
     // make HTML report
     HtmlReporter hr(mOptions);
     hr.setDupHist(dupHist, dupMeanGC, dupRate);
-    hr.report(sortedAllGenotypeMapVec, allSnpsMap, finalFilterResult, finalPreStats, finalPostStats);
+    hr.report(sortedAllGenotypeMapVec, finalFilterResult, finalPreStats, finalPostStats);
     cerr << "Finished Html report" << endl;
 
     // clean up

@@ -39,6 +39,7 @@ int main(int argc, char* argv[]){
     cmd.add<string>("loc", 0, "loci file containing loci names, 5'primer sequence, reverse complement of 3'primer sequence, 5'flank region, 3'flank region, repeat unit and reference microsatellite repeat array, separated by '\t", false, "");
     cmd.add("revCom", 0, "if your reverse primer sequence in the loc file is not reverse complentary, please specify it");
     cmd.add<int>("minSeqs", 0, "minimum number of reads for a genotype, default: 5", false, 5);
+    cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%)", false, 5);
     cmd.add<int>("maxMismatchesPSeq", 0, "maximum mismatches for primer sequences 2", false, 2);
     
     cmd.add<string>("mode", 0, "specify the sequence alignment mode: NW (default) | HW | SHW", false, "NW");
@@ -54,7 +55,6 @@ int main(int argc, char* argv[]){
     //for ssr;
     cmd.add<double>("maxMismatchesPer4FR", 0, "maximum percentage mismatches for the forward and reverse flanking regions, default 0.3 (30%) ", false, 0.3);
     cmd.add<int>("minWarningSeqs", 0, "minimum number of reads for warning a genotype, default: 50", false, 50);
-    cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%)", false, 5);
     cmd.add<double>("hlRatio1", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.4", false, 0.4);
     cmd.add<double>("hlRatio2", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 0.2", false, 0.2);
     cmd.add<double>("maxVarRatio", 0, "ratio of two heter alleles based on variations either in flanking regions or MRA, the ideal is 1, default: 1.5", false, 1.5);
@@ -201,7 +201,8 @@ int main(int argc, char* argv[]){
         opt->mLocVars.locVarOptions.numBestSeqs = cmd.get<int>("numBestSeqs");
         opt->mLocVars.locVarOptions.coreRep = cmd.get<int>("core");
     } else {
-        opt->mLocVars.locVarOptions.minSeqs = cmd.get<int>("minSeqs");
+        opt->mLocSnps.mLocSnpOptions.minSeqs = cmd.get<int>("minSeqs");
+        opt->mLocSnps.mLocSnpOptions.minSeqsPer= cmd.get<int>("minSeqsPercentage");
         opt->mLocSnps.mLocSnpOptions.htJetter = (double) cmd.get<int>("htJetter") / 100.00;
         opt->mLocSnps.mLocSnpOptions.hmPer = (double) cmd.get<int>("hmPer") / 100.00;
     }

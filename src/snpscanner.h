@@ -33,7 +33,7 @@ public:
     bool scanVar(Read* & r1, Read* & r2);
     //inline std::map<std::string, std::map<std::string, LocSnp>> getSubGenotypeMap(){return subGenotypeMap;};
     inline std::map<std::string, std::map<std::string, uint32>> getSubSeqsMap(){return subSeqsMap;};
-    static std::map<std::string, std::map<std::string, LocSnp>> merge(Options * & mOptions, std::vector<std::map<std::string, std::map < std::string, uint32>>> & totalSnpSeqMapVec);
+    static void merge(Options * & mOptions, std::vector<std::map<std::string, std::map < std::string, uint32>>> & totalSnpSeqMapVec);
     static std::pair<bool, std::map<int, std::pair<Sequence, Sequence>>> doAlignment(Options * & mOptions, std::string readName, const char* & qData, int qLength, std::string & targetName, const char* & tData, int tLength);
     static void doScanVariance(Options * & mOptions, EdlibAlignResult & result, Variance & variance, const char* & qData, const char* & tData, const int position);
     static void printVariance(Options * & mOptions, EdlibAlignResult & result, Variance & variance,
@@ -49,7 +49,7 @@ private:
     Options* mOptions;
     //std::map<std::string, std::map<std::string, LocSnp>> subGenotypeMap;
     std::map<std::string, std::map<std::string, uint32>> subSeqsMap;
-    LocSnp* locSnpIt;
+    LocSnp2* locSnpIt;
     const char* fpData;
     int fpLength;
     const char* rpData;

@@ -471,7 +471,7 @@ void Options::readLocFile(){
             lineStr = std::string(line);
             splitStr(lineStr, splitVec);
             if(splitVec.size() == 5){
-                LocSnp tmpLocSnp;
+                LocSnp2 tmpLocSnp;
                 tmpLocSnp.name = splitVec[0];
                 tmpLocSnp.fp = splitVec[1];
                 tmpLocSnp.rp = revCom ? Sequence(splitVec[2]).reverseComplement().mStr : splitVec[2];

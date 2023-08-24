@@ -690,13 +690,38 @@ std::pair<K, V> getMaxKeyValue(const std::map<K, V> & map, bool reverse = false)
 }
 
 template<typename K, typename V>
+std::vector<std::pair<K,V>> getTop2MaxKeyValueVec(const std::map<K, V> & map){
+    std::map<K, V> tmp = map;
+    std::pair<K,V> m1 = getMaxKeyValue(tmp);
+    tmp.erase(m1.first);
+    std::vector<std::pair<K, V>> tmpVec;
+    
+    tmpVec.push_back(m1);
+    
+    if (!tmp.empty()){
+        std::pair<K, V> m2 = getMaxKeyValue(tmp, true);
+        tmp.clear();
+        tmpVec.push_back(m2);
+    }
+    
+    return(tmpVec);
+}
+
+template<typename K, typename V>
 std::map<K,V> getTop2MaxKeyValue(const std::map<K, V> & map){
     std::map<K, V> tmp = map;
     std::pair<K,V> m1 = getMaxKeyValue(tmp);
     tmp.erase(m1.first);
-    std::pair<K,V> m2 = getMaxKeyValue(tmp, true);
-    tmp.clear();
-    tmp = {m1, m2};
+    
+    if (tmp.empty()) {
+        tmp.clear();
+        tmp = {m1};
+    } else {
+        std::pair<K, V> m2 = getMaxKeyValue(tmp, true);
+        tmp.clear();
+        tmp = {m1, m2};
+    }
+    
     return(tmp);
 }
 

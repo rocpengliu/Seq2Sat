@@ -142,10 +142,12 @@ LocSnp::LocSnp(){
     this->fp = Sequence("");
     this->rp = Sequence("");
     this->ref = Sequence("");
+    this->snpPosSetHaplo.clear();
     this->snpPosSet.clear();
     this->refSnpPosSet.clear();
     this->numReads = 0;
     this->totReads = 0;
+    this->totHaploReads = 0;
     this->snpsMap.clear();
     this->readsRatio = 0;
     this->genotype = "";
@@ -154,6 +156,8 @@ LocSnp::LocSnp(){
     this->uGeno.snpGenoMap.clear();
     this->haploVec.clear();
     this->isHaplotype = false;
+    this->genoStr3 = "seqerr";
+    this->ratioHaplo = 0;
 }
 
 void LocSnp::print(){
@@ -187,6 +191,24 @@ UnitedLocSnp::UnitedLocSnp(){
     this->preGenoMap.clear();
     this->snpGenoMap.clear();
     heter = false;
+}
+
+LocSnp2::LocSnp2(){
+    this->name = "";
+    this->fp = Sequence("");
+    this->rp = Sequence("");
+    this->ref = Sequence("");
+    this->snpPosSetHaplo.clear();
+    this->snpPosSet.clear();
+    this->refSnpPosSet.clear();
+    this->totPosSet.clear();
+    this->totReads = 0;
+    this->maxReads = 0;
+    this->totHaploReads = 0;
+    this->ratioHaplo = 0;
+    this->genoStr3 = "seqerr";
+    this->haploVec.clear();
+    this->genoMap.clear();
 }
 
 Sex::Sex(){

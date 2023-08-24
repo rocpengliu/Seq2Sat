@@ -22,7 +22,6 @@ void JsonReporter::setInsertHist(long* insertHist, int insertSizePeak) {
 
 extern string command;
 void JsonReporter::report(std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> & sortedAllGenotypeMapVec, 
-        std::map<std::string, std::map<std::string, LocSnp>> & allSnpsMap,
         FilterResult* result, Stats* preStats1, Stats* postStats1, Stats* preStats2, Stats* postStats2) {
     ofstream ofs;
     ofs.open(mOptions->jsonFile, ifstream::out);

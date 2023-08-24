@@ -300,13 +300,17 @@ public:
         maxMismatchesPSeq = 2;
         maxScorePrimer = -1;
         minSeqs = 5;
-        hmPer = 0.8;
+        minSeqsPer = 5;
+        hmPer = 0.9;
         htJetter = 0.15;
+        minReads4Filter = 100;
     };
 public:
     uint32 maxMismatchesPSeq;
     uint32 maxScorePrimer;
     uint32 minSeqs;
+    int minSeqsPer;//against largest peak; 5/%
+    int minReads4Filter;
     double hmPer, htJetter;
 };
 
@@ -328,7 +332,7 @@ public:
     };
     
 public:
-    std::map<std::string, LocSnp> refLocMap;//change to pointer to reduce memory usage
+    std::map<std::string, LocSnp2> refLocMap;//change to pointer to reduce memory usage
     LocSnpOptions mLocSnpOptions;
 };
 

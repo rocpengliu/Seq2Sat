@@ -158,8 +158,8 @@ bool PairEndProcessor::process(){
 
     std::map<std::string, std::map< std::string, Genotype>> allGenotypeMap;//marker, seq, geno
     std::vector<std::map <std::string, std::vector<std::pair<std::string, Genotype>>>> sortedAllGenotypeMapVec;
-    std::map<std::string, std::map<std::string, LocSnp>> allSnpsMap;
-    std::vector<std::map<std::string, std::vector<std::pair < std::string, LocSnp>>>> sortedAllSnpsMapVec;
+    //std::map<std::string, std::map<std::string, LocSnp2>> allSnpsMap;
+    //std::vector<std::map<std::string, std::vector<std::pair < std::string, LocSnp2>>>> sortedAllSnpsMapVec;
 
     if (mOptions->mVarType == ssr) {
          allGenotypeMap = SsrScanner::merge(totalGenotypeSsrMapVec);
@@ -176,7 +176,7 @@ bool PairEndProcessor::process(){
              }
          }
     } else if (mOptions->mVarType == snp) {
-        allSnpsMap = SnpScanner::merge(mOptions, totalSnpSeqMapVec);
+        SnpScanner::merge(mOptions, totalSnpSeqMapVec);
     }
 
     int* dupHist = NULL;
@@ -203,13 +203,13 @@ bool PairEndProcessor::process(){
     JsonReporter jr(mOptions);
     jr.setDupHist(dupHist, dupMeanGC, dupRate);
     jr.setInsertHist(mInsertSizeHist, peakInsertSize);
-    jr.report(sortedAllGenotypeMapVec, allSnpsMap, finalFilterResult, finalPreStats1, finalPostStats1, finalPreStats2, finalPostStats2);
+    jr.report(sortedAllGenotypeMapVec, finalFilterResult, finalPreStats1, finalPostStats1, finalPreStats2, finalPostStats2);
     cerr << "Finished Json report" << endl;
     // make HTML report
     HtmlReporter hr(mOptions);
     hr.setDupHist(dupHist, dupMeanGC, dupRate);
     hr.setInsertHist(mInsertSizeHist, peakInsertSize);
-    hr.report(sortedAllGenotypeMapVec, allSnpsMap, finalFilterResult, finalPreStats1, finalPostStats1, finalPreStats2, finalPostStats2);
+    hr.report(sortedAllGenotypeMapVec, finalFilterResult, finalPreStats1, finalPostStats1, finalPreStats2, finalPostStats2);
     cerr << "Finished Html report" << endl;
 
     // clean up

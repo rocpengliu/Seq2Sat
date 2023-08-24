@@ -25,7 +25,6 @@ public:
     void setDupHist(int* dupHist, double* dupMeanGC, double dupRate);
     void setInsertHist(long* insertHist, int insertSizePeak);
     void report(std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> &sortedAllGenotypeMapVec,
-            std::map<std::string, std::map<std::string, LocSnp>> &allSnpsMap,
             FilterResult* result, Stats* preStats1, Stats* postStats1, Stats* preStats2 = NULL, Stats* postStats2 = NULL);
 
 private:

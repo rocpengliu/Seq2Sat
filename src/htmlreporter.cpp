@@ -52,98 +52,85 @@ void HtmlReporter::outputRow(ofstream& ofs, std::string & marker, std::vector<st
     }
 }
 
-void HtmlReporter::outputRow(ofstream& ofs, std::string & marker, std::map<std::string, LocSnp> & snpsMap, std::vector<std::tuple<std::string, std::string, int>> & haploVec, int & totReads, std::set<int> & refSet) {
+void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true) {
+    int i = 1;
+    if (align) {
+        for (auto & it : locSnp.genoMap) {
+            std::string hap = "";
+            std::string fc = "black";
 
-//    std::vector<std::pair<std::string, LocSnp>> tmpVec(snpsMap.size());
-//    for(const auto & it : refSet){
-//        for(auto & it2 : snpsMap){
-//            if(it2.second.snpPosSet.find(it) != it2.second.snpPosSet.end()){
-//                tmpVec.push_back(it2);
+            if (it.second.haploStr != "") {
+                hap = it.second.haploStr;
+                fc = "blue";
+            }
+
+            ofs << "<tr>";
+            ofs << "<td>" + std::to_string(i) + "</td>" + 
+                    "<td>" + locSnp.name + "</td>" +
+                    "<td>" + it.second.snpsStr + "</td>" +
+                    "<td> <font color='" + fc + "'>" + hap + "</font></td>" +
+                    "<td>" + std::to_string(it.second.numReads) + "</td>" +
+                    "<td>" + std::to_string((double) it.second.numReads / locSnp.totReads) + "</td>" +
+                    "<td>" + std::to_string(locSnp.totReads) + "</td>" +
+                    "<td>" + std::to_string(it.first.length()) + "</td>" +
+                    "<td align='center'>" + highligher(locSnp, false, locSnp.ref.mStr, it.first, it.second.snpPosSet) + "</td>";
+            ofs << "</tr>\n";
+            i++;
+        }
+    } else {
+        for (const auto & it : locSnp.snpsMap) {
+            std::string fc = it.second.color == "transparent" ? "black" : "white";
+            ofs << "<tr>";
+            ofs << "<td>" + std::to_string(i) + "</td>" + //ID
+                    "<td>" + std::to_string(it.first) + "</td>" + //Position
+                    "<td bgcolor='" + (it.second.color) + "'>" + //Genotype
+                    "<font color='" + fc + "'>" + it.second.snp1 + "|" + it.second.snp2 + "</font></td>" +
+                    "<td bgcolor='" + (it.second.color) + "'>" + //Putative Genotype
+                    "<font color='" + fc + "'>" + (it.second.genoStr3 != "inconclusive" ? "yes" : "no") + "</font></td>" +
+                    "<td>" + std::to_string(it.second.reads1) + "</td>" +
+                    "<td>" + std::to_string(it.second.reads2) + "</td>" +
+                    "<td>" + std::to_string(it.second.ratio) + "</td>" +
+                    "<td>" + std::to_string(locSnp.totHaploReads) + "</font></td>";
+            ofs << "</tr>\n";
+            i++;
+        }
+    }
+}
+
+//void HtmlReporter::outputRow(ofstream& ofs, int & pos, SimSnp& simSnp, int & totReads) {
+//    int i = 1;
+//    for (auto & it : snpGenoMap) {
+//        
+//        std::string bgcol = "white";
+//        if(refSet.find(it.first) == refSet.end()){
+//            //if(it.second.geno[0] == it.second.geno[2]){
+//                bgcol = "orange";
+//           // }
+//        } else {
+//            if(it.second.geno[0] == it.second.geno[2]){
+//                bgcol = "green";
+//            } else {
+//                bgcol = "red";
 //            }
 //        }
-//    }
-//    
-//    std::set<std::string> uset;
-//    for (auto & it : tmpVec) {
 //        
-//        if(uset.find(it.first) != uset.end()){
-//            continue;
-//        }
-//
 //        ofs << "<tr>";
-//        ofs << "<td>" + marker + "</td>" +
-//                "<td>" + it.second.getGenotype() + "</td>" +
-//                "<td>" + std::to_string(it.second.numReads) + "</td>" +
-//                "<td>" + std::to_string((double) it.second.numReads / totReads) + "</td>" +
-//                "<td>" + std::to_string(it.first.length()) + "</td>" +
-//                "<td align='center'>" + highligher(it.second, false, refSet) + "</td>";
-//        ofs << "</tr>\n";
-//        
-//        uset.insert(it.first);
+//        ofs << "<td>" + std::to_string(i) + "</td>" +//ID
+//                "<td>" + std::to_string(it.first) + "</td>" +//Position
+//                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" +//Genotype
+//                "<font color='" + (it.second.tORf ? "white" : "black") +  "'>" + it.second.geno + "</font></td>" +
+//                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" +//Putative Genotype
+//                "<font color='" + (it.second.tORf ? "white" : "black") +  "'>" + (it.second.tORf ? "yes" : "no") + "</font></td>" +
+//                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" + //original Genotype
+//                "<font color='" + (it.second.tORf ? "white" : "black") + "'>" + it.second.oGeno + "</font></td>" +
+//                "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.read1) + "</font></td>" +
+//                "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.read2) + "</font></td>" +
+//                "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.ratio) + "</font></td>" + 
+//                "<td>" + std::to_string(totReads) + "</font></td>";
+//                ofs << "</tr>\n";
+//        i++;
 //    }
-
-     //std::multimap<std::string, LocSnp, ComparatorSnp> sortedSnpsMap(snpsMap.begin(), snpsMap.end());
-
-    std::string operand1 = std::string(get<1>(haploVec[0]));
-    std::string operand2 = std::string(get<1>(haploVec[1]));
-    
-    for (auto & it : snpsMap) {
-        std::string hap = "NA";
-        std::string fc = "black";
-        if (it.second.ref.mStr == get<0>(haploVec[0])) {
-            hap = get<1>(haploVec[0]);
-            fc = "blue";
-        } else if (it.second.ref.mStr == get<0>(haploVec[1])) {
-            hap = get<1>(haploVec[1]);
-            fc = "green";
-        }
-        
-        ofs << "<tr>";
-        ofs << "<td>" + marker + "</td>" +
-                "<td>" + it.second.getGenotype() + "</td>" +
-                "<td> <font color='" + fc + "'>" + hap + "</font></td>" +
-                "<td>" + std::to_string(it.second.numReads) + "</td>" +
-                "<td>" + std::to_string((double) it.second.numReads / totReads) + "</td>" +
-                "<td>" + std::to_string(it.first.length()) + "</td>" +
-                "<td align='center'>" + highligher(it.second, false, refSet) + "</td>";
-        ofs << "</tr>\n";
-    }
-}
-
-void HtmlReporter::outputRow(ofstream& ofs, std::map<int, SimGeno> & snpGenoMap, std::set<int> & refSet, int & totReads) {
-    int i = 1;
-    for (auto & it : snpGenoMap) {
-        
-        std::string bgcol = "white";
-        if(refSet.find(it.first) == refSet.end()){
-            //if(it.second.geno[0] == it.second.geno[2]){
-                bgcol = "orange";
-           // }
-        } else {
-            if(it.second.geno[0] == it.second.geno[2]){
-                bgcol = "green";
-            } else {
-                bgcol = "red";
-            }
-        }
-        
-        ofs << "<tr>";
-        ofs << "<td>" + std::to_string(i) + "</td>" +//ID
-                "<td>" + std::to_string(it.first) + "</td>" +//Position
-                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" +//Genotype
-                "<font color='" + (it.second.tORf ? "white" : "black") +  "'>" + it.second.geno + "</font></td>" +
-                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" +//Putative Genotype
-                "<font color='" + (it.second.tORf ? "white" : "black") +  "'>" + (it.second.tORf ? "yes" : "no") + "</font></td>" +
-                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" + //original Genotype
-                "<font color='" + (it.second.tORf ? "white" : "black") + "'>" + it.second.oGeno + "</font></td>" +
-                "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.read1) + "</font></td>" +
-                "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.read2) + "</font></td>" +
-                "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.ratio) + "</font></td>" + 
-                "<td>" + std::to_string(totReads) + "</font></td>";
-                ofs << "</tr>\n";
-        i++;
-    }
-}
+//}
 
 string HtmlReporter::formatNumber(long number) {
     double num = (double) number;
@@ -343,7 +330,7 @@ void HtmlReporter::reportInsertSize(ofstream& ofs, int isizeLimit) {
     ofs << "</div>\n";
 
     ofs << "<div class='sub_section_tips'>This estimation is based on paired-end overlap analysis, and there are ";
-    ofs << to_string(unknownPercents);
+    ofs << std::to_string(unknownPercents);
     ofs << "% reads found not overlapped. <br /> The nonoverlapped read pairs may have insert size &lt;" << mOptions->overlapRequire;
     ofs << " or &gt;" << isizeLimit;
     ofs << ", or contain too much sequencing errors to be detected as overlapped.";
@@ -362,7 +349,7 @@ void HtmlReporter::reportInsertSize(ofstream& ofs, int isizeLimit) {
 
     json_str += "];\n";
 
-    json_str += "var layout={title:'Insert size distribution (" + to_string(unknownPercents) + "% reads are with unknown length)', xaxis:{title:'Insert size'}, yaxis:{title:'Read percent (%)'}};\n";
+    json_str += "var layout={title:'Insert size distribution (" + std::to_string(unknownPercents) + "% reads are with unknown length)', xaxis:{title:'Insert size'}, yaxis:{title:'Read percent (%)'}};\n";
     json_str += "Plotly.newPlot('plot_insert_size', data, layout);\n";
 
     ofs << json_str;
@@ -536,7 +523,6 @@ void HtmlReporter::reportSex(ofstream & ofs) {
 }
 
 void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> &sortedAllGenotypeMapVec,
-        std::map<std::string, std::map<std::string, LocSnp>> &allSnpsMap,
         FilterResult* result, Stats* preStats1, Stats* postStats1, Stats* preStats2, Stats* postStats2) {
     ofstream ofs;
     ofs.open(mOptions->htmlFile, ifstream::out);
@@ -566,9 +552,9 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
     if (mOptions->mVarType == ssr) {
         reportAllGenotype(ofs, sortedAllGenotypeMapVec);
     } else {
-        if(!allSnpsMap.empty()){
-            reportAllSnps(ofs, allSnpsMap);
-        }
+        //if(!allSnpsMap.empty()){
+            reportAllSnps(ofs);
+        //}
     }
 
     ofs << "</div>\n";
@@ -611,19 +597,11 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
 
 }
 
-void HtmlReporter::reportAllSnps(ofstream& ofs, std::map<std::string, std::map<std::string, LocSnp>> & allSnpsMap) {
+void HtmlReporter::reportAllSnps(ofstream& ofs) {
     
-    for (auto & it : allSnpsMap) {
-        if(it.second.empty()) continue;
-        int totReads = 0;
-        int maxReads = 0;
-        for (auto & it2 : it.second) {
-            totReads += it2.second.numReads;
-            if (it2.second.numReads > maxReads) {
-                maxReads = it2.second.numReads;
-            }
-        }
-        
+    for (auto & it : mOptions->mLocSnps.refLocMap) {
+        if(it.second.genoMap.empty()) continue;
+
         std::string subsection = "Marker: " + it.first;
         std::string divName = replace(subsection, " ", "_");
         divName = replace(divName, ":", "_");
@@ -633,248 +611,158 @@ void HtmlReporter::reportAllSnps(ofstream& ofs, std::map<std::string, std::map<s
         ofs << "<div id='" + divName + "'>\n";
         ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
 
-        reportSnpAlignmentTable(ofs, it.first, divName, it.second, totReads);
-        reportSnpTablePlot(ofs, it.first, divName, totReads);
+        reportSnpAlignmentTable(ofs, divName, it.second);
+        reportSnpTablePlot(ofs, divName, it.second);
         ofs << "</div>\n";
 
     }
 }
 
-void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string marker, std::string & divName, std::map<std::string, LocSnp> & snpsMap, int & totReads) {
+void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName, LocSnp2 & locSnp) {
 
-    auto it = mOptions->mLocSnps.refLocMap.find(marker);
-    if (it != mOptions->mLocSnps.refLocMap.end()) {
+    //auto it = mOptions->mLocSnps.refLocMap.find(marker);
+    //if (it != mOptions->mLocSnps.refLocMap.end()) {
         ofs << "<div class='figurehalf' id='plot_h" + divName + "'></div>\n";
 
         ofs << "<div class='sub_section_tips'><font color='red'>Target heter SNPs are highlighted with red, </font> <font color='green'>while target homo SNPs are highlighted with green, </font> <font color='orange'>new potential SNPs are in orange!</font></div>\n";
         ofs << "<pre overflow: scroll>\n";
         ofs << "<table class='summary_table' style='width:100%'>\n";
-        ofs << "<tr style='background:#cccccc'> <td>Marker</td><td>SNPs</td><td>Haplotype</td><td>N. of Reads</td><td>Reads(%)</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
+        ofs << "<tr style='background:#cccccc'> <td>ID</td><td>Marker</td><td>SNPs</td><td>Haplotype</td><td>N. of Reads</td><td>Reads(%)</td><td>Total Reads</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
         
         ofs << "<tr style='color:blue'>";
-        ofs << "<td>Reference</td>" <<
-                "<td>" + it->second.getGenotype() + "</td>" <<
+        ofs << "<td>0</td>" <<
+                "<td>Reference</td>" <<
+                "<td>ref</td>" <<
                 "<td>N.A.</td>" <<
                 "<td>N.A.</td>" <<
                 "<td>N.A.</td>" <<
-                "<td>" + std::to_string(it->second.ref.mStr.length()) + "</td>" <<
-                "<td align='center'>" + highligher(it->second, true, it->second.refSnpPosSet) + "</td>";
+                "<td>N.A.</td>" <<
+                "<td>" + std::to_string(locSnp.ref.mStr.length()) + "</td>" <<
+                "<td align='center'>" + highligher(locSnp, true, locSnp.ref.mStr, locSnp.ref.mStr, locSnp.totPosSet) + "</td>";
         ofs << "</tr>\n";
-        outputRow(ofs, marker, snpsMap, it->second.haploVec, totReads, it->second.refSnpPosSet);
-
+        outputRow(ofs, locSnp, true);
         ofs << "</table>\n";
         ofs << "</pre>\n";
 
+        if(locSnp.haploVec.empty()) return;
+        
         ofs << "\n<script type=\"text/javascript\">" << endl;
 
         string json_str = "var data=[{";
         //json_str += "x:['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],";
         json_str += "x:['Allele', 'Allele'],";
-        json_str += "y:[" + std::to_string(get<2>(it->second.haploVec[0])) + ", " + std::to_string(get<2>(it->second.haploVec[1])) + "],";
-        json_str += "text: ['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],";
+        json_str += "y:[" + std::to_string(get<2>(locSnp.haploVec[0])) + ", " + std::to_string(get<2>(locSnp.haploVec[1])) + "],";
+        json_str += "text: ['" + get<1>(locSnp.haploVec[0]) + "', '" + get<1>(locSnp.haploVec[1]) + "'],";
         json_str += "width: [0.5, 0.5],";
         json_str += "type:'bar', textposition: 'auto', ";
-        std::string operand1 = std::string(get<1>(it->second.haploVec[0]));
-        std::string operand2 = std::string(get<1>(it->second.haploVec[1]));
 
-        if(operand1 == operand2){
+        if(get<0>(locSnp.haploVec[0]) == get<0>(locSnp.haploVec[1])){
             json_str += "marker:{color: ['darkgreen', 'darkgreen'], line: {color: 'white', width: 1.5}}";
         } else {
             json_str += "marker:{color: ['goldenrod', 'darkgreen'], line: {color: 'white', width: 1.5}}";
         }
         
         json_str += "}];\n";
-        json_str += "var layout = {xaxis:{tickmode: 'array', tickvals:['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],  title:'" + "Haplotype" + "', automargin: true},";
+        json_str += "var layout = {xaxis:{tickmode: 'array', tickvals:['" + get<1>(locSnp.haploVec[0]) + "', '" + get<1>(locSnp.haploVec[1]) + "'],  title:'" + "Haplotype" + "', automargin: true},";
         json_str += "yaxis:{title:'Number of reads', automargin: true}, ";
         json_str += "barmode: 'stack'};\n";
         json_str += "Plotly.newPlot('plot_h" + divName + "', data, layout);\n";
         ofs << json_str;
         ofs << "</script>" << endl;
-    }
+    //}
 }
 
-void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::string & divName, int & totReads){
+void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string & divName, LocSnp2 & locSnp){
 
-    LocSnp* locSnpIt = &(mOptions->mLocSnps.refLocMap[marker]);
 
-    std::vector<std::string> x_vec(locSnpIt->uGeno.snpGenoMap.size(), "");//A
-    //x_vec.reserve(locSnpIt->uGeno.snpGenoMap.size());
-    std::vector<int> y_vec(locSnpIt->uGeno.snpGenoMap.size(), 0);
-    //y_vec.reserve(locSnpIt->uGeno.snpGenoMap.size());
-    std::vector<double> bar_width_vec(locSnpIt->uGeno.snpGenoMap.size(), 0.5);
-    //bar_width_vec.reserve(locSnpIt->uGeno.snpGenoMap.size());
+    std::vector<std::string> x_vec(locSnp.snpsMap.size(), "");//A
+    //x_vec.reserve(locSnp.snpPosSetHaplo.size());
+    std::vector<int> y_vec(locSnp.snpsMap.size(), 0);
+    //y_vec.reserve(locSnp.snpPosSetHaplo.size());
+    std::vector<double> bar_width_vec(locSnp.snpsMap.size(), 0.5);
+    //bar_width_vec.reserve(locSnp.snpPosSetHaplo.size());
 
-    std::vector<std::string> x_vec_2(locSnpIt->uGeno.snpGenoMap.size(), "");//C
-    //x_vec_2.reserve(locSnpIt->uGeno.snpGenoMap.size());
-    std::vector<int> y_vec_2(locSnpIt->uGeno.snpGenoMap.size(), 0);
-    //y_vec_2.reserve(locSnpIt->uGeno.snpGenoMap.size());
-    std::vector<double> bar_width_vec_2(locSnpIt->uGeno.snpGenoMap.size(), 0.5);
-    //bar_width_vec_2.reserve(locSnpIt->uGeno.snpGenoMap.size());
+    std::vector<std::string> x_vec_2(locSnp.snpsMap.size(), "");//C
+    //x_vec_2.reserve(locSnp.snpPosSetHaplo.size());
+    std::vector<int> y_vec_2(locSnp.snpsMap.size(), 0);
+    //y_vec_2.reserve(locSnp.snpPosSetHaplo.size());
+    std::vector<double> bar_width_vec_2(locSnp.snpsMap.size(), 0.5);
+    //bar_width_vec_2.reserve(locSnp.snpPosSetHaplo.size());
 
-    std::vector<std::string> x_vec_3(locSnpIt->uGeno.snpGenoMap.size(), "");//G
-    //x_vec_3.reserve(locSnpIt->uGeno.snpGenoMap.size());
-    std::vector<int> y_vec_3(locSnpIt->uGeno.snpGenoMap.size(), 0);
-    //y_vec_3.reserve(locSnpIt->uGeno.snpGenoMap.size());
-    std::vector<double> bar_width_vec_3(locSnpIt->uGeno.snpGenoMap.size(), 0.5);
-    //bar_width_vec_3.reserve(locSnpIt->uGeno.snpGenoMap.size());
+    std::vector<std::string> x_vec_3(locSnp.snpsMap.size(), "");//G
+    //x_vec_3.reserve(locSnp.snpPosSetHaplo.size());
+    std::vector<int> y_vec_3(locSnp.snpsMap.size(), 0);
+    //y_vec_3.reserve(locSnp.snpPosSetHaplo.size());
+    std::vector<double> bar_width_vec_3(locSnp.snpsMap.size(), 0.5);
+    //bar_width_vec_3.reserve(locSnp.snpPosSetHaplo.size());
 
-    std::vector<std::string> x_vec_4(locSnpIt->uGeno.snpGenoMap.size(), "");//T
-    //x_vec_4.reserve(locSnpIt->uGeno.snpGenoMap.size());
-    std::vector<int> y_vec_4(locSnpIt->uGeno.snpGenoMap.size(), 0);
-    //y_vec_24reserve(locSnpIt->uGeno.snpGenoMap.size());
-    std::vector<double> bar_width_vec_4(locSnpIt->uGeno.snpGenoMap.size(), 0.5);
-    //bar_width_vec_4.reserve(locSnpIt->uGeno.snpGenoMap.size());
+    std::vector<std::string> x_vec_4(locSnp.snpsMap.size(), "");//T
+    //x_vec_4.reserve(locSnp.snpPosSetHaplo.size());
+    std::vector<int> y_vec_4(locSnp.snpsMap.size(), 0);
+    //y_vec_24reserve(locSnp.snpPosSetHaplo.size());
+    std::vector<double> bar_width_vec_4(locSnp.snpsMap.size(), 0.5);
+    //bar_width_vec_4.reserve(locSnp.snpPosSetHaplo.size());
 
     int i = 0;
-    for (auto & it2 : locSnpIt->uGeno.snpGenoMap) {
+    for (auto & it2 : locSnp.snpsMap) {
 
-        x_vec[i] = (std::to_string(it2.first) + it2.second.geno);
-        x_vec_2[i] = (std::to_string(it2.first) + it2.second.geno);
-        x_vec_3[i] = (std::to_string(it2.first) + it2.second.geno);
-        x_vec_4[i] = (std::to_string(it2.first) + it2.second.geno);
-        
-        if(it2.second.oGeno[0] == it2.second.oGeno[2]){
-            if(it2.second.oGeno[0] == 'A') {
-                y_vec[i] = it2.second.read1;
-            } else if(it2.second.oGeno[0] == 'C'){
-                y_vec_2[i] = it2.second.read1;
-            } else if(it2.second.oGeno[0] == 'G'){
-                y_vec_3[i] = it2.second.read1;
-            } else {
-                y_vec_4[i] = it2.second.read1;
+        x_vec[i] = x_vec_2[i] = x_vec_3[i] = x_vec_4[i] = (std::to_string(it2.first) + it2.second.snp1 + "|" + it2.second.snp2);
+
+        if(it2.second.snp1 == it2.second.snp2){
+            if(it2.second.snp1 == 'A') {
+                y_vec[i] = it2.second.reads1 + it2.second.reads2;
+            } else if(it2.second.snp1 == 'C'){
+                y_vec_2[i] = it2.second.reads1 + it2.second.reads2;
+            } else if(it2.second.snp1 == 'G'){
+                y_vec_3[i] = it2.second.reads1 + it2.second.reads2;
+            } else if(it2.second.snp1 == 'T'){
+                y_vec_4[i] = it2.second.reads1 + it2.second.reads2;
             }
         } else {
-            if (it2.second.oGeno[0] == 'A') {
-                y_vec.at(i) = it2.second.read1;
-            } else if (it2.second.oGeno[0] == 'C') {
-                y_vec_2.at(i) = it2.second.read1;
-            } else if (it2.second.oGeno[0] == 'G') {
-                y_vec_3.at(i) = it2.second.read1;
-            } else if(it2.second.oGeno[0] == 'T'){
-                y_vec_4.at(i) = it2.second.read1;
-            }
-
-            if (it2.second.oGeno[2] == 'A') {
-                y_vec.at(i) = it2.second.read2;
+            if (it2.second.snp1 == 'A') {
+                y_vec.at(i) = it2.second.reads1;
                 
-                if(it2.second.oGeno.length() == 4){
-                    if(it2.second.oGeno[3] == 'C'){
-                        y_vec_2.at(i) = it2.second.read3;
-                    } else if(it2.second.oGeno[3] == 'G'){
-                        y_vec_3.at(i) = it2.second.read3;
-                    } else if(it2.second.oGeno[3] == 'T'){
-                        y_vec_4.at(i) = it2.second.read3;
-                    }
-                } else if(it2.second.oGeno.length() == 5){
-
-                    if (it2.second.oGeno[3] == 'C') {
-                        y_vec_2.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'G') {
-                        y_vec_3.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'T') {
-                        y_vec_4.at(i) = it2.second.read3;
-                    }
-
-                    if (it2.second.oGeno[4] == 'C') {
-                        y_vec_2.at(i) = it2.second.read4;
-                    } else if (it2.second.oGeno[4] == 'G') {
-                        y_vec_3.at(i) = it2.second.read4;
-                    } else if (it2.second.oGeno[4] == 'T') {
-                        y_vec_4.at(i) = it2.second.read4;
-                    }
-                } 
+                if(it2.second.snp2 == 'C'){
+                     y_vec_2[i] = it2.second.reads2;
+                } else if(it2.second.snp2 == 'G'){
+                     y_vec_3[i] = it2.second.reads2;
+                } else if(it2.second.snp2 == 'T'){
+                     y_vec_4[i] = it2.second.reads2;
+                }
                 
-            } else if (it2.second.oGeno[2] == 'C') {
-                y_vec_2.at(i) = it2.second.read2;
-
-                if (it2.second.oGeno.length() == 4) {
-                    if (it2.second.oGeno[3] == 'A') {
-                        y_vec.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'G') {
-                        y_vec_3.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'T') {
-                        y_vec_4.at(i) = it2.second.read3;
-                    }
-                } else if (it2.second.oGeno.length() == 5) {
-
-                    if (it2.second.oGeno[3] == 'A') {
-                        y_vec.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'G') {
-                        y_vec_3.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'T') {
-                        y_vec_4.at(i) = it2.second.read3;
-                    }
-
-                    if (it2.second.oGeno[4] == 'A') {
-                        y_vec.at(i) = it2.second.read4;
-                    } else if (it2.second.oGeno[4] == 'G') {
-                        y_vec_3.at(i) = it2.second.read4;
-                    } else if (it2.second.oGeno[4] == 'T') {
-                        y_vec_4.at(i) = it2.second.read4;
-                    }
-                } 
+            } else if (it2.second.snp1 == 'C') {
+                y_vec_2.at(i) = it2.second.reads1;
                 
-            } else if (it2.second.oGeno[2] == 'G') {
-                y_vec_3.at(i) = it2.second.read2;
-
-                if (it2.second.oGeno.length() == 4) {
-                    if (it2.second.oGeno[3] == 'A') {
-                        y_vec.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'C') {
-                        y_vec_2.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'T') {
-                        y_vec_4.at(i) = it2.second.read3;
-                    }
-                } else if (it2.second.oGeno.length() == 5) {
-
-                    if (it2.second.oGeno[3] == 'A') {
-                        y_vec.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'C') {
-                        y_vec_2.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'T') {
-                        y_vec_4.at(i) = it2.second.read3;
-                    }
-
-                    if (it2.second.oGeno[4] == 'A') {
-                        y_vec.at(i) = it2.second.read4;
-                    } else if (it2.second.oGeno[4] == 'C') {
-                        y_vec_2.at(i) = it2.second.read4;
-                    } else if (it2.second.oGeno[4] == 'T') {
-                        y_vec_4.at(i) = it2.second.read4;
-                    }
+                if (it2.second.snp2 == 'A') {
+                    y_vec[i] = it2.second.reads2;
+                } else if (it2.second.snp2 == 'G') {
+                    y_vec_3[i] = it2.second.reads2;
+                } else if (it2.second.snp2 == 'T') {
+                    y_vec_4[i] = it2.second.reads2;
                 }
                 
                 
-            } else if(it2.second.oGeno[2] == 'T'){
-                y_vec_4.at(i) = it2.second.read2;
+            } else if (it2.second.snp1 == 'G') {
+                y_vec_3.at(i) = it2.second.reads1;
 
-                if (it2.second.oGeno.length() == 4) {
-                    if (it2.second.oGeno[3] == 'A') {
-                        y_vec.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'C') {
-                        y_vec_2.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'G') {
-                        y_vec_3.at(i) = it2.second.read3;
-                    }
-                } else if (it2.second.oGeno.length() == 5) {
-
-                    if (it2.second.oGeno[3] == 'A') {
-                        y_vec.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'C') {
-                        y_vec_2.at(i) = it2.second.read3;
-                    } else if (it2.second.oGeno[3] == 'G') {
-                        y_vec_3.at(i) = it2.second.read3;
-                    }
-
-                    if (it2.second.oGeno[4] == 'A') {
-                        y_vec.at(i) = it2.second.read4;
-                    } else if (it2.second.oGeno[4] == 'C') {
-                        y_vec_2.at(i) = it2.second.read4;
-                    } else if (it2.second.oGeno[4] == 'G') {
-                        y_vec_3.at(i) = it2.second.read4;
-                    }
+                if (it2.second.snp2 == 'A') {
+                    y_vec[i] = it2.second.reads2;
+                } else if (it2.second.snp2 == 'C') {
+                    y_vec_2[i] = it2.second.reads2;
+                } else if (it2.second.snp2 == 'T') {
+                    y_vec_4[i] = it2.second.reads2;
                 }
                 
+            } else if(it2.second.snp1 == 'T'){
+                y_vec_4.at(i) = it2.second.reads1;
+
+                if (it2.second.snp2 == 'A') {
+                    y_vec[i] = it2.second.reads2;
+                } else if (it2.second.snp2 == 'C') {
+                    y_vec_2[i] = it2.second.reads2;
+                } else if (it2.second.snp2 == 'G') {
+                    y_vec_3[i] = it2.second.reads2;
+                }
             }
         }
         i++;
@@ -888,9 +776,9 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
     ofs << "<div class='sub_section_tips'><font color='red'> Heter target loci are in red</font>, <font color='green'> homo target loci are in green</font>, <font color='orange'> while new heter (including homo against reference) loci are in orange</font></div>\n";
     ofs << "<pre overflow: scroll>\n";
     ofs << "<table class='summary_table' style='width:40%'>\n";
-    ofs <<  "<tr style='background:#cccccc'> <td>ID</td><td>Position</td><td>Genotype</td><td>Putative Genotype</td><td>Original Genotype</td><td>N. of reads1</td><td>N. of reads2</td><td>Reads ratio</td><td>Total reads</td></tr>\n";
+    ofs <<  "<tr style='background:#cccccc'> <td>ID</td><td>Position</td><td>Genotype</td><td>Putative Genotype</td><td>N. of reads1</td><td>N. of reads2</td><td>Reads ratio</td><td>Total reads</td></tr>\n";
     
-    outputRow(ofs, locSnpIt->uGeno.snpGenoMap, locSnpIt->refSnpPosSet, totReads);
+    outputRow(ofs, locSnp, false);
 
     ofs << "</table>\n";
     ofs << "</pre>\n";
@@ -939,47 +827,47 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string marker, std::st
     json_str += "}";
 
     json_str += "];\n";
-    json_str += "var layout={autosize: true, title:'" + marker + "',";
+    json_str += "var layout={autosize: true, title:'" + locSnp.name + "',";
     
         json_str += "shapes: [";
         
         json_str += "{ type: 'line', xref: 'paper', ";
         json_str += "x0: 0, ";
-        json_str += "y0: " + std::to_string((double) totReads / 2) + ", ";
+        json_str += "y0: " + std::to_string((double) locSnp.totHaploReads / 2) + ", ";
         json_str += "x1: 1, ";
-        json_str += "y1: " + std::to_string((double) totReads / 2) + ", ";
+        json_str += "y1: " + std::to_string((double) locSnp.totHaploReads / 2) + ", ";
         json_str += "line:{color: 'white', width: 4, dash: 'line'}";
         json_str += "},\n";
 
         json_str += "{ type: 'line', xref: 'paper', ";
         json_str += "x0: 0, ";
-        json_str += "y0: " + std::to_string((double) totReads / 2 - ((double) totReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
+        json_str += "y0: " + std::to_string((double) locSnp.totHaploReads / 2 - ((double) locSnp.totHaploReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
         json_str += "x1: 1, ";
-        json_str += "y1: " + std::to_string((double) totReads / 2 - ((double) totReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
+        json_str += "y1: " + std::to_string((double) locSnp.totHaploReads / 2 - ((double) locSnp.totHaploReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
         json_str += "line:{color: 'magenta', width: 2, dash: 'line'}";
         json_str += "},\n";
 
         json_str += "{ type: 'line', xref: 'paper', ";
         json_str += "x0: 0, ";
-        json_str += "y0: " + std::to_string((double) totReads / 2 + ((double) totReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
+        json_str += "y0: " + std::to_string((double) locSnp.totHaploReads / 2 + ((double) locSnp.totHaploReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
         json_str += "x1: 1, ";
-        json_str += "y1: " + std::to_string((double) totReads  / 2+ ((double) totReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
+        json_str += "y1: " + std::to_string((double) locSnp.totHaploReads  / 2+ ((double) locSnp.totHaploReads * mOptions->mLocSnps.mLocSnpOptions.htJetter)) + ", ";
         json_str += "line:{color: 'magenta', width: 2, dash: 'line'}";
         json_str += "},\n";
         
         json_str += "{ type: 'line', xref: 'paper', ";
         json_str += "x0: 0, ";
-        json_str += "y0: " + std::to_string((double) totReads * mOptions->mLocSnps.mLocSnpOptions.hmPer) + ", ";
+        json_str += "y0: " + std::to_string((double) locSnp.totHaploReads * mOptions->mLocSnps.mLocSnpOptions.hmPer) + ", ";
         json_str += "x1: 1, ";
-        json_str += "y1: " + std::to_string((double) totReads * mOptions->mLocSnps.mLocSnpOptions.hmPer) + ", ";
+        json_str += "y1: " + std::to_string((double) locSnp.totHaploReads * mOptions->mLocSnps.mLocSnpOptions.hmPer) + ", ";
         json_str += "line:{color: 'goldenrod', width: 4, dash: 'line'}";
         json_str += "},\n";
 
         json_str += "{ type: 'line', xref: 'paper', ";
         json_str += "x0: 0, ";
-        json_str += "y0: " + std::to_string((double) totReads * (1 - mOptions->mLocSnps.mLocSnpOptions.hmPer)) + ", ";
+        json_str += "y0: " + std::to_string((double) locSnp.totHaploReads * (1 - mOptions->mLocSnps.mLocSnpOptions.hmPer)) + ", ";
         json_str += "x1: 1, ";
-        json_str += "y1: " + std::to_string((double) totReads * (1 - mOptions->mLocSnps.mLocSnpOptions.hmPer)) + ", ";
+        json_str += "y1: " + std::to_string((double) locSnp.totHaploReads * (1 - mOptions->mLocSnps.mLocSnpOptions.hmPer)) + ", ";
         json_str += "line:{color: 'goldenrod', width: 4, dash: 'line'}";
         json_str += "}\n";
         
@@ -1257,37 +1145,39 @@ std::string HtmlReporter::highligher(std::string & str, std::set<int> & snpsSet)
     return hstr;
 }
 
-std::string HtmlReporter::highligher(LocSnp & locSnp, bool ref, std::set<int> & refSet) {
+std::string HtmlReporter::highligher(LocSnp2 & locSnp, bool ref, std::string refStr, std::string tarStr, std::set<int> & posSet) {
     if (ref) {
         std::string hstr = locSnp.ref.mStr;
-        for(auto it = locSnp.uGeno.snpGenoMap.rbegin(); it != locSnp.uGeno.snpGenoMap.rend(); it++) {
-            if (it->second.geno[0] == it->second.geno[2]) {
-                hstr.insert(it->first + 1, "</mark3>");
-                hstr.insert(it->first, "<mark3>");
+        for(auto it = locSnp.totPosSet.rbegin(); it != locSnp.totPosSet.rend(); it++) {
+            if(locSnp.refSnpPosSet.find(*it) == locSnp.refSnpPosSet.end()){
+                hstr.insert(*it + 1, "</mark2>");
+                hstr.insert(*it, "<mark2>");
             } else {
-                if (locSnp.refSnpPosSet.find(it->first) == locSnp.refSnpPosSet.end()) {
-                    hstr.insert(it->first + 1, "</mark2>");
-                    hstr.insert(it->first, "<mark2>");
+                if(locSnp.snpPosSet.find(*it) == locSnp.snpPosSet.end()) {
+                    hstr.insert(*it + 1, "</mark3>");
+                    hstr.insert(*it, "<mark3>");
                 } else {
-                    hstr.insert(it->first + 1, "</mark>");
-                    hstr.insert(it->first, "<mark>");
+                    hstr.insert(*it + 1, "</mark>");
+                    hstr.insert(*it, "<mark>");
                 }
             }
         }
         return hstr;
     } else {
-        if (locSnp.snpsMap.empty()) {
-            return locSnp.ref.mStr;
+        if (posSet.empty()) {
+            return tarStr;
         } else {
-            std::string hstr = locSnp.ref.mStr;
-            for (auto it = locSnp.snpsMap.rbegin(); it != locSnp.snpsMap.rend(); it++) {
-                if (refSet.find(it->first) == refSet.end()) {
-                    hstr.insert(it->first + 1, "</mark2>");
-                    hstr.insert(it->first, "<mark2>");
-                } else {
-                    hstr.insert(it->first + 1, "</mark>");
-                    hstr.insert(it->first, "<mark>");
-                }
+            std::string hstr = tarStr;
+            for (auto it = posSet.rbegin(); it != posSet.rend(); it++) {
+                if(refStr[*it] != tarStr[*it]){
+                    if (locSnp.refSnpPosSet.find(*it) == locSnp.refSnpPosSet.end()) {
+                        hstr.insert(*it + 1, "</mark2>");
+                        hstr.insert(*it, "<mark2>");
+                    } else {
+                        hstr.insert(*it + 1, "</mark>");
+                        hstr.insert(*it, "<mark>");
+                    }
+                } 
             }
             return hstr;
         }
