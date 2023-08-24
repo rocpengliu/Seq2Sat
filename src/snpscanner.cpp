@@ -453,7 +453,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
         error_exit("Can not open output file: " + foutName2);
     }
     if (mOptions->verbose) loginfo("Starting to write haplotype table!");
-    *fout2 << "#Locus\tHaplotype\tNumReads\tReadsRatio\tTotalReads\tSeq\n";
+    *fout2 << "#Locus\tHaplotype\tNumReads\tReadsRatio\tTotalReads\tConclusive\tMicroHaplotype\n";
     
     for(const auto & it : tmpSnpSeqsMap){
         if(mOptions->mLocSnps.refLocMap.find(it.first) == mOptions->mLocSnps.refLocMap.end()){
@@ -495,8 +495,29 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
         }
         
         for (const auto & it2 : it.second) {
+            bool go = false;
             
-            bool go = (locSnpIt->maxReads < mOptions->mLocSnps.mLocSnpOptions.minReads4Filter || it2.second >= mOptions->mLocSnps.mLocSnpOptions.minSeqs) ? true : false;
+            if (locSnpIt->maxReads >= mOptions->mLocSnps.mLocSnpOptions.minReads4Filter) {//50
+                if(it2.second >= mOptions->mLocSnps.mLocSnpOptions.minSeqs){//5
+                    go = true;
+                } else {
+                    go = false;
+                }
+            } else {
+                if (locSnpIt->genoStr3 == "homo") {
+                    if (it2.second >= mOptions->mLocSnps.mLocSnpOptions.minSeqs) {//5
+                        go = true;
+                    } else {
+                        go = false;
+                    }
+                } else {
+                    if(it2.second >= mOptions->mLocSnps.mLocSnpOptions.minSeqsPer * locSnpIt->maxReads){//5%
+                        go = true;
+                    } else {
+                        go = false;
+                    }
+                }
+            }
             
             if(!go) continue;
             
@@ -533,11 +554,11 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
                         tmpSimSnps.isHaplo = true;
                         tmpSimSnps.genoStr6 = "homo";
                         locSnpIt->snpPosSetHaplo.insert(tmpSimSnps.snpPosSet.begin(), tmpSimSnps.snpPosSet.end());
-
-                        for (const auto & it3 : tmpSimSnps.snpPosSet) {
-                            tmpSimSnps.haploStr.push_back(it2.first[it3]);
-                        }
-                        
+                        locSnpIt->snpPosSetTrueHaplo.insert(tmpSimSnps.snpPosSet.begin(), tmpSimSnps.snpPosSet.end());
+//                        for (const auto & it3 : tmpSimSnps.snpPosSet) {
+//                            tmpSimSnps.haploStr.push_back(it2.first[it3]);
+//                        }
+//                        
                     } else {
                         tmpSimSnps.genoStr6 = "seqerr";
                         tmpSimSnps.isHaplo = false;
@@ -548,16 +569,18 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
                         tmpSimSnps.isHaplo = true;
                         tmpSimSnps.genoStr6 = "heter1";
                         locSnpIt->snpPosSetHaplo.insert(tmpSimSnps.snpPosSet.begin(), tmpSimSnps.snpPosSet.end());
-                        for (const auto & it3 : tmpSimSnps.snpPosSet) {
-                            tmpSimSnps.haploStr.push_back(it2.first[it3]);
-                        }
+                        locSnpIt->snpPosSetTrueHaplo.insert(tmpSimSnps.snpPosSet.begin(), tmpSimSnps.snpPosSet.end());
+//                        for (const auto & it3 : tmpSimSnps.snpPosSet) {
+//                            tmpSimSnps.haploStr.push_back(it2.first[it3]);
+//                        }
                     } else if (it2.first == twoPeaks.back().first) {
                         tmpSimSnps.isHaplo = true;
                         tmpSimSnps.genoStr6 = "heter2";
                         locSnpIt->snpPosSetHaplo.insert(tmpSimSnps.snpPosSet.begin(), tmpSimSnps.snpPosSet.end());
-                        for (const auto & it3 : tmpSimSnps.snpPosSet) {
-                            tmpSimSnps.haploStr.push_back(it2.first[it3]);
-                        }
+                        locSnpIt->snpPosSetTrueHaplo.insert(tmpSimSnps.snpPosSet.begin(), tmpSimSnps.snpPosSet.end());
+//                        for (const auto & it3 : tmpSimSnps.snpPosSet) {
+//                            tmpSimSnps.haploStr.push_back(it2.first[it3]);
+//                        }
                     } else {
                         tmpSimSnps.genoStr6 = "seqerr";
                         tmpSimSnps.isHaplo = false;
@@ -584,15 +607,13 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
         if (locSnpIt->genoMap.empty()) continue;
 
         //std::set<int> totPosSet;//get total snps positions only for these true haplotypes also include the inconclusive ones
-        std::set_union(locSnpIt->refSnpPosSet.begin(), locSnpIt->refSnpPosSet.end(),
-                locSnpIt->snpPosSet.begin(), locSnpIt->snpPosSet.end(),
-                std::inserter(locSnpIt->totPosSet, locSnpIt->totPosSet.begin()));
-
+        
+        locSnpIt->totPosSet.insert(locSnpIt->snpPosSet.begin(), locSnpIt->snpPosSet.end());
 
         std::string haploStr1 = "";
         std::string haploStr2 = "";
-        
-        for (const auto & it2 : locSnpIt->totPosSet) {
+
+        for (const auto & it2 : locSnpIt->snpPosSetHaplo) {
             
             bool isPrint = false;
             SimSnp tmpSimSnp;
@@ -607,6 +628,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
                     tmpSimSnp.color = "orange";
                 }
                 isPrint = true;
+                
                 haploStr1.push_back(twoPeaks.front().first[it2]);
                 haploStr2.push_back(twoPeaks.front().first[it2]);
             } else if(twoPeaks.size() == 2) {
@@ -624,7 +646,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
                     isPrint = true;
 
                     haploStr1.push_back(twoPeaks.front().first[it2]);
-                    haploStr2.push_back(twoPeaks.front().first[it2]);
+                    haploStr2.push_back(twoPeaks.back().first[it2]);
                     
                 } else {//AC; CA; CT; 
                     if (twoPeaks.back().first[it2] == locSnpIt->ref.mStr[it2]) {//CA;
@@ -643,7 +665,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
                     }
 
                     if (locSnpIt->genoStr3 == "heter") {
-                        tmpSimSnp.color = "red";
+                        tmpSimSnp.color = (locSnpIt->refSnpPosSet.find(it2) == locSnpIt->refSnpPosSet.end()) ? "orange" : "red";
                         tmpSimSnp.genoStr3 = "heter";
                         isPrint = true;
                         haploStr1.push_back(twoPeaks.front().first[it2]);
@@ -658,21 +680,32 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
 
             locSnpIt->snpsMap[it2] = tmpSimSnp;
             
-            if(isPrint) *fout << it.first << "\t" << it2 << "\t" << tmpSimSnp.snp1 << "|" << tmpSimSnp.snp2  << "\t" << tmpSimSnp.reads1 << "|" << tmpSimSnp.reads2  << "\t" << tmpSimSnp.ratio << (tmpSimSnp.reads1 + tmpSimSnp.reads2) << (locSnpIt->refSnpPosSet.find(it2) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
+            if(isPrint) *fout << it.first << "\t" << it2 << "\t" << tmpSimSnp.snp1 << "|" << tmpSimSnp.snp2  << "\t" << tmpSimSnp.reads1 << "|" << tmpSimSnp.reads2  << "\t" << tmpSimSnp.ratio << (tmpSimSnp.reads1 + tmpSimSnp.reads2) << "\t" << (locSnpIt->refSnpPosSet.find(it2) == locSnpIt->refSnpPosSet.end() ? "Y" : "N") << "\n";
         }
-        if(locSnpIt->genoStr3 != "inconclusive"){
-            if(twoPeaks.size() == 1){
-                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, (twoPeaks.front().second / 2), (double((twoPeaks.front().second / 2))/locSnpIt->totHaploReads)));
-                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr2, (twoPeaks.front().second / 2), (double((twoPeaks.front().second / 2))/locSnpIt->totHaploReads)));
-            } else if(twoPeaks.size() == 2){
-                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, twoPeaks.front().second, (double(twoPeaks.front().second)/locSnpIt->totHaploReads)));
-                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.back().first, haploStr2, twoPeaks.back().second, (double(twoPeaks.back().second)/locSnpIt->totHaploReads)));
+
+        if (twoPeaks.size() == 1) {
+            if (locSnpIt->genoStr3 == "inconclusive") {
+                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, (twoPeaks.front().second / 2), (double((twoPeaks.front().second / 2)) / locSnpIt->totHaploReads), 'N'));
+                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, (twoPeaks.front().second / 2), (double((twoPeaks.front().second / 2)) / locSnpIt->totHaploReads), 'N'));
+            } else {
+                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, (twoPeaks.front().second / 2), (double((twoPeaks.front().second / 2)) / locSnpIt->totHaploReads), 'Y'));
+                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, (twoPeaks.front().second / 2), (double((twoPeaks.front().second / 2)) / locSnpIt->totHaploReads), 'Y'));
             }
-            
-            for(const auto & it2 : locSnpIt->haploVec){
-                *fout2 << it.first << "\t" << get<1>(it2) << "\t" << get<2>(it2) << "\t" << get<3>(it2) << "\t" << locSnpIt->totHaploReads << "\t" << locSnpIt->totReads << "\n";
+        } else if (twoPeaks.size() == 2) {
+            if (locSnpIt->genoStr3 == "inconclusive") {
+                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, twoPeaks.front().second, (double(twoPeaks.front().second) / locSnpIt->totHaploReads), 'N'));
+                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.back().first, haploStr2, twoPeaks.back().second, (double(twoPeaks.back().second) / locSnpIt->totHaploReads), 'N'));
+            } else {
+                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, twoPeaks.front().second, (double(twoPeaks.front().second) / locSnpIt->totHaploReads), 'Y'));
+                locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.back().first, haploStr2, twoPeaks.back().second, (double(twoPeaks.back().second) / locSnpIt->totHaploReads), 'Y'));
             }
         }
+        
+        for (const auto & it2 : locSnpIt->haploVec) {
+            locSnpIt->genoMap[get<0>(it2)].haploStr = get<1>(it2);
+            *fout2 << it.first << "\t" << get<1>(it2) << "\t" << get<2>(it2) << "\t" << get<3>(it2) << "\t" << locSnpIt->totHaploReads << "\t" << locSnpIt->totReads << "\t" << get<4>(it2) << "\t" << get<0>(it2) << "\n";
+        }
+        
     }
     
     tmpSnpSeqsMap.clear();

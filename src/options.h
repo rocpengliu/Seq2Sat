@@ -300,16 +300,16 @@ public:
         maxMismatchesPSeq = 2;
         maxScorePrimer = -1;
         minSeqs = 5;
-        minSeqsPer = 5;
+        minSeqsPer = 0.1;
         hmPer = 0.9;
         htJetter = 0.15;
-        minReads4Filter = 100;
+        minReads4Filter = 50;
     };
 public:
     uint32 maxMismatchesPSeq;
     uint32 maxScorePrimer;
     uint32 minSeqs;
-    int minSeqsPer;//against largest peak; 5/%
+    double minSeqsPer;//against largest peak; 10/%
     int minReads4Filter;
     double hmPer, htJetter;
 };

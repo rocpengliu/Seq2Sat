@@ -484,6 +484,9 @@ void Options::readLocFile(){
                 for(auto & itt : posVec){
                     if(itt == "NA") break;
                     tmpLocSnp.refSnpPosSet.insert(std::stoi(itt));
+                    tmpLocSnp.snpPosSetTrueHaplo.insert(std::stoi(itt));
+                    tmpLocSnp.snpPosSetHaplo.insert(std::stoi(itt));
+                    tmpLocSnp.totPosSet.insert(std::stoi(itt));
                 }
                 posVec.clear();
                 tmpLocSnp.ref = splitVec[4];

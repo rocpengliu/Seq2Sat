@@ -58,17 +58,22 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true) 
         for (auto & it : locSnp.genoMap) {
             std::string hap = "";
             std::string fc = "black";
+            std::string bc = "transparent";
 
             if (it.second.haploStr != "") {
                 hap = it.second.haploStr;
-                fc = "blue";
+                fc = "white";
+                bc = "olive";
+            } else {
+                hap = "seq error";
             }
 
             ofs << "<tr>";
             ofs << "<td>" + std::to_string(i) + "</td>" + 
                     "<td>" + locSnp.name + "</td>" +
                     "<td>" + it.second.snpsStr + "</td>" +
-                    "<td> <font color='" + fc + "'>" + hap + "</font></td>" +
+                    "<td bgcolor='" + bc + "'>" + //Genotype
+                    "<font color='" + fc + "'>" + hap + "</font></td>" +
                     "<td>" + std::to_string(it.second.numReads) + "</td>" +
                     "<td>" + std::to_string((double) it.second.numReads / locSnp.totReads) + "</td>" +
                     "<td>" + std::to_string(locSnp.totReads) + "</td>" +
@@ -778,18 +783,22 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string & divName, LocS
     ofs << "<table class='summary_table' style='width:40%'>\n";
     ofs <<  "<tr style='background:#cccccc'> <td>ID</td><td>Position</td><td>Genotype</td><td>Putative Genotype</td><td>N. of reads1</td><td>N. of reads2</td><td>Reads ratio</td><td>Total reads</td></tr>\n";
     
-    outputRow(ofs, locSnp, false);
+    outputRow(ofs, locSnp,false);
 
     ofs << "</table>\n";
     ofs << "</pre>\n";
     
     ofs << "\n<script type=\"text/javascript\">" << endl;
     
+    std::vector<std::string> Avec(x_vec.size(), "A");
+    std::vector<std::string> Cvec(x_vec.size(), "C");
+    std::vector<std::string> Gvec(x_vec.size(), "G");
+    std::vector<std::string> Tvec(x_vec.size(), "T");
     string json_str = "var data=[";
     json_str += "A = {";
     json_str += "x:[" + Stats::list2string(x_vec, x_vec.size()) + "],";
     json_str += "y:[" + Stats::list2string2(y_vec, y_vec.size()) + "],";
-    json_str += "text: [" + Stats::list2string(x_vec, x_vec.size()) + "],";
+    json_str += "text: [" + Stats::list2string( Avec, x_vec.size()) + "],";
     //json_str += "width: [" + Stats::list2string2(bar_width_vec, bar_width_vec.size()) + "],";
     json_str += "name: 'A',";
     json_str += "marker:{color:'darkgreen'},";
@@ -799,7 +808,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string & divName, LocS
     json_str += "C = {";
     json_str += "x:[" + Stats::list2string(x_vec_2, x_vec_2.size()) + "],";
     json_str += "y:[" + Stats::list2string2(y_vec_2, y_vec_2.size()) + "],";
-    json_str += "text: [" + Stats::list2string(x_vec_2, x_vec_2.size()) + "],";
+    json_str += "text: [" + Stats::list2string(Cvec, x_vec_2.size()) + "],";
     //json_str += "width: [" + Stats::list2string2(bar_width_vec_2, bar_width_vec_2.size()) + "],";
     json_str += "name: 'C',";
     json_str += "marker:{color:'darkred'},";
@@ -809,7 +818,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string & divName, LocS
     json_str += "G = {";
     json_str += "x:[" + Stats::list2string(x_vec_3, x_vec_3.size()) + "],";
     json_str += "y:[" + Stats::list2string2(y_vec_3, y_vec_3.size()) + "],";
-    json_str += "text: [" + Stats::list2string(x_vec_3, x_vec_3.size()) + "],";
+    json_str += "text: [" + Stats::list2string(Gvec, x_vec_3.size()) + "],";
     //json_str += "width: [" + Stats::list2string2(bar_width_vec_3, bar_width_vec_3.size()) + "],";
     json_str += "name: 'G',";
     json_str += "marker:{color:'grey'},";
@@ -819,7 +828,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string & divName, LocS
     json_str += "T = {";
     json_str += "x:[" + Stats::list2string(x_vec_4, x_vec_4.size()) + "],";
     json_str += "y:[" + Stats::list2string2(y_vec_4, y_vec_4.size()) + "],";
-    json_str += "text: [" + Stats::list2string(x_vec_4, x_vec_4.size()) + "],";
+    json_str += "text: [" + Stats::list2string(Tvec, x_vec_4.size()) + "],";
     //json_str += "width: [" + Stats::list2string2(bar_width_vec_4, bar_width_vec_4.size()) + "],";
     json_str += "name: 'T',";
     json_str += "marker:{color:'darkblue'},";

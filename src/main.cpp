@@ -39,7 +39,6 @@ int main(int argc, char* argv[]){
     cmd.add<string>("loc", 0, "loci file containing loci names, 5'primer sequence, reverse complement of 3'primer sequence, 5'flank region, 3'flank region, repeat unit and reference microsatellite repeat array, separated by '\t", false, "");
     cmd.add("revCom", 0, "if your reverse primer sequence in the loc file is not reverse complentary, please specify it");
     cmd.add<int>("minSeqs", 0, "minimum number of reads for a genotype, default: 5", false, 5);
-    cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%)", false, 5);
     cmd.add<int>("maxMismatchesPSeq", 0, "maximum mismatches for primer sequences 2", false, 2);
     
     cmd.add<string>("mode", 0, "specify the sequence alignment mode: NW (default) | HW | SHW", false, "NW");
@@ -54,6 +53,7 @@ int main(int argc, char* argv[]){
     
     //for ssr;
     cmd.add<double>("maxMismatchesPer4FR", 0, "maximum percentage mismatches for the forward and reverse flanking regions, default 0.3 (30%) ", false, 0.3);
+    cmd.add<int>("minSeqsPercentage", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%)", false, 5);
     cmd.add<int>("minWarningSeqs", 0, "minimum number of reads for warning a genotype, default: 50", false, 50);
     cmd.add<double>("hlRatio1", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.4", false, 0.4);
     cmd.add<double>("hlRatio2", 0, "ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 0.2", false, 0.2);
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
     //for snp;
     cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 15 means the percentage of reads with SNPs to total reads are from 40 - 60 %, must be coupled with hmPer, default: 15", false, 15);
     cmd.add<int>("hmPer", 0, "allele is considered as homo when its reads to total reads is > 90 %, must be coupled with htJetter default: 90", false, 90);
-    
+    cmd.add<int>("minSeqsPerSnp", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%)", false, 10);
     //for sex
     cmd.add<string>("sex", 0, "sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by '\t", false, "");
     cmd.add<unsigned int>("maxMismatchesSexPSeq", 0, "maximum number of mismatches for sex primers, default: 2", false, 2);
@@ -202,7 +202,8 @@ int main(int argc, char* argv[]){
         opt->mLocVars.locVarOptions.coreRep = cmd.get<int>("core");
     } else {
         opt->mLocSnps.mLocSnpOptions.minSeqs = cmd.get<int>("minSeqs");
-        opt->mLocSnps.mLocSnpOptions.minSeqsPer= cmd.get<int>("minSeqsPercentage");
+        
+        opt->mLocSnps.mLocSnpOptions.minSeqsPer= (double) cmd.get<int>("minSeqsPerSnp") / 100.00;
         opt->mLocSnps.mLocSnpOptions.htJetter = (double) cmd.get<int>("htJetter") / 100.00;
         opt->mLocSnps.mLocSnpOptions.hmPer = (double) cmd.get<int>("hmPer") / 100.00;
     }

@@ -183,15 +183,16 @@ public:
     Sequence fp;
     Sequence rp;
     Sequence ref;
-    std::set<int> snpPosSetHaplo;//only for haplotype snp positions. including ref snps; even if it is inconclusive but not the seq errors.
-    std::set<int> snpPosSet;//snps poitions including seq errors
+    std::set<int> snpPosSetTrueHaplo;//for haplotype; including ref, true haplotype; not the inconclusive ones; not used
+    std::set<int> snpPosSetHaplo;//only for true haplotype snp positions. including ref snps; also include the inconclusive ones; for snp table;
+    std::set<int> snpPosSet;//snps poitions including seq errors; for alignment table reference
     std::set<int> refSnpPosSet;//reference target snps
     std::set<int> totPosSet;//all the snps pos including ref, combine snpPosSet and refSnpPosSet;
     int totReads;
     int maxReads;
     int totHaploReads;
     double ratioHaplo; //ratio = big one / big one + small one; if 1 is homo,  if < jetter is heter, is <homo > jetter is inconclusive.
-    std::vector<std::tuple<std::string, std::string, int, double>> haploVec;//seq, haplotype, num reads, num reads/totlhaploreads;
+    std::vector<std::tuple<std::string, std::string, int, double, char>> haploVec;//seq, haplotype, num reads, num reads/totlhaploreads, conclusive or not (if CC  against ref AA with other heter is inconclusive; eg CA -> ref CG (A|G is inconclusive))
     //bool isHaplotype;//inconclusive is false;
     std::string genoStr3;//seqerr (ratio > homo and should regarded as seq errors), inconclusive (ratio between homo and heter), homo or heter;//homo also include CC against ref AA;
     //for ref is only homo, heter and inconclusive, for each variants, it could be homo, heter, inconclusive and seqerr (if it homo, but has seq errors)
