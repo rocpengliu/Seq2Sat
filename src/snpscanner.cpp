@@ -761,7 +761,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
 //
 //    if (!fout2->is_open()) error_exit("Can not open output file: " + foutName2);
 //    if (mOptions->verbose) loginfo("Starting to write haplotype table!");
-//    *fout2 << "#Locus\tHaplotype\tNumReads\tReadsRatio\tTotalReads\tSeq\n";
+//    *fout2 << "#Locus\tHaplotype\tNumReads\tReadsRatio\tTotalHaploReads\tTotalReads\tSeq\n";
 //    
 //    for(const auto & it : tmpSnpSeqsMap){
 //        if(mOptions->mLocSnps.refLocMap.find(it.first) == mOptions->mLocSnps.refLocMap.end()){
