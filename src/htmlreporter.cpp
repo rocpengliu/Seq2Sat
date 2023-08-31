@@ -59,15 +59,38 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true) 
             std::string hap = "";
             std::string fc = "black";
             std::string bc = "transparent";
-
-            if (it.second.haploStr != "") {
-                hap = it.second.haploStr;
+       
+            if(it.second.genoStr8 == "seqerr"){
+                 hap =  "seq error";
+            } else {
+                if (it.second.genoStr8 == "indel1") {
+                    hap = "indel1";
+                } else if (it.second.genoStr8 == "indel2") {
+                    hap = "indel2";
+                } else {
+                    hap = it.second.haploStr;
+                }
+                
                 fc = "white";
                 bc = "olive";
-            } else {
-                hap = "seq error";
             }
-
+//            if (it.second.haploStr != "") {
+//                hap = it.second.haploStr;
+//                fc = "white";
+//                bc = "olive";
+//            } else {
+//                if (it.second.genoStr8 == "indel1") {
+//                    hap = "indel1";
+//                    fc = "white";
+//                    bc = "olive";
+//                } else if (it.second.genoStr8 == "indel2") {
+//                    hap = "indel2";
+//                    fc = "white";
+//                    bc = "olive";
+//                } else {
+//                    hap =  "seq error";
+//                }
+//            }
             ofs << "<tr>";
             ofs << "<td>" + std::to_string(i) + "</td>" + 
                     "<td>" + locSnp.name + "</td>" +
@@ -617,7 +640,10 @@ void HtmlReporter::reportAllSnps(ofstream& ofs) {
         ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
 
         reportSnpAlignmentTable(ofs, divName, it.second);
-        reportSnpTablePlot(ofs, divName, it.second);
+        
+        if(!it.second.isIndel){
+            reportSnpTablePlot(ofs, divName, it.second);
+        }
         ofs << "</div>\n";
 
     }
@@ -779,6 +805,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string & divName, LocS
     ofs << "<div class='figurefull' id='plot_" + divName + "'></div>\n";
     
     ofs << "<div class='sub_section_tips'><font color='red'> Heter target loci are in red</font>, <font color='green'> homo target loci are in green</font>, <font color='orange'> while new heter (including homo against reference) loci are in orange</font></div>\n";
+    ofs << "<div class='sub_section_tips'><span style='background-color: purple;'><font color='white'>Caution: if there are at least 2 SNPs (heter), the SNPs are still regarded as true SNPs even if the Reads ratio is between purple and yellow!</font></span></div>\n";
     ofs << "<pre overflow: scroll>\n";
     ofs << "<table class='summary_table' style='width:40%'>\n";
     ofs <<  "<tr style='background:#cccccc'> <td>ID</td><td>Position</td><td>Genotype</td><td>Putative Genotype</td><td>N. of reads1</td><td>N. of reads2</td><td>Reads ratio</td><td>Total reads</td></tr>\n";

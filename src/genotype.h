@@ -160,8 +160,8 @@ struct SimSnps{
     int numReads = 0;
     std::string snpsStr = "";//all snps 
     std::string haploStr = "";//only true haploStr;
-    bool isHaplo = false;//if only genoStr6 is seqerr;
-    std::string genoStr6 = "seqerr"; //homo, heter1 (high read number), heter2 (low read number), inHeter1, inHeter2, (inconclusive), seqerr;
+    bool isHaplo = false;//if only genoStr8 is seqerr;
+    std::string genoStr8 = "seqerr"; //homo, heter1 (high read number), heter2 (low read number), inHeter1, inHeter2, (inconclusive), indel1, indel2 and seqerr;
 };
 
 struct SimSnp{
@@ -192,9 +192,10 @@ public:
     int maxReads;
     int totHaploReads;
     double ratioHaplo; //ratio = big one / big one + small one; if 1 is homo,  if < jetter is heter, is <homo > jetter is inconclusive.
-    std::vector<std::tuple<std::string, std::string, int, double, char>> haploVec;//seq, haplotype, num reads, num reads/totlhaploreads, conclusive or not (if CC  against ref AA with other heter is inconclusive; eg CA -> ref CG (A|G is inconclusive))
+    std::vector<std::tuple<std::string, std::string, int, double, char, char>> haploVec;//seq, haplotype, num reads, num reads/totlhaploreads, conclusive or not (if CC  against ref AA with other heter is inconclusive; eg CA -> ref CG (A|G is inconclusive)), last is indel;
     //bool isHaplotype;//inconclusive is false;
-    std::string genoStr3;//seqerr (ratio > homo and should regarded as seq errors), inconclusive (ratio between homo and heter), homo or heter;//homo also include CC against ref AA;
+    std::string genoStr3;//seqerr (ratio > homo and should regarded as seq errors), inconclusive (ratio between homo and heter), homo or heter;//homo also include CC against ref AA;;
+    bool isIndel;
     //for ref is only homo, heter and inconclusive, for each variants, it could be homo, heter, inconclusive and seqerr (if it homo, but has seq errors)
     std::map<std::string, SimSnps> genoMap;//read is the key
     std::map<int, SimSnp> snpsMap;//position, snps, only include snps in the haloptypes; also the inconclusive ones;
