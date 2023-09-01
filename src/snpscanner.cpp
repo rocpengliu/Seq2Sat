@@ -495,7 +495,6 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
         std::set<int> posCorr;//for correction if there are >= 2 snps and ratio is between 0.65 - 0.90 and inconclusive one
         for (const auto & it2 : it.second) {
             bool go = false;
-            
             if (locSnpIt->maxReads >= mOptions->mLocSnps.mLocSnpOptions.minReads4Filter) {//50
                 if(it2.second >= mOptions->mLocSnps.mLocSnpOptions.minSeqs){//5
                     go = true;
@@ -595,42 +594,38 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
                 }
                 locSnpIt->genoMap[it2.first] = tmpSimSnps;
             } else {//for indels
-                
-                indel |= true;
                 if (locSnpIt->genoStr3 == "homo") {
                     if (it2.first == twoPeaks.front().first) {
                         tmpSimSnps.isHaplo = true;
                         tmpSimSnps.genoStr8 = "indel1";
-                    } else {
-                        tmpSimSnps.genoStr8 = "seqerr";
-                        tmpSimSnps.isHaplo = false;
+                        indel |= true;
+                        locSnpIt->genoMap[it2.first] = tmpSimSnps;
                     }
-
                 } else if (locSnpIt->genoStr3 == "heter") {
                     if (it2.first == twoPeaks.front().first) {
                         tmpSimSnps.isHaplo = true;
                         tmpSimSnps.genoStr8 = "indel1";
+                        indel |= true;
+                        locSnpIt->genoMap[it2.first] = tmpSimSnps;
                     } else if (it2.first == twoPeaks.back().first) {
                         tmpSimSnps.isHaplo = true;
                         tmpSimSnps.genoStr8 = "indel2";
-                    } else {
-                        tmpSimSnps.genoStr8 = "seqerr";
-                        tmpSimSnps.isHaplo = false;
+                        indel |= true;
+                        locSnpIt->genoMap[it2.first] = tmpSimSnps;
                     }
                 } else {
-
                     if (it2.first == twoPeaks.front().first) {
                         tmpSimSnps.isHaplo = true;
                         tmpSimSnps.genoStr8 = "indel1";
+                        indel |= true;
+                        locSnpIt->genoMap[it2.first] = tmpSimSnps;
                     } else if (it2.first == twoPeaks.back().first) {
                         tmpSimSnps.isHaplo = true;
                         tmpSimSnps.genoStr8 = "indel2";
-                    } else {
-                        tmpSimSnps.genoStr8 = "seqerr";
-                        tmpSimSnps.isHaplo = false;
-                    }
+                        indel |= true;
+                        locSnpIt->genoMap[it2.first] = tmpSimSnps;
+                    } 
                 }
-                locSnpIt->genoMap[it2.first] = tmpSimSnps;
             }
         }
         
