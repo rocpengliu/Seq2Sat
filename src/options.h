@@ -301,7 +301,9 @@ public:
         maxScorePrimer = -1;
         minSeqs = 5;
         minSeqsPer = 0.1;
-        hmPer = 0.9;
+        hmPerH = 0.9;
+        hmPerL = 0.8;
+        hmPer = 0.0;
         htJetter = 0.15;
         minReads4Filter = 50;
     };
@@ -311,7 +313,8 @@ public:
     uint32 minSeqs;
     double minSeqsPer;//against largest peak; 10/%
     int minReads4Filter;
-    double hmPer, htJetter;
+    double hmPerL, hmPerH, htJetter;
+    double hmPer; //the actual one, it is either hmPerL or hmPerH, depending on how many true snps there.
 };
 
 class MultiLocVars{

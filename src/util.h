@@ -690,7 +690,7 @@ std::pair<K, V> getMaxKeyValue(const std::map<K, V> & map, bool reverse = false)
 }
 
 template<typename K, typename V>
-std::vector<std::pair<K,V>> getTop2MaxKeyValueVec(const std::map<K, V> map){
+std::vector<std::pair<K,V>> getTop2MaxKeyValueVec(const std::map<K, V>& map){
     std::map<K, V> tmp = map;
     std::pair<K,V> m1 = getMaxKeyValue(tmp);
     tmp.erase(m1.first);

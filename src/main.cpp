@@ -61,7 +61,8 @@ int main(int argc, char* argv[]){
     
     //for snp;
     cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 15 means the percentage of reads with SNPs to total reads are from 40 - 60 %, must be coupled with hmPer, default: 15", false, 15);
-    cmd.add<int>("hmPer", 0, "allele is considered as homo when its reads to total reads is > 90 %, must be coupled with htJetter default: 90", false, 90);
+    cmd.add<int>("hmPerH", 0, "allele is considered as homo when its reads against total reads is > 90 % and there are at least 2 true SNPs, must be coupled with htJetter and hmPerL, must be > hmPerL. default: 90", false, 90);
+    cmd.add<int>("hmPerL", 0, "allele is considered as homo when its reads against total reads is > 80 % and there are at most 1 true SNP, must be coupled with htJetter and hmPerH, must be < hmPerH and > htJetter + 50. default: 80", false, 80);
     cmd.add<int>("minSeqsPerSnp", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%)", false, 10);
     //for sex
     cmd.add<string>("sex", 0, "sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by '\t", false, "");
@@ -202,10 +203,10 @@ int main(int argc, char* argv[]){
         opt->mLocVars.locVarOptions.coreRep = cmd.get<int>("core");
     } else {
         opt->mLocSnps.mLocSnpOptions.minSeqs = cmd.get<int>("minSeqs");
-        
-        opt->mLocSnps.mLocSnpOptions.minSeqsPer= (double) cmd.get<int>("minSeqsPerSnp") / 100.00;
+        opt->mLocSnps.mLocSnpOptions.minSeqsPer = (double) cmd.get<int>("minSeqsPerSnp") / 100.00;
         opt->mLocSnps.mLocSnpOptions.htJetter = (double) cmd.get<int>("htJetter") / 100.00;
-        opt->mLocSnps.mLocSnpOptions.hmPer = (double) cmd.get<int>("hmPer") / 100.00;
+        opt->mLocSnps.mLocSnpOptions.hmPerH = (double) cmd.get<int>("hmPerH") / 100.00;
+        opt->mLocSnps.mLocSnpOptions.hmPerL = (double) cmd.get<int>("hmPerL") / 100.00;
     }
     opt->locFile = cmd.get<string>("loc");
     opt->revCom = cmd.exist("revCom");

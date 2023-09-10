@@ -297,6 +297,18 @@ bool Options::validate() {
         }
 
     }
+    
+    
+    if(mLocSnps.mLocSnpOptions.minSeqsPer > 1 || mLocSnps.mLocSnpOptions.minSeqsPer <= 0) error_exit("--minSeqsPerSnp must be < 100 and > 0");
+    if(mLocSnps.mLocSnpOptions.htJetter >= 0 
+            && ((0.5 + mLocSnps.mLocSnpOptions.htJetter) < mLocSnps.mLocSnpOptions.hmPerL )
+            && mLocSnps.mLocSnpOptions.hmPerL < mLocSnps.mLocSnpOptions.hmPerH 
+            && mLocSnps.mLocSnpOptions.hmPerH <= 1){
+    } else {
+        error_exit("--minSeqsPerSnp must be < 100");
+    }
+    
+    
 
     if (locFile.empty()) {
         error_exit("locus file is empty, please provide a valid file!");

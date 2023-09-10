@@ -100,7 +100,7 @@ std::string SnpScanner::scanVar(Read* & r1) {
     return returnedlocus;
 }
 
-std::pair<bool,std::map<int, std::pair<Sequence, Sequence>>> SnpScanner::doAlignment(Options * & mOptions, std::string readName, const char* & qData, int qLength, std::string & targetName, const char* & tData, int tLength) {
+std::pair<bool,std::map<int, std::pair<Sequence, Sequence>>> SnpScanner::doAlignment(Options * & mOptions, std::string readName, const char* & qData, int qLength, std::string targetName, const char* & tData, int tLength) {
     EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
             edlibNewAlignConfig(mOptions->mLocVars.locVarOptions.maxScorePrimer,
             EDLIB_MODE_NW,
@@ -476,8 +476,25 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
             locSnpIt->ratioHaplo = 1;
             locSnpIt->genoStr3 = "homo";
         } else if(twoPeaks.size() == 2){//two alleles
+            const char* rchar1 = twoPeaks.front().first.c_str();
+            const char* rchar2 = twoPeaks.back().first.c_str();
+            auto mapPair = doAlignment(mOptions, "read1", rchar1, twoPeaks.front().first.length(),
+                    "read2", rchar2, twoPeaks.back().first.length());
+
+            if (mapPair.first) {
+                if (mapPair.second.size() < 2) {
+                    mOptions->mLocSnps.mLocSnpOptions.hmPer = mOptions->mLocSnps.mLocSnpOptions.hmPerL;
+                } else {
+                    mOptions->mLocSnps.mLocSnpOptions.hmPer = mOptions->mLocSnps.mLocSnpOptions.hmPerH;
+                }
+
+            } else {
+                mOptions->mLocSnps.mLocSnpOptions.hmPer = mOptions->mLocSnps.mLocSnpOptions.hmPerH;
+            }
+            
             locSnpIt->ratioHaplo = double(twoPeaks.front().second) / (twoPeaks.front().second + twoPeaks.back().second);
-            if(locSnpIt->ratioHaplo >= mOptions->mLocSnps.mLocSnpOptions.hmPer){//homo
+
+            if (locSnpIt->ratioHaplo >= mOptions->mLocSnps.mLocSnpOptions.hmPer) {//homo
                 twoPeaks.pop_back();
                 twoPeaks.shrink_to_fit();
                 locSnpIt->genoStr3 = "homo";//also include if it is heter against the ref, eg, ref: AA, target: CC;
@@ -489,6 +506,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
                 locSnpIt->genoStr3 = "inconclusive";
                 locSnpIt->totHaploReads += twoPeaks.back().second;
             }
+            
         }
 
         bool indel = false;
