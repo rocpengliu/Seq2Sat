@@ -468,10 +468,8 @@ void Options::readLocFile(){
         } 
     } else if(mVarType == snp) {
         mLocSnps.refLocMap.clear();
-        splitVec.reserve(5);
+        splitVec.reserve(7);
         std::vector<std::string> posVec;
-        std::vector<std::string> tmpSnpsVec;
-        Sequence rp("");
         while(fileIn.getline(line, maxLine)) {
             readed = strlen(line);
             if (line[readed - 1] == '\n' || line[readed - 1] == '\r') {
@@ -482,28 +480,46 @@ void Options::readLocFile(){
             }
             lineStr = std::string(line);
             splitStr(lineStr, splitVec);
-            if(splitVec.size() == 5){
+            if(splitVec.size() == 7){
                 LocSnp2 tmpLocSnp;
                 tmpLocSnp.name = splitVec[0];
                 tmpLocSnp.fp = splitVec[1];
                 tmpLocSnp.rp = revCom ? Sequence(splitVec[2]).reverseComplement().mStr : splitVec[2];
-                 if (splitVec[3].find("|") != std::string::npos) {
-                     splitStr(splitVec[3], posVec, "|");
-                 } else {
-                     posVec.push_back(splitVec[3]);
-                 }
+                tmpLocSnp.trimPos = std::make_pair(std::stoi(splitVec[3]), std::stoi(splitVec[4]));
                 
-                for(auto & itt : posVec){
-                    if(itt == "NA") break;
-                    tmpLocSnp.refSnpPosSet.insert(std::stoi(itt));
-                    tmpLocSnp.snpPosSetTrueHaplo.insert(std::stoi(itt));
-                    tmpLocSnp.snpPosSetHaplo.insert(std::stoi(itt));
-                    tmpLocSnp.totPosSet.insert(std::stoi(itt));
+                if (!(tmpLocSnp.trimPos.first >= 0 &&
+                        tmpLocSnp.trimPos.first < (splitVec[6].length() - tmpLocSnp.trimPos.second) &&
+                        tmpLocSnp.trimPos.second >= 0 &&
+                        tmpLocSnp.trimPos.second < (splitVec[6].length() - tmpLocSnp.trimPos.first))) {
+                    error_exit(tmpLocSnp.name  + " trimming site is not correct!");
+                }
+                
+                tmpLocSnp.ft = Sequence(splitVec[6].substr(0, tmpLocSnp.trimPos.first));
+                tmpLocSnp.rt = Sequence(splitVec[6].substr((splitVec[6].length() - tmpLocSnp.trimPos.second)));
+                tmpLocSnp.ref = splitVec[6].substr(tmpLocSnp.trimPos.first, splitVec[6].length() - tmpLocSnp.trimPos.second - tmpLocSnp.trimPos.first);
+                
+                if (splitVec[5].find("|") != std::string::npos) {
+                    splitStr(splitVec[5], posVec, "|");
+                } else {
+                    posVec.push_back(splitVec[5]);
+                }
+
+                for (auto & itt : posVec) {
+                    if (itt == "NA") break;
+                    auto pos = std::stoi(itt);
+                    if (pos > tmpLocSnp.trimPos.first && pos < (tmpLocSnp.trimPos.first + tmpLocSnp.ref.length())) {
+                        pos -= tmpLocSnp.trimPos.first;
+                        tmpLocSnp.refSnpPosSet.insert(pos);
+                        tmpLocSnp.snpPosSetTrueHaplo.insert(pos);
+                        tmpLocSnp.snpPosSetHaplo.insert(pos);
+                        tmpLocSnp.totPosSet.insert(pos);
+                    }
                 }
                 posVec.clear();
-                tmpLocSnp.ref = splitVec[4];
                 mLocSnps.refLocMap[tmpLocSnp.name] = tmpLocSnp;
                 //tmpLocSnp.print();
+            } else {
+                error_exit("Your locus " + lineStr + " does not have 7 columns!");
             }
             splitVec.clear();
         }

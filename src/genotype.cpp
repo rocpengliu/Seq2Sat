@@ -211,6 +211,27 @@ LocSnp2::LocSnp2(){
     this->isIndel = false;
     this->haploVec.clear();
     this->genoMap.clear();
+    this->ft = Sequence("");
+    this->rt = Sequence("");
+}
+
+
+void LocSnp2::print(){
+    std::string msg = "";
+    msg = "name: " + name + " -> " + std::to_string(totReads) + "\n";
+    msg += fp.mStr +  " :" + std::to_string(fp.mStr.length()) + "\n";
+    msg += ft.mStr +  " :" + std::to_string(ft.mStr.length()) + "\n";
+    msg += ref.mStr + " :" + std::to_string(ref.mStr.length()) + "\n";
+    msg += rt.mStr +  " :" + std::to_string(rt.mStr.length()) + "\n";
+    msg += rp.mStr +  " :" + std::to_string(rp.mStr.length()) + "\n";
+    cCout(msg, 'r');
+//    msg = "";
+//    if (!snpsMap.empty()) {
+//        for (const auto & it : snpsMap) {
+//            msg += std::to_string(it.first) + " : " + it.second.first.mStr + "|" + it.second.second.mStr + "\n";
+//        }
+//    }
+//    cCout(msg, 'b');
 }
 
 Sex::Sex(){

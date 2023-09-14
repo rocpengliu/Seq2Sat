@@ -74,23 +74,6 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true) 
                 fc = "white";
                 bc = "olive";
             }
-//            if (it.second.haploStr != "") {
-//                hap = it.second.haploStr;
-//                fc = "white";
-//                bc = "olive";
-//            } else {
-//                if (it.second.genoStr8 == "indel1") {
-//                    hap = "indel1";
-//                    fc = "white";
-//                    bc = "olive";
-//                } else if (it.second.genoStr8 == "indel2") {
-//                    hap = "indel2";
-//                    fc = "white";
-//                    bc = "olive";
-//                } else {
-//                    hap =  "seq error";
-//                }
-//            }
             ofs << "<tr>";
             ofs << "<td>" + std::to_string(i) + "</td>" + 
                     "<td>" + locSnp.name + "</td>" +
@@ -110,7 +93,7 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true) 
             std::string fc = it.second.color == "transparent" ? "black" : "white";
             ofs << "<tr>";
             ofs << "<td>" + std::to_string(i) + "</td>" + //ID
-                    "<td>" + std::to_string(it.first) + "</td>" + //Position
+                    "<td>" + std::to_string(it.first + locSnp.ft.length()) + "</td>" + //Position
                     "<td bgcolor='" + (it.second.color) + "'>" + //Genotype
                     "<font color='" + fc + "'>" + it.second.snp1 + "|" + it.second.snp2 + "</font></td>" +
                     "<td bgcolor='" + (it.second.color) + "'>" + //Putative Genotype
@@ -124,41 +107,6 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true) 
         }
     }
 }
-
-//void HtmlReporter::outputRow(ofstream& ofs, int & pos, SimSnp& simSnp, int & totReads) {
-//    int i = 1;
-//    for (auto & it : snpGenoMap) {
-//        
-//        std::string bgcol = "white";
-//        if(refSet.find(it.first) == refSet.end()){
-//            //if(it.second.geno[0] == it.second.geno[2]){
-//                bgcol = "orange";
-//           // }
-//        } else {
-//            if(it.second.geno[0] == it.second.geno[2]){
-//                bgcol = "green";
-//            } else {
-//                bgcol = "red";
-//            }
-//        }
-//        
-//        ofs << "<tr>";
-//        ofs << "<td>" + std::to_string(i) + "</td>" +//ID
-//                "<td>" + std::to_string(it.first) + "</td>" +//Position
-//                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" +//Genotype
-//                "<font color='" + (it.second.tORf ? "white" : "black") +  "'>" + it.second.geno + "</font></td>" +
-//                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" +//Putative Genotype
-//                "<font color='" + (it.second.tORf ? "white" : "black") +  "'>" + (it.second.tORf ? "yes" : "no") + "</font></td>" +
-//                "<td bgcolor='" + (it.second.tORf ? bgcol : "transparent") + "'>" + //original Genotype
-//                "<font color='" + (it.second.tORf ? "white" : "black") + "'>" + it.second.oGeno + "</font></td>" +
-//                "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.read1) + "</font></td>" +
-//                "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.read2) + "</font></td>" +
-//                "<td><font color='" + (((bgcol == "red" || bgcol == "orange") && it.second.tORf) ? "red" : "black") + "'>" + std::to_string(it.second.ratio) + "</font></td>" + 
-//                "<td>" + std::to_string(totReads) + "</font></td>";
-//                ofs << "</tr>\n";
-//        i++;
-//    }
-//}
 
 string HtmlReporter::formatNumber(long number) {
     double num = (double) number;
@@ -650,57 +598,53 @@ void HtmlReporter::reportAllSnps(ofstream& ofs) {
 }
 
 void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName, LocSnp2 & locSnp) {
+    ofs << "<div class='figurehalf' id='plot_h" + divName + "'></div>\n";
 
-    //auto it = mOptions->mLocSnps.refLocMap.find(marker);
-    //if (it != mOptions->mLocSnps.refLocMap.end()) {
-        ofs << "<div class='figurehalf' id='plot_h" + divName + "'></div>\n";
+    ofs << "<div class='sub_section_tips'><font color='red'>Target heter SNPs are highlighted with red, </font> <font color='green'>while target homo SNPs are highlighted with green, </font> <font color='orange'>new potential SNPs are in orange!</font></div>\n";
+    ofs << "<pre overflow: scroll>\n";
+    ofs << "<table class='summary_table' style='width:100%'>\n";
+    ofs << "<tr style='background:#cccccc'> <td>ID</td><td>Marker</td><td>SNPs</td><td>Haplotype</td><td>N. of Reads</td><td>Reads(%)</td><td>Total Reads</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
 
-        ofs << "<div class='sub_section_tips'><font color='red'>Target heter SNPs are highlighted with red, </font> <font color='green'>while target homo SNPs are highlighted with green, </font> <font color='orange'>new potential SNPs are in orange!</font></div>\n";
-        ofs << "<pre overflow: scroll>\n";
-        ofs << "<table class='summary_table' style='width:100%'>\n";
-        ofs << "<tr style='background:#cccccc'> <td>ID</td><td>Marker</td><td>SNPs</td><td>Haplotype</td><td>N. of Reads</td><td>Reads(%)</td><td>Total Reads</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
-        
-        ofs << "<tr style='color:blue'>";
-        ofs << "<td>0</td>" <<
-                "<td>Reference</td>" <<
-                "<td>ref</td>" <<
-                "<td>N.A.</td>" <<
-                "<td>N.A.</td>" <<
-                "<td>N.A.</td>" <<
-                "<td>N.A.</td>" <<
-                "<td>" + std::to_string(locSnp.ref.mStr.length()) + "</td>" <<
-                "<td align='center'>" + highligher(locSnp, true, locSnp.ref.mStr, locSnp.ref.mStr, locSnp.totPosSet) + "</td>";
-        ofs << "</tr>\n";
-        outputRow(ofs, locSnp, true);
-        ofs << "</table>\n";
-        ofs << "</pre>\n";
+    ofs << "<tr style='color:blue'>";
+    ofs << "<td>0</td>" <<
+            "<td>Reference</td>" <<
+            "<td>ref</td>" <<
+            "<td>N.A.</td>" <<
+            "<td>N.A.</td>" <<
+            "<td>N.A.</td>" <<
+            "<td>N.A.</td>" <<
+            "<td>" + std::to_string(locSnp.ft.length() + locSnp.ref.mStr.length() + locSnp.rt.length()) + "</td>" <<
+            "<td align='center'>" + highligher(locSnp, true, locSnp.ref.mStr, locSnp.ref.mStr, locSnp.totPosSet) + "</td>";
+    ofs << "</tr>\n";
+    outputRow(ofs, locSnp, true);
+    ofs << "</table>\n";
+    ofs << "</pre>\n";
 
-        if(locSnp.haploVec.empty()) return;
-        
-        ofs << "\n<script type=\"text/javascript\">" << endl;
+    if (locSnp.haploVec.empty()) return;
 
-        string json_str = "var data=[{";
-        //json_str += "x:['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],";
-        json_str += "x:['Allele', 'Allele'],";
-        json_str += "y:[" + std::to_string(get<2>(locSnp.haploVec[0])) + ", " + std::to_string(get<2>(locSnp.haploVec[1])) + "],";
-        json_str += "text: ['" + get<1>(locSnp.haploVec[0]) + "', '" + get<1>(locSnp.haploVec[1]) + "'],";
-        json_str += "width: [0.5, 0.5],";
-        json_str += "type:'bar', textposition: 'auto', ";
+    ofs << "\n<script type=\"text/javascript\">" << endl;
 
-        if(get<0>(locSnp.haploVec[0]) == get<0>(locSnp.haploVec[1])){
-            json_str += "marker:{color: ['darkgreen', 'darkgreen'], line: {color: 'white', width: 1.5}}";
-        } else {
-            json_str += "marker:{color: ['goldenrod', 'darkgreen'], line: {color: 'white', width: 1.5}}";
-        }
-        
-        json_str += "}];\n";
-        json_str += "var layout = {xaxis:{tickmode: 'array', tickvals:['" + get<1>(locSnp.haploVec[0]) + "', '" + get<1>(locSnp.haploVec[1]) + "'],  title:'" + "Haplotype" + "', automargin: true},";
-        json_str += "yaxis:{title:'Number of reads', automargin: true}, ";
-        json_str += "barmode: 'stack'};\n";
-        json_str += "Plotly.newPlot('plot_h" + divName + "', data, layout);\n";
-        ofs << json_str;
-        ofs << "</script>" << endl;
-    //}
+    string json_str = "var data=[{";
+    //json_str += "x:['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],";
+    json_str += "x:['Allele', 'Allele'],";
+    json_str += "y:[" + std::to_string(get<2>(locSnp.haploVec[0])) + ", " + std::to_string(get<2>(locSnp.haploVec[1])) + "],";
+    json_str += "text: ['" + get<1>(locSnp.haploVec[0]) + "', '" + get<1>(locSnp.haploVec[1]) + "'],";
+    json_str += "width: [0.5, 0.5],";
+    json_str += "type:'bar', textposition: 'auto', ";
+
+    if (get<0>(locSnp.haploVec[0]) == get<0>(locSnp.haploVec[1])) {
+        json_str += "marker:{color: ['darkgreen', 'darkgreen'], line: {color: 'white', width: 1.5}}";
+    } else {
+        json_str += "marker:{color: ['goldenrod', 'darkgreen'], line: {color: 'white', width: 1.5}}";
+    }
+
+    json_str += "}];\n";
+    json_str += "var layout = {xaxis:{tickmode: 'array', tickvals:['" + get<1>(locSnp.haploVec[0]) + "', '" + get<1>(locSnp.haploVec[1]) + "'],  title:'" + "Haplotype" + "', automargin: true},";
+    json_str += "yaxis:{title:'Number of reads', automargin: true}, ";
+    json_str += "barmode: 'stack'};\n";
+    json_str += "Plotly.newPlot('plot_h" + divName + "', data, layout);\n";
+    ofs << json_str;
+    ofs << "</script>" << endl;
 }
 
 void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string & divName, LocSnp2 & locSnp){
@@ -737,7 +681,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string & divName, LocS
     int i = 0;
     for (auto & it2 : locSnp.snpsMap) {
 
-        x_vec[i] = x_vec_2[i] = x_vec_3[i] = x_vec_4[i] = (std::to_string(it2.first) + it2.second.snp1 + "|" + it2.second.snp2);
+        x_vec[i] = x_vec_2[i] = x_vec_3[i] = x_vec_4[i] = (std::to_string(it2.first + locSnp.ft.length()) + it2.second.snp1 + "|" + it2.second.snp2);
 
         if(it2.second.snp1 == it2.second.snp2){
             if(it2.second.snp1 == 'A') {
@@ -1183,6 +1127,18 @@ std::string HtmlReporter::highligher(std::string & str, std::set<int> & snpsSet)
 
 std::string HtmlReporter::highligher(LocSnp2 & locSnp, bool ref, std::string refStr, std::string tarStr, std::set<int> & posSet) {
     if (ref) {
+        std::string ft = locSnp.ft.mStr;
+        for(int i = ft.length() -1; i >= 0; i--){
+            ft.insert(i + 1, "</mark4>");
+            ft.insert(i, "<mark4>");
+        }
+
+        std::string rt = locSnp.rt.mStr;
+        for (int i = rt.length() - 1; i >= 0; i--) {
+            rt.insert(i + 1, "</mark4>");
+            rt.insert(i, "<mark4>");
+        }
+        
         std::string hstr = locSnp.ref.mStr;
         for(auto it = locSnp.totPosSet.rbegin(); it != locSnp.totPosSet.rend(); it++) {
             if(locSnp.refSnpPosSet.find(*it) == locSnp.refSnpPosSet.end()){
@@ -1198,12 +1154,74 @@ std::string HtmlReporter::highligher(LocSnp2 & locSnp, bool ref, std::string ref
                 }
             }
         }
-        return hstr;
+        return (ft + hstr + rt);
+        
     } else {
+         std::string ft(locSnp.ft.length(), '*');
+         std::string rt(locSnp.rt.length(), '*');
+
         if (posSet.empty()) {
-            return tarStr;
-        } else {
+            return (ft + tarStr + rt);
+        } else {            
             std::string hstr = tarStr;
+//            for (int i = (tarStr.length() -1); i >= 0; i--) {
+//                if (posSet.find(i) == posSet.end()) {
+//                    
+//                    switch(tarStr[i]){
+//                        case 'A':
+//                            hstr.insert(i + 1, "</fontA>");
+//                            hstr.insert(i, "<fontA>");
+//                            break;
+//                        case 'C':
+//                            hstr.insert(i + 1, "</fontC>");
+//                            hstr.insert(i, "<fontC>");
+//                            break;
+//                        case 'G':
+//                            hstr.insert(i + 1, "</fontG>");
+//                            hstr.insert(i, "<fontG>");
+//                            break;
+//                        case 'T':
+//                            hstr.insert(i + 1, "</fontT>");
+//                            hstr.insert(i, "<fontT>");
+//                            break;
+//                        default:
+//                            break;
+//                    }
+//
+//                } else {
+//                    if (refStr[i] != tarStr[i]) {
+//                        if (locSnp.refSnpPosSet.find(i) == locSnp.refSnpPosSet.end()) {
+//                            hstr.insert(i + 1, "</mark2>");
+//                            hstr.insert(i, "<mark2>");
+//                        } else {
+//                            hstr.insert(i + 1, "</mark>");
+//                            hstr.insert(i, "<mark>");
+//                        }
+//                    } else {
+//                        switch (tarStr[i]) {
+//                            case 'A':
+//                                hstr.insert(i + 1, "</fontA>");
+//                                hstr.insert(i, "<fontA>");
+//                                break;
+//                            case 'C':
+//                                hstr.insert(i + 1, "</fontC>");
+//                                hstr.insert(i, "<fontC>");
+//                                break;
+//                            case 'G':
+//                                hstr.insert(i + 1, "</fontG>");
+//                                hstr.insert(i, "<fontG>");
+//                                break;
+//                            case 'T':
+//                                hstr.insert(i + 1, "</fontT>");
+//                                hstr.insert(i, "<fontT>");
+//                                break;
+//                            default:
+//                                break;
+//                        }
+//                    }
+//                }
+//            }
+
             for (auto it = posSet.rbegin(); it != posSet.rend(); it++) {
                 if(refStr[*it] != tarStr[*it]){
                     if (locSnp.refSnpPosSet.find(*it) == locSnp.refSnpPosSet.end()) {
@@ -1215,7 +1233,7 @@ std::string HtmlReporter::highligher(LocSnp2 & locSnp, bool ref, std::string ref
                     }
                 } 
             }
-            return hstr;
+            return (ft + hstr + rt);
         }
     }
 }
@@ -1264,6 +1282,11 @@ void HtmlReporter::printCSS(ofstream& ofs) {
     ofs << "mark{background-color: red; color: white;}" << endl;
     ofs << "mark2{background-color: orange; color: white;}" << endl;
     ofs << "mark3{background-color: green; color: white;}" << endl;
+    ofs << "mark4{background-color: gray;}" << endl;
+    ofs << "fontA{color: green;}" << endl;
+    ofs << "fontC{color: red;}" << endl;
+    ofs << "fontG{color: gray;}" << endl;
+    ofs << "fontT{color: blue;}" << endl;
     ofs << "pre{overflow: auto; width:0; min-width:100%;}" << endl;
     ofs << "</style>" << endl;
 }

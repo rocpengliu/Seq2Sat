@@ -292,8 +292,10 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
         // trim in head and tail, and apply quality cut in sliding window
         int frontTrimmed1 = 0;
         int frontTrimmed2 = 0;
-        Read* r1 = mFilter->trimAndCut(or1, mOptions->trim.front1, mOptions->trim.tail1, frontTrimmed1);
-        Read* r2 = mFilter->trimAndCut(or2, mOptions->trim.front2, mOptions->trim.tail2, frontTrimmed2);
+//        Read* r1 = mFilter->trimAndCut(or1, mOptions->trim.front1, mOptions->trim.tail1, frontTrimmed1);
+//        Read* r2 = mFilter->trimAndCut(or2, mOptions->trim.front2, mOptions->trim.tail2, frontTrimmed2);
+        Read* r1 = mFilter->trimAndCut(or1, 0, mOptions->trim.tail1, frontTrimmed1);
+        Read* r2 = mFilter->trimAndCut(or2, 0, mOptions->trim.tail2, frontTrimmed2);
 
         if(r1 != NULL && r2!=NULL) {
             if(mOptions->polyGTrim.enabled)

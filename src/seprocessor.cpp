@@ -255,7 +255,8 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
 
         int frontTrimmed = 0;
         // trim in head and tail, and apply quality cut in sliding window
-        Read* r1 = mFilter->trimAndCut(or1, mOptions->trim.front1, mOptions->trim.tail1, frontTrimmed);
+//        Read* r1 = mFilter->trimAndCut(or1, mOptions->trim.front1, mOptions->trim.tail1, frontTrimmed);
+        Read* r1 = mFilter->trimAndCut(or1, 0, 0, frontTrimmed);
 
         if(r1 != NULL) {
             if(mOptions->polyGTrim.enabled)

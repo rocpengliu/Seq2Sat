@@ -183,6 +183,9 @@ public:
     Sequence fp;
     Sequence rp;
     Sequence ref;
+    std::pair<int, int> trimPos;//  trim front and back for reference and reads
+    Sequence ft;//forward trimming region
+    Sequence rt;//reverse trimming region;
     std::set<int> snpPosSetTrueHaplo;//for haplotype; including ref, true haplotype; not the inconclusive ones; not used
     std::set<int> snpPosSetHaplo;//only for true haplotype snp positions. including ref snps; also include the inconclusive ones; for snp table;
     std::set<int> snpPosSet;//snps poitions including seq errors; for alignment table reference
@@ -199,6 +202,7 @@ public:
     //for ref is only homo, heter and inconclusive, for each variants, it could be homo, heter, inconclusive and seqerr (if it homo, but has seq errors)
     std::map<std::string, SimSnps> genoMap;//read is the key
     std::map<int, SimSnp> snpsMap;//position, snps, only include snps in the haloptypes; also the inconclusive ones;
+    void print();
 };
 
 struct ComparatorSnp {
