@@ -477,7 +477,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
         
         auto twoPeaks = getTop2MaxKeyValueVec(it.second);
         locSnpIt->totHaploReads = twoPeaks.front().second;
-           
+                  
         if(twoPeaks.size() == 1){//one homo allele
             locSnpIt->ratioHaplo = 1;
             locSnpIt->genoStr3 = "homo";
@@ -513,7 +513,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
             }
             
         }
-
+        
         bool indel = false;
         std::set<int> posCorr;//for correction if there are >= 2 snps and ratio is between 0.65 - 0.90 and inconclusive one
         for (const auto & it2 : it.second) {
@@ -653,7 +653,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
         }
         
         if (locSnpIt->genoMap.empty()) continue;
-
+        
         if (indel) {
             locSnpIt->isIndel = true;
         } else {
@@ -679,7 +679,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
         //std::set<int> totPosSet;//get total snps positions only for these true haplotypes also include the inconclusive ones
         
         locSnpIt->totPosSet.insert(locSnpIt->snpPosSet.begin(), locSnpIt->snpPosSet.end());
-
+        
         std::string haploStr1 = "";
         std::string haploStr2 = "";
 
@@ -794,8 +794,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
         for (const auto & it2 : locSnpIt->haploVec) {
             locSnpIt->genoMap[get<0>(it2)].haploStr = get<1>(it2);
             *fout2 << it.first << "\t" << get<1>(it2) << "\t" << get<2>(it2) << "\t" << get<3>(it2) << "\t" << locSnpIt->totHaploReads << "\t" << locSnpIt->totReads << "\t" << get<4>(it2) << "\t" << get<5>(it2) << "\t" << get<0>(it2) << "\n";
-        }
-        
+        }       
     }
     
     tmpSnpSeqsMap.clear();

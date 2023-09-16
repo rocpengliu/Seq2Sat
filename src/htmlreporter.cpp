@@ -65,14 +65,21 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true) 
             } else {
                 if (it.second.genoStr8 == "indel1") {
                     hap = "indel1";
+                    bc = "gray";
                 } else if (it.second.genoStr8 == "indel2") {
                     hap = "indel2";
+                    bc = "gray";
                 } else {
                     hap = it.second.haploStr;
+                    if (it.second.genoStr8 == "inHeter1") {
+                        bc = "gray";
+                    } else if (it.second.genoStr8 == "inHeter2") {
+                        bc = "gray";
+                    } else {
+                        bc = "olive";
+                    }
                 }
-                
                 fc = "white";
-                bc = "olive";
             }
             ofs << "<tr>";
             ofs << "<td>" + std::to_string(i) + "</td>" + 
@@ -97,7 +104,7 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true) 
                     "<td bgcolor='" + (it.second.color) + "'>" + //Genotype
                     "<font color='" + fc + "'>" + it.second.snp1 + "|" + it.second.snp2 + "</font></td>" +
                     "<td bgcolor='" + (it.second.color) + "'>" + //Putative Genotype
-                    "<font color='" + fc + "'>" + (it.second.genoStr3 != "inconclusive" ? "yes" : "no") + "</font></td>" +
+                    "<font color='" + fc + "'>" + (it.second.genoStr3 != "inconclusive" ? "yes" : "inconclusive") + "</font></td>" +
                     "<td>" + std::to_string(it.second.reads1) + "</td>" +
                     "<td>" + std::to_string(it.second.reads2) + "</td>" +
                     "<td>" + std::to_string(it.second.ratio) + "</td>" +
