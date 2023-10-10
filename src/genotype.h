@@ -194,6 +194,7 @@ public:
     int totReads;
     int maxReads;
     int totHaploReads;
+    int totEffectReads;//total reads after filtering, used to calculate error rate;
     double ratioHaplo; //ratio = big one / big one + small one; if 1 is homo,  if < jetter is heter, is <homo > jetter is inconclusive.
     std::vector<std::tuple<std::string, std::string, int, double, char, char>> haploVec;//seq, haplotype, num reads, num reads/totlhaploreads, conclusive or not (if CC  against ref AA with other heter is inconclusive; eg CA -> ref CG (A|G is inconclusive)), last is indel;
     //bool isHaplotype;//inconclusive is false;
@@ -203,6 +204,7 @@ public:
     std::map<std::string, SimSnps> genoMap;//read is the key
     std::map<int, SimSnp> snpsMap;//position, snps, only include snps in the haloptypes; also the inconclusive ones;
     void print();
+    std::map<int, double> baseErrorMap;//for error rate, int: pos, percentage error rate; 
 };
 
 struct ComparatorSnp {

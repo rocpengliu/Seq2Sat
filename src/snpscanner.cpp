@@ -458,12 +458,24 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
   
     *fout2 << "#Locus\tHaplotype\tNumReads\tReadsRatio\tTotalHaploReads\tTotalReads\tConclusive\tIndel\tMicroHaplotype\n";
     
+    
+    std::string foutName3 = mOptions->prefix + "_all_amplicon.txt";
+    std::ofstream * fout3 = new std::ofstream();
+    fout3->open(foutName3.c_str(), std::ofstream::out);
+    *fout3 << "#Locus\tAmplicon\tNumReads\tTotalReads\n";
+    
+    std::string foutName4 = mOptions->prefix + "_error_rate.txt";
+    std::ofstream * fout4 = new std::ofstream();
+    fout4->open(foutName4.c_str(), std::ofstream::out);
+    *fout4 << "#Locus\tErrorRate\totalEffectiveReads\n";
+    
     for(const auto & it : tmpSnpSeqsMap){
         if(mOptions->mLocSnps.refLocMap.find(it.first) == mOptions->mLocSnps.refLocMap.end()){
             continue;
         }
 
         LocSnp2* locSnpIt = &(mOptions->mLocSnps.refLocMap[it.first]);
+        std::map<int, std::map<char, int>> baseFreqMap;
         //std::set<int> posSet;
         
         for(const auto & it2 : it.second){
@@ -542,6 +554,9 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
             
             if(!go) continue;
             
+            locSnpIt->totEffectReads += it2.second;
+            *fout3 << it.first << "\t" << it2.first << "\t" << it2.second << "\t" << locSnpIt->totReads << "\n";
+            
             const char* target = locSnpIt->ref.mStr.c_str();
             int targetLength = locSnpIt->ref.length();
             const char* readSeq = it2.first.c_str();
@@ -554,6 +569,11 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
             auto mapPair = doAlignment(mOptions, "read", readSeq, readLength, locSnpIt->name, target, targetLength);
             
             if (mapPair.first) {//if there is not indel, that's true, including no snps
+                
+                //for sequence error rate;
+                for(int pos = 0; pos < it2.first.length(); pos++){
+                    baseFreqMap[pos][it2.first[pos]] += it2.second;
+                }
                  
                 if (!mapPair.second.empty()) {
                     for (auto & it3 : mapPair.second) {
@@ -772,6 +792,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
             }
 
         } else {
+            
             if (twoPeaks.size() == 1) {
                 if (locSnpIt->genoStr3 == "inconclusive") {
                     locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, (twoPeaks.front().second / 2), (double((twoPeaks.front().second / 2)) / locSnpIt->totHaploReads), 'N', 'N'));
@@ -779,6 +800,20 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
                 } else {
                     locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, (twoPeaks.front().second / 2), (double((twoPeaks.front().second / 2)) / locSnpIt->totHaploReads), 'Y', 'N'));
                     locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, (twoPeaks.front().second / 2), (double((twoPeaks.front().second / 2)) / locSnpIt->totHaploReads), 'Y', 'N'));
+                    
+                    for(int pos = 0; pos < twoPeaks.front().first.length(); pos++){
+                        int posReads = 0;
+                        auto posIt = baseFreqMap[pos].find(twoPeaks.front().first[pos]);
+                        if(posIt != baseFreqMap[pos].end()){
+                            for(const auto & posIt2 : baseFreqMap[pos]){
+                                if(posIt2.first != twoPeaks.front().first[pos]){
+                                    posReads += posIt2.second;
+                                }
+                            }
+                        }
+                        locSnpIt->baseErrorMap[pos] = static_cast<double>(posReads * 100) / static_cast<double>(locSnpIt->totEffectReads);
+                    }
+                    
                 }
             } else if (twoPeaks.size() == 2) {
                 if (locSnpIt->genoStr3 == "inconclusive") {
@@ -787,8 +822,46 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
                 } else {
                     locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.front().first, haploStr1, twoPeaks.front().second, (double(twoPeaks.front().second) / locSnpIt->totHaploReads), 'Y', 'N'));
                     locSnpIt->haploVec.push_back(std::make_tuple(twoPeaks.back().first, haploStr2, twoPeaks.back().second, (double(twoPeaks.back().second) / locSnpIt->totHaploReads), 'Y', 'N'));
+                    
+                    for (int pos = 0; pos < twoPeaks.front().first.length(); pos++) {
+                        int posReads = 0;
+
+                        if (twoPeaks.front().first[pos] == twoPeaks.back().first[pos]) {
+                            auto posIt = baseFreqMap[pos].find(twoPeaks.front().first[pos]);
+                            if (posIt != baseFreqMap[pos].end()) {
+                                for (const auto & posIt2 : baseFreqMap[pos]) {
+                                    if (posIt2.first != twoPeaks.front().first[pos]) {
+                                        posReads += posIt2.second;
+                                    }
+                                }
+                            }
+                        } else {
+                            auto posIt = baseFreqMap[pos].find(twoPeaks.front().first[pos]);
+                            auto posItb = baseFreqMap[pos].find(twoPeaks.back().first[pos]);
+                            if (posIt != baseFreqMap[pos].end() && posItb != baseFreqMap[pos].end()) {
+                                for (const auto & posIt2 : baseFreqMap[pos]) {
+                                    if (posIt2.first != twoPeaks.front().first[pos] && posIt2.first != twoPeaks.back().first[pos]) {
+                                        posReads += posIt2.second;
+                                    }
+                                }
+                            }
+                            
+                        }
+                        
+                        locSnpIt->baseErrorMap[pos] = static_cast<double>(posReads * 100) / static_cast<double>(locSnpIt->totEffectReads);
+                    }
+                    
                 }
             }
+            
+        }
+        
+        if(!locSnpIt->baseErrorMap.empty()){
+            *fout4 << it.first << "\t";
+            for(const auto & posIt : locSnpIt->baseErrorMap){
+                *fout4 << posIt.second << ";";
+            }
+            *fout4 << "\t" << locSnpIt->totEffectReads << "\n";
         }
         
         for (const auto & it2 : locSnpIt->haploVec) {
@@ -806,6 +879,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
         delete fout;
         fout = nullptr;
     }
+    
     if (mOptions->verbose) loginfo("Finished writing genotype table!");
 
     fout2->flush();
@@ -817,6 +891,24 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
     }
     
     if (mOptions->verbose) loginfo("Finished writing haplotype table!");
+    
+    fout3->flush();
+    fout3->clear();
+    fout3->close();
+    if(fout3 != nullptr){
+        delete fout3;
+        fout3 = nullptr;
+    }
+    if(mOptions->verbose) loginfo("Finished writing amplicon table!");
+    
+    fout4->flush();
+    fout4->clear();
+    fout4->close();
+    if(fout4 != nullptr){
+        delete fout4;
+        fout4 = nullptr;
+    }
+    if(mOptions->verbose) loginfo("Finished writing error rate table!");
     
     //return allGenotypeSnpMap;
 }

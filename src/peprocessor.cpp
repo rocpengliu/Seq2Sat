@@ -378,7 +378,7 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                             locus = config->getSnpScanner()->scanVar(merged);
                         }
 
-                        if (locus.empty()) {
+                        if (!locus.empty()) {
                             failedOutput += merged->toStringWithTag(locus);//bug here
                         } else {
                             outstr1 += r1->toString();

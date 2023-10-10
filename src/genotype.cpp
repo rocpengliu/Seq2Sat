@@ -206,6 +206,7 @@ LocSnp2::LocSnp2(){
     this->totReads = 0;
     this->maxReads = 0;
     this->totHaploReads = 0;
+    this->totEffectReads = 0;
     this->ratioHaplo = 0;
     this->genoStr3 = "seqerr";
     this->isIndel = false;
@@ -213,6 +214,7 @@ LocSnp2::LocSnp2(){
     this->genoMap.clear();
     this->ft = Sequence("");
     this->rt = Sequence("");
+    this->baseErrorMap.clear();
 }
 
 

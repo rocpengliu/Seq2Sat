@@ -6,7 +6,7 @@
 #include <string>
 #include <utility>
 
-#define SEQ2SAT_VER "0.2.0"
+#define SEQ2SAT_VER "0.2.0.1"
 
 #define _DEBUG false
 

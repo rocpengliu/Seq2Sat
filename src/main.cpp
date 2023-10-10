@@ -393,7 +393,7 @@ int main(int argc, char* argv[]){
         opt->out1 = cmd.get<string>("out1");
         opt->out2 = cmd.get<string>("out2");
         opt->prefix = cmd.get<string>("prefix");
-        opt->outFRFile = opt->prefix + "_failed_reads.fastq.gz";
+        opt->outFRFile = opt->prefix + "_output_reads.fastq.gz";
         opt->jsonFile = cmd.get<string>("json");
         opt->htmlFile = cmd.get<string>("html");
         opt->reportTitle = cmd.get<string>("report_title");
@@ -480,7 +480,7 @@ int main(int argc, char* argv[]){
             opt->prefix = it.prefix;
             opt->in1 = it.in1;
             opt->in2 = it.in2;
-            opt->outFRFile = opt->prefix + "_failed_reads.fastq.gz";
+            opt->outFRFile = opt->prefix + "_output_reads.fastq.gz";
             //opt->out1 = it.prefix + "_R1.fastq.gz";
            // opt->out2 = it.prefix + "_R2.fastq.gz";
             opt->jsonFile = it.prefix + ".json";

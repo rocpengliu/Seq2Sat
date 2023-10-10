@@ -302,7 +302,7 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
                 config->getSnpScanner()->scanVar(r1);
             }
 
-            if (locus.empty()) {
+            if (!locus.empty()) {
                 failedOutput += r1->toStringWithTag(locus);
             } else {
                 outstr += r1->toString();

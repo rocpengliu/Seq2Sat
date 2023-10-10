@@ -606,7 +606,10 @@ void HtmlReporter::reportAllSnps(ofstream& ofs) {
 
 void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName, LocSnp2 & locSnp) {
     ofs << "<div class='figurehalf' id='plot_h" + divName + "'></div>\n";
-
+    if(!locSnp.baseErrorMap.empty()){
+        ofs << "<div class='figurefull' id='plot_e" + divName + "'></div>\n";
+    }
+    
     ofs << "<div class='sub_section_tips'><font color='red'>Target heter SNPs are highlighted with red, </font> <font color='green'>while target homo SNPs are highlighted with green, </font> <font color='orange'>new potential SNPs are in orange!</font></div>\n";
     ofs << "<pre overflow: scroll>\n";
     ofs << "<table class='summary_table' style='width:100%'>\n";
@@ -631,6 +634,7 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName,
 
     ofs << "\n<script type=\"text/javascript\">" << endl;
 
+    //for bar plot of haplotype;
     string json_str = "var data=[{";
     //json_str += "x:['" + get<1>(it->second.haploVec[0]) + "', '" + get<1>(it->second.haploVec[1]) + "'],";
     json_str += "x:['Allele', 'Allele'],";
@@ -651,6 +655,32 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName,
     json_str += "barmode: 'stack'};\n";
     json_str += "Plotly.newPlot('plot_h" + divName + "', data, layout);\n";
     ofs << json_str;
+    
+    //for error rate line char
+
+    if (!locSnp.baseErrorMap.empty()) {
+        std::vector<int> keyV;
+        keyV.reserve(locSnp.baseErrorMap.size());
+        std::vector<double> valueV;
+        valueV.reserve(locSnp.baseErrorMap.size());
+        for(const auto & posIt : locSnp.baseErrorMap){
+            keyV.push_back(posIt.first);
+            valueV.push_back(posIt.second);
+        }
+        
+        json_str.clear();
+        json_str = "var data=[{";
+        json_str += "x:[" + Stats::list2string2(keyV, keyV.size()) + "],";
+        json_str += "y:[" + Stats::list2string2(valueV, valueV.size()) + "],";
+        json_str += "type:'scatter', mode: 'markers', marker:{color: 'red'}, textposition: 'auto'";
+        json_str += "}];\n";
+        json_str += "var layout = {xaxis:{title:'Position', automargin: true},";
+        json_str += "yaxis:{title:'Error rate (%)', automargin: true}";
+        json_str += "};\n";
+        json_str += "Plotly.newPlot('plot_e" + divName + "', data, layout);\n";
+        ofs << json_str;
+    }
+    
     ofs << "</script>" << endl;
 }
 
