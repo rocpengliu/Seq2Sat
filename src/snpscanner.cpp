@@ -467,7 +467,7 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
     std::string foutName4 = mOptions->prefix + "_error_rate.txt";
     std::ofstream * fout4 = new std::ofstream();
     fout4->open(foutName4.c_str(), std::ofstream::out);
-    *fout4 << "#Locus\tErrorRate\totalEffectiveReads\n";
+    *fout4 << "#Locus\tErrorRate\tTotalEffectiveReads\n";
     
     for(const auto & it : tmpSnpSeqsMap){
         if(mOptions->mLocSnps.refLocMap.find(it.first) == mOptions->mLocSnps.refLocMap.end()){
@@ -859,7 +859,12 @@ void SnpScanner::merge(Options * & mOptions, std::vector<std::map<std::string, s
         if(!locSnpIt->baseErrorMap.empty()){
             *fout4 << it.first << "\t";
             for(const auto & posIt : locSnpIt->baseErrorMap){
-                *fout4 << posIt.second << ";";
+                if(posIt.first == locSnpIt->baseErrorMap.rbegin()->first){
+                    *fout4 << posIt.second;
+                } else {
+                    *fout4 << posIt.second << ";";
+                }
+                
             }
             *fout4 << "\t" << locSnpIt->totEffectReads << "\n";
         }
