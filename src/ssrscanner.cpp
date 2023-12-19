@@ -2189,19 +2189,17 @@ std::string SsrScanner::scanVar (Read* & r1) {
             if (r1->mSeq.length() > (it.second.fp.length() + it.second.rp.length())) {
                 bool goRP = false;
                 int trimPosF = 0;
-                int fpMismatches = (int) edit_distance(it.second.fp.mStr, r1->mSeq.mStr.substr(0, it.second.fp.length()));
-                if (fpMismatches > mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
+                int fpMismatches = (int) edit_distance(it.second.fp.mStr, r1->mSeq.mStr.substr(0, it.second.fp.length()));             
+                 if (fpMismatches > mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
                     fpData = it.second.fp.mStr.c_str();
                     fpLength = it.second.fp.length();
                     auto endBoolF = doPrimerAlignment(fpData, fpLength, it.second.name, readSeq, readLength, r1->mName, true);
-                    
                     if (get<2>(endBoolF) && get<1>(endBoolF) <= readLength) {
                         fpMismatches = get<0>(endBoolF);
                         if(fpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
                             if ((get<1>(endBoolF) + it.second.ff.length() + it.second.rf.length() + it.second.rp.length()) <= r1->length()) {
                                 trimPosF = get<1>(endBoolF);
                                 goRP = true;
-                                //if(bprint) nnumberF++;
                             } else {
                                 goRP = false;
                             }
@@ -2210,11 +2208,10 @@ std::string SsrScanner::scanVar (Read* & r1) {
                         }
                     }
                 } else {
-                    trimPosF = locVarIt->fp.length();
+                    trimPosF = it.second.fp.length();
                     goRP = true;
-                    //if(bprint) nnumberF++;
                 }
-                
+                 
                 if (goRP && (fpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) && (r1->length() >= it.second.rp.length() + it.second.rf.length() + it.second.ff.length())) {
                     int rpMismatches = (int) edit_distance(it.second.rp.mStr, r1->mSeq.mStr.substr(r1->mSeq.length() - it.second.rp.length()));
                     if (rpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {

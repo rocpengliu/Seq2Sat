@@ -72,8 +72,7 @@ void PairEndProcessor::closeOutput() {
 void PairEndProcessor::initConfig(ThreadConfig* config) {
     if(mOptions->out1.empty())
         return;
-}
-
+}\
 
 bool PairEndProcessor::process(){
     initOutput();
@@ -266,7 +265,6 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
     string failedOutput;
     int readPassed = 0;
     int mergedCount = 0;
-    //if(mOptions->debug) cCout("starting consuming reads pack");
     for(int p=0;p<pack->count;p++){
         ReadPair* pair = pack->data[p];
         Read* or1 = pair->mLeft;
@@ -515,7 +513,6 @@ void PairEndProcessor::producerTask(){
     bool needToBreak = false;
     if(mOptions->debug) cCout("start to read data: " + mOptions->in1 + " and " + mOptions->in2);
     while(true){
-        //if(mOptions->debug) cCout("reading data 1");
         ReadPair* read = reader.read();
         // TODO: put needToBreak here is just a WAR for resolve some unidentified dead lock issue 
         if(!read || needToBreak){
@@ -630,8 +627,7 @@ void PairEndProcessor::consumerTask(ThreadConfig* config){
     }
 }
 
-void PairEndProcessor::writeTask(WriterThread* config)
-{
+void PairEndProcessor::writeTask(WriterThread* config){
     while(true) {
         if(config->isCompleted()){
             // last check for possible threading related issue
