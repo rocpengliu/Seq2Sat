@@ -60,7 +60,7 @@ int main(int argc, char* argv[]){
     cmd.add<double>("maxVarRatio", 0, "ratio of two heter alleles based on variations either in flanking regions or MRA, the ideal is 1, default: 1.5", false, 1.5);
     
     //for snp;
-    cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 15 means the percentage of reads with SNPs to total reads are from 40 - 60 %, must be coupled with hmPer, default: 15", false, 15);
+    cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 15 means the percentage of reads with SNPs to total reads are from 35 - 65 %, must be coupled with hmPer, default: 15", false, 15);
     cmd.add<int>("hmPerH", 0, "allele is considered as homo when its reads against total reads is > 90 % and there are at least 2 true SNPs, must be coupled with htJetter and hmPerL, must be > hmPerL. default: 90", false, 90);
     cmd.add<int>("hmPerL", 0, "allele is considered as homo when its reads against total reads is > 80 % and there are at most 1 true SNP, must be coupled with htJetter and hmPerH, must be < hmPerH and > htJetter + 50. default: 80", false, 80);
     cmd.add<int>("minSeqsPerSnp", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%)", false, 10);
@@ -104,10 +104,10 @@ int main(int argc, char* argv[]){
     cmd.add("detect_adapter_for_pe", 0, "by default, the auto-detection for adapter is for SE data input only, turn on this option to enable it for PE data.");
 
     // trimming
-    //cmd.add<int>("trim_front1", 'f', "trimming how many bases in front for read1, default is 0", false, 0);
+    cmd.add<int>("trim_front1", 'f', "trimming how many bases in front for read1, default is 0", false, 0);
     cmd.add<int>("trim_tail1", 't', "trimming how many bases in tail for read1, default is 0", false, 0);
     cmd.add<int>("max_len1", 'b', "if read1 is longer than max_len1, then trim read1 at its tail to make it as long as max_len1. Default 0 means no limitation", false, 0);
-    //cmd.add<int>("trim_front2", 'F', "trimming how many bases in front for read2. If it's not specified, it will follow read1's settings", false, 0);
+    cmd.add<int>("trim_front2", 'F', "trimming how many bases in front for read2. If it's not specified, it will follow read1's settings", false, 0);
     cmd.add<int>("trim_tail2", 'T', "trimming how many bases in tail for read2. If it's not specified, it will follow read1's settings", false, 0);
     cmd.add<int>("max_len2", 'B', "if read2 is longer than max_len2, then trim read2 at its tail to make it as long as max_len2. Default 0 means no limitation. If it's not specified, it will follow read1's settings", false, 0);
 
@@ -135,7 +135,7 @@ int main(int argc, char* argv[]){
 
     // quality filtering
     cmd.add("disable_quality_filtering", 'Q', "quality filtering is enabled by default. If this option is specified, quality filtering is disabled");
-    cmd.add<int>("qualified_quality_phred", 'q', "the quality value that a base is qualified. Default 20 means phred quality >=Q15 is qualified.", false, 20);
+    cmd.add<int>("qualified_quality_phred", 'q', "the quality value that a base is qualified. Default 20 means phred quality >=Q20 is qualified.", false, 20);
     cmd.add<int>("unqualified_percent_limit", 'u', "how many percents of bases are allowed to be unqualified (0~100). Default 40 means 40%", false, 40);
     cmd.add<int>("n_base_limit", 'n', "if one read's number of N base is >n_base_limit, then this read/pair is discarded. Default is 5", false, 5);
     cmd.add<int>("average_qual", 'e', "if one read's average quality score <avg_qual, then this read/pair is discarded. Default 0 means no requirement", false, 0);
@@ -246,14 +246,14 @@ int main(int argc, char* argv[]){
     }
 
     // trimming
-    //opt->trim.front1 = cmd.get<int>("trim_front1");
+    opt->trim.front1 = cmd.get<int>("trim_front1");
     opt->trim.tail1 = cmd.get<int>("trim_tail1");
     opt->trim.maxLen1 = cmd.get<int>("max_len1");
     // read2 settings follows read1 if it's not specified
-//    if(cmd.exist("trim_front2"))
-//        opt->trim.front2 = cmd.get<int>("trim_front2");
-//    else
-//        opt->trim.front2 = opt->trim.front1;
+    if(cmd.exist("trim_front2"))
+        opt->trim.front2 = cmd.get<int>("trim_front2");
+    else
+        opt->trim.front2 = opt->trim.front1;
     
     if(cmd.exist("trim_tail2"))
         opt->trim.tail2 = cmd.get<int>("trim_tail2");

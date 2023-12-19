@@ -68,6 +68,7 @@ private:
     WriterThread* mFailedWriter;
     Duplicate* mDuplicate;
     SsrScanner* mSsrScanner;
+    int nnumber;
 };
 
 

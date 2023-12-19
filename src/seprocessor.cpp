@@ -27,6 +27,7 @@ SingleEndProcessor::SingleEndProcessor(Options* opt){
         mDuplicate = new Duplicate(mOptions);
     }
     mSsrScanner = new SsrScanner(opt);
+    nnumber = 0;
 }
 
 SingleEndProcessor::~SingleEndProcessor() {
@@ -255,8 +256,8 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
 
         int frontTrimmed = 0;
         // trim in head and tail, and apply quality cut in sliding window
-//        Read* r1 = mFilter->trimAndCut(or1, mOptions->trim.front1, mOptions->trim.tail1, frontTrimmed);
-        Read* r1 = mFilter->trimAndCut(or1, 0, 0, frontTrimmed);
+        Read* r1 = mFilter->trimAndCut(or1, mOptions->trim.front1, mOptions->trim.tail1, frontTrimmed);
+        //Read* r1 = mFilter->trimAndCut(or1, 0, 0, frontTrimmed);
 
         if(r1 != NULL) {
             if(mOptions->polyGTrim.enabled)
@@ -291,7 +292,7 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
 
             locus.clear();
 
-            if (mOptions->mVarType == ssr) {
+            if (mOptions->mVarType == ssr) {     
                 locus = config->getSsrScanner()->scanVar(r1);
                 size_t found = locus.find("_failed");
                 if (found != std::string::npos && found == (locus.length() - 7)) {
@@ -301,7 +302,7 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
             } else {
                 config->getSnpScanner()->scanVar(r1);
             }
-
+      
             if (!locus.empty()) {
                 failedOutput += r1->toStringWithTag(locus);
             } else {

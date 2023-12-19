@@ -2183,23 +2183,54 @@ std::string SsrScanner::scanVar (Read* & r1) {
         returnedlocus = mOptions->mSex.sexMarker + "_true";
     } else {
 
-        std::map<std::string, std::pair<int, int>> locMap; //loci, seq score, trimpos;
+        std::map<std::string, std::tuple<int, int, int>> locMap; //loci, seq score, trimposF, trimposR;
 
         for (auto & it : mOptions->mLocVars.refLocMap) {
             if (r1->mSeq.length() > (it.second.fp.length() + it.second.rp.length())) {
+                bool goRP = false;
+                int trimPosF = 0;
                 int fpMismatches = (int) edit_distance(it.second.fp.mStr, r1->mSeq.mStr.substr(0, it.second.fp.length()));
-                if (fpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
+                if (fpMismatches > mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
+                    fpData = it.second.fp.mStr.c_str();
+                    fpLength = it.second.fp.length();
+                    auto endBoolF = doPrimerAlignment(fpData, fpLength, it.second.name, readSeq, readLength, r1->mName, true);
+                    
+                    if (get<2>(endBoolF) && get<1>(endBoolF) <= readLength) {
+                        fpMismatches = get<0>(endBoolF);
+                        if(fpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
+                            if ((get<1>(endBoolF) + it.second.ff.length() + it.second.rf.length() + it.second.rp.length()) <= r1->length()) {
+                                trimPosF = get<1>(endBoolF);
+                                goRP = true;
+                                //if(bprint) nnumberF++;
+                            } else {
+                                goRP = false;
+                            }
+                        } else {
+                            goRP = false;
+                        }
+                    }
+                } else {
+                    trimPosF = locVarIt->fp.length();
+                    goRP = true;
+                    //if(bprint) nnumberF++;
+                }
+                
+                if (goRP && (fpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) && (r1->length() >= it.second.rp.length() + it.second.rf.length() + it.second.ff.length())) {
                     int rpMismatches = (int) edit_distance(it.second.rp.mStr, r1->mSeq.mStr.substr(r1->mSeq.length() - it.second.rp.length()));
                     if (rpMismatches <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
-                        locMap[it.second.name] = std::make_pair((fpMismatches + rpMismatches), readLength - it.second.fp.mStr.length() - it.second.rp.mStr.length());
+                        //if(bprint) nnumberR++;
+                        locMap[it.second.name] = std::make_tuple((fpMismatches + rpMismatches), trimPosF, (readLength - trimPosF - it.second.rp.mStr.length()));
+                        //locMap[it.second.name] = std::make_pair((fpMismatches + rpMismatches), readLength - it.second.fp.mStr.length() - it.second.rp.mStr.length());
                         //should punish if there are mismatches in fp; 
                         //and could not be the best if there are indel in the head of the rp
                     } else {
-                        fpData = it.second.rp.mStr.c_str();
-                        fpLength = it.second.rp.length();
-                        auto endBool = doPrimerAlignment(fpData, fpLength, it.second.name, readSeq, readLength, r1->mName, true);
+                        rpData = it.second.rp.mStr.c_str();
+                        rpLength = it.second.rp.length();
+                        auto endBool = doPrimerAlignment(rpData, rpLength, it.second.name, readSeq, readLength, r1->mName, true);
                         if (get<2>(endBool) && get<1>(endBool) <= readLength) {
-                            locMap[it.second.name] = std::make_pair((fpMismatches + get<0>(endBool)), get<1>(endBool) - it.second.fp.mStr.length() - it.second.rp.mStr.length());
+                            //if(bprint) nnumberR++;
+                            locMap[it.second.name] = std::make_tuple((fpMismatches + get<0>(endBool)), trimPosF, (get<1>(endBool) - trimPosF - it.second.rp.mStr.length()));
+                            //locMap[it.second.name] = std::make_pair((fpMismatches + get<0>(endBool)), get<1>(endBool) - it.second.fp.mStr.length() - it.second.rp.mStr.length());
                         }
                     }
                 }
@@ -2215,14 +2246,14 @@ std::string SsrScanner::scanVar (Read* & r1) {
             } else {
                 std::vector<int> seqScoreVec;
                 for (const auto & it : locMap) {
-                    seqScoreVec.push_back(it.second.first);
+                    seqScoreVec.push_back(get<0>(it.second));
                 }
                 auto minValue = *std::min_element(seqScoreVec.begin(), seqScoreVec.end());
                 //warning, what if there are multiple identical values
                 seqScoreVec.clear();
 
                 for (const auto & it : locMap) {
-                    if (it.second.first == minValue) {
+                    if (get<0>(it.second) == minValue) {
                         locName = it.first;
                         ss.str();
                         break; //warning, what if there are multiple identical values
@@ -2231,9 +2262,10 @@ std::string SsrScanner::scanVar (Read* & r1) {
             }
 
             locVarIt = &(mOptions->mLocVars.refLocMap[locName]);
-            r1->trimFront(locVarIt->fp.length());
-            r1->resize(locMap[locName].second);
+            r1->trimFront(get<1>(locMap[locName]));
+            r1->resize(get<2>(locMap[locName]));
             locMap.clear();
+            
             minReadLen = std::max(locVarIt->ff.length(), locVarIt->rf.length()) +
                     mOptions->mLocVars.locVarOptions.minNSSRUnit * (locVarIt->repuit.mStr.length() + locVarIt->repuit2.mStr.length());
             if (r1->length() < minReadLen) {
@@ -2241,6 +2273,8 @@ std::string SsrScanner::scanVar (Read* & r1) {
                 return (returnedlocus);
             }
           
+            
+            
             std::map<std::string, std::map < std::string, Genotype>>::iterator itGenotypeMap = tmpAllGenotypeMap.find(locVarIt->name);
             std::map<std::string, Genotype> tmpGenotypeMap;
             Genotype* tmpGenotype = new Genotype();

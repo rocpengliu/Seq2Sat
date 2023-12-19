@@ -128,6 +128,9 @@ private:
     uint32 mismachesFF;
     uint32 mismachesRF;
     int minReadLen;
+    int nnumberF;
+    int nnumberR;
+    int nnumber;
 };
 
 #endif /* SSRSCANNER_H */
