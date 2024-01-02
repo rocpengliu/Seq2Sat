@@ -64,15 +64,15 @@ int main(int argc, char* argv[]){
     cmd.add<int>("hmPerH", 0, "allele is considered as homo when its reads against total reads is > 90 % and there are at least 2 true SNPs, must be coupled with htJetter and hmPerL, must be > hmPerL. default: 90", false, 90);
     cmd.add<int>("hmPerL", 0, "allele is considered as homo when its reads against total reads is > 80 % and there are at most 1 true SNP, must be coupled with htJetter and hmPerH, must be < hmPerH and > htJetter + 50. default: 80", false, 80);
     cmd.add<int>("minSeqsPerSnp", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%)", false, 10);
+    cmd.add<int>("minReads4Filter", 0, "minimum reads for filtering read variant. if the maximum reads of haplotype is more than this, the low abundance read variants will be filtered, otherwise will be kept. This is used for the shallow sequencing. default: 50", false, 50);
+    
     //for sex
     cmd.add<string>("sex", 0, "sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by '\t", false, "");
     cmd.add<unsigned int>("maxMismatchesSexPSeq", 0, "maximum number of mismatches for sex primers, default: 2", false, 2);
     cmd.add<unsigned int>("maxMismatchesSexRefSeq", 0, "maximum number of mismatches for sex reference sequences, default: 2", false, 2);
     cmd.add<double>("yxRatio", 0, "minimum ratio of numbers of reads Y/X to W/Z, default: 0.001", false, 0.001);
-    cmd.add<int>("minTotalReadsX", 0, "minimum number of reads assigned to X; default: 10", false, 10);
-    cmd.add<int>("minTotalReadsY", 0, "minimum number of reads assigned to Y; default: 10", false, 10);
-    cmd.add<int>("minReadsX", 0, "minimum number of reads assigned to each variant of X; default: 5", false, 5);
-    cmd.add<int>("minReadsY", 0, "minimum number of reads assigned to each variant of Y; default: 5", false, 5);
+    cmd.add<int>("minReadsSexAllele", 0, "minimum number of reads assigned to each sex allele of X or Y; default: 10", false, 10);
+    cmd.add<int>("minReadsSexVariant", 0, "minimum number of reads assigned to each sex variant of X or Y; default: 5", false, 5);
     
     cmd.add("debug", 0, "If specified, print debug");
     
@@ -188,8 +188,26 @@ int main(int argc, char* argv[]){
     opt->mEdOptions.silent = cmd.exist("silentAlignment");
     opt->mEdOptions.printRes = cmd.exist("printResults");
     opt->mEdOptions.format = cmd.get<string>("format");
+
+    opt->sexFile = cmd.get<string>("sex");
+    opt->mSex.mismatchesPF = opt->mSex.mismatchesPR = cmd.get<unsigned int>("maxMismatchesSexPSeq");
+    opt->mSex.mismatchesRX = opt->mSex.mismatchesRY = cmd.get<unsigned int>("maxMismatchesSexRefSeq");
+    opt->mSex.YXRationCuttoff = cmd.get<double>("yxRatio");
+    opt->mSex.minReadsSexAllele = cmd.get<int>("minReadsSexAllele");
+    opt->mSex.minReadsSexVariant = cmd.get<int>("minReadsSexVariant");
+
+    opt->mLocVars.locVarOptions.maxScore = cmd.get<int>("maxScore");
+    opt->mLocVars.locVarOptions.numBestSeqs = cmd.get<int>("numBestSeqs");
+    opt->mLocVars.locVarOptions.coreRep = cmd.get<int>("core");
         
-    if (opt->var == "ssr") {
+    if (opt->var == "snp" || opt->sexFile != "") {
+        opt->mLocSnps.mLocSnpOptions.minSeqs = cmd.get<int>("minSeqs");
+        opt->mLocSnps.mLocSnpOptions.minSeqsPer = (double) cmd.get<int>("minSeqsPerSnp") / 100.00;
+        opt->mLocSnps.mLocSnpOptions.htJetter = (double) cmd.get<int>("htJetter") / 100.00;
+        opt->mLocSnps.mLocSnpOptions.hmPerH = (double) cmd.get<int>("hmPerH") / 100.00;
+        opt->mLocSnps.mLocSnpOptions.hmPerL = (double) cmd.get<int>("hmPerL") / 100.00;
+        opt->mLocSnps.mLocSnpOptions.minReads4Filter = cmd.get<int>("minReads4Filter");
+    } else {
         opt->mLocVars.locVarOptions.maxMismatchesPSeq = cmd.get<int>("maxMismatchesPSeq");
         opt->mLocVars.locVarOptions.maxMismatchesPer4FR = cmd.get<double>("maxMismatchesPer4FR");
         opt->mLocVars.locVarOptions.minSeqs = cmd.get<int>("minSeqs");
@@ -198,27 +216,10 @@ int main(int argc, char* argv[]){
         opt->mLocVars.locVarOptions.hlRatio1 = cmd.get<double>("hlRatio1");
         opt->mLocVars.locVarOptions.hlRatio2 = cmd.get<double>("hlRatio2");
         opt->mLocVars.locVarOptions.varRatio = cmd.get<double>("maxVarRatio");
-        opt->mLocVars.locVarOptions.maxScore = cmd.get<int>("maxScore");
-        opt->mLocVars.locVarOptions.numBestSeqs = cmd.get<int>("numBestSeqs");
-        opt->mLocVars.locVarOptions.coreRep = cmd.get<int>("core");
-    } else {
-        opt->mLocSnps.mLocSnpOptions.minSeqs = cmd.get<int>("minSeqs");
-        opt->mLocSnps.mLocSnpOptions.minSeqsPer = (double) cmd.get<int>("minSeqsPerSnp") / 100.00;
-        opt->mLocSnps.mLocSnpOptions.htJetter = (double) cmd.get<int>("htJetter") / 100.00;
-        opt->mLocSnps.mLocSnpOptions.hmPerH = (double) cmd.get<int>("hmPerH") / 100.00;
-        opt->mLocSnps.mLocSnpOptions.hmPerL = (double) cmd.get<int>("hmPerL") / 100.00;
     }
     opt->locFile = cmd.get<string>("loc");
     opt->revCom = cmd.exist("revCom");
     
-    opt->sexFile = cmd.get<string>("sex");
-    opt->mSex.mismatchesPF = opt->mSex.mismatchesPR = cmd.get<unsigned int>("maxMismatchesSexPSeq");
-    opt->mSex.mismatchesRX = opt->mSex.mismatchesRY = cmd.get<unsigned int>("maxMismatchesSexRefSeq");
-    opt->mSex.YXRationCuttoff = cmd.get<double>("yxRatio");
-    opt->mSex.minTotalReadsX = cmd.get<int>("minTotalReadsX");
-    opt->mSex.minTotalReadsY = cmd.get<int>("minTotalReadsY");
-    opt->mSex.minReadsX = cmd.get<int>("minReadsX");
-    opt->mSex.minReadsY = cmd.get<int>("minReadsY");
     
     //opt->mergerOverlappedPE = cmd.exist("dont_merge_overlapped_PE") ? false : true;
     

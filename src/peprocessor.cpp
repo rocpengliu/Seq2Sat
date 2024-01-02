@@ -72,7 +72,7 @@ void PairEndProcessor::closeOutput() {
 void PairEndProcessor::initConfig(ThreadConfig* config) {
     if(mOptions->out1.empty())
         return;
-}\
+}
 
 bool PairEndProcessor::process(){
     initOutput();
@@ -141,12 +141,13 @@ bool PairEndProcessor::process(){
         preStats2.push_back(configs[t]->getPreStats2());
         postStats2.push_back(configs[t]->getPostStats2());
         filterResults.push_back(configs[t]->getFilterResult());
+        if(!mOptions->mSex.sexMarker.empty()){
+            totalSexLocVec.emplace_back(configs[t]->getSexScanner()->getSexLoc());
+        }
         if (mOptions->mVarType == ssr) {
             totalGenotypeSsrMapVec.push_back(configs[t]->getSsrScanner()->getGenotypeMap());
-            totalSexLocVec.emplace_back(configs[t]->getSsrScanner()->getSexLoc());
         } else if(mOptions->mVarType == snp){
             totalSnpSeqMapVec.push_back(configs[t]->getSnpScanner()->getSubSeqsMap());
-            //totalSexLocVec.emplace_back(configs[t]->getSnpScanner()->getSexLoc());
         }
     }
     Stats* finalPreStats1 = Stats::merge(preStats1);
@@ -160,11 +161,13 @@ bool PairEndProcessor::process(){
     //std::map<std::string, std::map<std::string, LocSnp2>> allSnpsMap;
     //std::vector<std::map<std::string, std::vector<std::pair < std::string, LocSnp2>>>> sortedAllSnpsMapVec;
 
+    if (!mOptions->mSex.sexMarker.empty()) {
+        SexScanner::merge(totalSexLocVec, mOptions);
+        SexScanner::report(mOptions);
+    }
+    
     if (mOptions->mVarType == ssr) {
          allGenotypeMap = SsrScanner::merge(totalGenotypeSsrMapVec);
-         if(!mOptions->mSex.sexMarker.empty()){
-             SsrScanner::merge(totalSexLocVec, mOptions);
-         }
          sortedAllGenotypeMapVec = SsrScanner::report(mOptions, allGenotypeMap);
          if(!mOptions->samples.empty()){
              for(auto & it : mOptions->samples){
@@ -361,19 +364,31 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                     Read* merged = OverlapAnalysis::merge(r1, r2, ov);
                     int result = mFilter->passFilter(merged);
                     if (result == PASS_FILTER) {
-                        
                         locus.clear();
-
-                        if (mOptions->mVarType == ssr) {
-                            locus = config->getSsrScanner()->scanVar(merged);
-                            size_t found = locus.find("_failed");
-                            if(found != std::string::npos && found == (locus.length() - 7)){
-                                auto revReads = merged->reverseComplement();
-                                locus = config->getSsrScanner()->scanVar(revReads);
+                        bool goGeno = false;
+                        if(!mOptions->mSex.sexMarker.empty()){
+                            auto rep = config->getSexScanner()->sexScan(merged);
+                            if (rep.first) {
+                                locus = rep.second;
+                                goGeno = false;
+                            } else {
+                                goGeno = true;
                             }
-                            
                         } else {
-                            locus = config->getSnpScanner()->scanVar(merged);
+                            goGeno = true;
+                        }
+
+                        if (goGeno) {
+                            if (mOptions->mVarType == ssr) {
+                                locus = config->getSsrScanner()->scanVar(merged);
+                                size_t found = locus.find("_failed");
+                                if (found != std::string::npos && found == (locus.length() - 7)) {
+                                    auto revReads = merged->reverseComplement();
+                                    locus = config->getSsrScanner()->scanVar(revReads);
+                                }
+                            } else {
+                                locus = config->getSnpScanner()->scanVar(merged);
+                            }
                         }
 
                         if (!locus.empty()) {

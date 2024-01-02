@@ -65,6 +65,7 @@ private:
     void reportSnpAlignmentTable(ofstream& ofs, std::string & divName, LocSnp2 & locSnp);
     void reportSnpTablePlot(ofstream& ofs, std::string & divName, LocSnp2 & locSnp);
     void reportSex(ofstream & ofs);
+    void reportSeqError(ofstream& ofs, std::string & divName);
     
 private:
     Options* mOptions;

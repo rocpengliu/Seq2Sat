@@ -420,54 +420,88 @@ void HtmlReporter::reportSex(ofstream & ofs) {
     ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
 
     ofs << "<div class='figure' id='plot_" + divName + "'></div>\n";
+    if(!(mOptions->mSex.baseErrorMapX.empty() && mOptions->mSex.baseErrorMapY.empty())){
+        ofs << "<div class='figure' id='plot_sex_e" + divName + "'></div>\n";
+    }
 
-    ofs << "<div class='sub_section_tips'>SNPs are highlighted with red background</div>\n";
+    ofs << "<div class='sub_section_tips'>SNPs/artifacts are highlighted in red</div>\n";
     ofs << "<pre overflow: scroll>\n";
     ofs << "<table class='summary_table' style='width:100%'>\n";
-    ofs << "<tr style='background:#cccccc'> <td>Sex allele</td><td>N. of Reads</td><td>Percentage(%)</td><td>Allele Size</td><td align='center'>Sequence</td></tr>\n";
+    ofs << "<tr style='background:#cccccc'> <td>Sex allele</td><td>N. of Reads</td><td>Percentage(%)</td><td>Haplotype</td><td>Allele Size</td><td align='center'>Sequence</td></tr>\n";
 
     if (!mOptions->mSex.sexMarker.empty()) {
-        std::string tmpRefStr = mOptions->mSex.primerF.mStr + mOptions->mSex.refX.mStr + mOptions->mSex.primerR.mStr;
-        ofs << "<tr style='color:blue'>";
-        ofs << "<td>Ref. X</td>" <<
-                "<td>N.A.</td>" <<
-                "<td>N.A.</td>" <<
-                "<td>" + std::to_string(mOptions->mSex.primerF.length() + mOptions->mSex.refX.length() + mOptions->mSex.primerR.length()) + "</td>" <<
-                "<td align='center'>" + highligher(tmpRefStr, mOptions->mSex.snpsRefX) + "</td>";
-        ofs << "</tr>";
-        //outputRow(ofs, marker, snpsMap);
-
-        if (!mOptions->mSex.seqVecX.empty()) {
-            for (auto & it : mOptions->mSex.seqVecX) {
-                ofs << "<tr>";
-                ofs << "<td>X</td>" <<
-                        "<td>" + std::to_string(get<1>(it)) + "</td>" <<
-                        "<td>" + std::to_string((double) get<1>(it) * 100.00 / (double) mOptions->mSex.readsX) + "</td>" <<
-                        "<td>" + std::to_string(get<0>(it).length()) + "</td>" <<
-                        "<td align='center'>" + highligher(get<0>(it), get<2>(it)) + "</td>";
-                ofs << "</tr>";
-            }
-        }
-
         if (!mOptions->mSex.seqVecY.empty()) {
-
-            tmpRefStr = mOptions->mSex.primerF.mStr + mOptions->mSex.refY.mStr + mOptions->mSex.primerR.mStr;
-
             ofs << "<tr style='color:blue'>";
             ofs << "<td>Ref. Y</td>" <<
                     "<td>N.A.</td>" <<
                     "<td>N.A.</td>" <<
-                    "<td>" + std::to_string(mOptions->mSex.primerF.length() + mOptions->mSex.refY.length() + mOptions->mSex.primerR.length()) + "</td>" <<
-                    "<td align='center'>" + highligher(tmpRefStr, mOptions->mSex.snpsRefY) + "</td>";
+                    "<td>N.A.</td>" <<
+                    "<td>" + std::to_string(mOptions->mSex.refY.length()) + "</td>" <<
+                    "<td align='center'>" + highligher(mOptions->mSex.refY.mStr, mOptions->mSex.snpsRefY) + "</td>";
             ofs << "</tr>";
-
-            for (auto & it : mOptions->mSex.seqVecY) {
+            for (auto it = mOptions->mSex.seqVecY.begin(); it != mOptions->mSex.seqVecY.end(); ++it) {
+                std::string note = "";
+                if(it == mOptions->mSex.seqVecY.begin()) {
+                    if(mOptions->mSex.sexMF == "Male") {
+                        note = "haplotype";
+                    } else if (mOptions->mSex.sexMF == "Female") {
+                        note = "Inconclusive";
+                    } else {
+                        note = "Inconclusive";
+                    }
+                } else {
+                    note = "seq_error";
+                }
+                
                 ofs << "<tr>";
                 ofs << "<td>Y</td>" <<
-                        "<td>" + std::to_string(get<1>(it)) + "</td>" <<
-                        "<td>" + std::to_string((double) get<1>(it) * 100.00 / (double) mOptions->mSex.readsY) + "</td>" <<
-                        "<td>" + std::to_string(get<0>(it).length()) + "</td>" <<
-                        "<td align='center'>" + highligher(get<0>(it), get<2>(it)) + "</td>";
+                        "<td>" + std::to_string(get<1>(*it)) + "</td>" <<
+                        "<td>" + std::to_string((double) get<1>(*it) * 100.00 / (double) mOptions->mSex.readsY) + "</td>" <<
+                        "<td>" + note + "</td>" <<
+                        "<td>" + std::to_string(get<0>(*it).length()) + "</td>" <<
+                        "<td align='center'>" + highligher(get<0>(*it), get<2>(*it)) + "</td>";
+                ofs << "</tr>";
+            }
+        }
+
+        if (!mOptions->mSex.seqVecX.empty()) {
+            ofs << "<tr style='color:blue'>";
+            ofs << "<td>Ref. X</td>" <<
+                    "<td>N.A.</td>" <<
+                    "<td>N.A.</td>" <<
+                    "<td>N.A.</td>" <<
+                    "<td>" + std::to_string(mOptions->mSex.refX.length()) + "</td>" <<
+                    "<td align='center'>" + highligher(mOptions->mSex.refX.mStr, mOptions->mSex.snpsRefX) + "</td>";
+            ofs << "</tr>";
+            for (auto it = mOptions->mSex.seqVecX.begin(); it != mOptions->mSex.seqVecX.end(); ++it) {
+                std::string note = "";
+                if (it == mOptions->mSex.seqVecX.begin()) {
+                    if (mOptions->mSex.sexMF == "Male") {
+                        note = "haplotype";
+                    } else if (mOptions->mSex.sexMF == "Female") {
+                        note = "haplotype";
+                    } else {
+                        note = "Inconclusive";
+                    }
+                } else {
+                    if(mOptions->mSex.haplotype){
+                        if(get<0>(*it) == get<0>(mOptions->mSex.haploTupX2)){
+                            note = "haplotype";
+                        } else {
+                            note = "seq_error";
+                        }
+                    } else {
+                        note = "seq_error";
+                    }
+                }
+                
+                ofs << "<tr>";
+                ofs << "<td>X</td>" <<
+                        "<td>" + std::to_string(get<1>(*it)) + "</td>" <<
+                        "<td>" + std::to_string((double) get<1>(*it) * 100.00 / (double) mOptions->mSex.readsX) + "</td>" <<
+                        "<td>" + note + "</td>" <<
+                        "<td>" + std::to_string(get<0>(*it).length()) + "</td>" <<
+                        "<td align='center'>" + highligher(get<0>(*it), get<2>(*it)) + "</td>";
                 ofs << "</tr>";
             }
         }
@@ -483,8 +517,6 @@ void HtmlReporter::reportSex(ofstream & ofs) {
     json_str += "{";
     json_str += "x:[" + Stats::list2string(x_vec, x_vec.size()) + "],";
     json_str += "y:[" + Stats::list2string2(y_vec, y_vec.size()) + "],";
-    //json_str += "text: [" + Stats::list2string(x_vec, x_vec.size()) + "],";
-    //json_str += "width: [" + Stats::list2string(bar_width_vec, bar_width_vec.size()) + "],";
     json_str += "type:'bar', textposition: 'auto'";
     json_str += "}";
     json_str += "];\n";
@@ -495,14 +527,73 @@ void HtmlReporter::reportSex(ofstream & ofs) {
     json_str += "Plotly.newPlot('plot_" + divName + "', data, layout);\n";
     ofs << json_str;
     ofs << "</script>" << endl;
-
-
     x_vec.clear();
     x_vec.shrink_to_fit();
     y_vec.clear();
     y_vec.shrink_to_fit();
     bar_width_vec.clear();
     bar_width_vec.shrink_to_fit();
+    reportSeqError(ofs, divName);
+}
+
+void HtmlReporter::reportSeqError(ofstream& ofs, std::string & divName) {
+    if(mOptions->mSex.baseErrorMapX.empty() && mOptions->mSex.baseErrorMapY.empty()){
+        return;
+    }
+    
+    ofs << "\n<script type=\"text/javascript\">" << endl;
+    std::string json_str = "";
+    
+    if(!mOptions->mSex.baseErrorMapY.empty()){
+        std::vector<int> keyV;
+        keyV.reserve(mOptions->mSex.baseErrorMapY.size());
+        std::vector<double> valueV;
+        valueV.reserve(mOptions->mSex.baseErrorMapY.size());
+        for(const auto & posIt : mOptions->mSex.baseErrorMapY){
+            keyV.push_back(posIt.first);
+            valueV.push_back(posIt.second);
+        }
+        
+        json_str += "var Ydata = {";
+        json_str += "x:[" + Stats::list2string2(keyV, keyV.size()) + "],";
+        json_str += "y:[" + Stats::list2string2(valueV, valueV.size()) + "],";
+        json_str += "type: 'scatter', mode: 'markers', marker:{color: 'blue'}, textposition: 'auto', name: 'Y allele'";
+        json_str += "};\n";
+    }
+
+    if (!mOptions->mSex.baseErrorMapX.empty()) {
+        std::vector<int> keyV;
+        keyV.reserve(mOptions->mSex.baseErrorMapX.size());
+        std::vector<double> valueV;
+        valueV.reserve(mOptions->mSex.baseErrorMapX.size());
+        for (const auto & posIt : mOptions->mSex.baseErrorMapX) {
+            keyV.push_back(posIt.first);
+            if(mOptions->mSex.baseErrorMapY.empty()){
+                 valueV.push_back(posIt.second);
+            } else {
+                 posIt.second == 0 ? valueV.push_back(posIt.second) : valueV.push_back(-posIt.second);
+            }
+        }
+
+        json_str += "var Xdata = {";
+        json_str += "x:[" + Stats::list2string2(keyV, keyV.size()) + "],";
+        json_str += "y:[" + Stats::list2string2(valueV, valueV.size()) + "],";
+        json_str += "type: 'scatter', mode: 'markers', marker:{color: 'red'}, textposition: 'auto', name: 'X allele'";
+        json_str += "};\n";
+    }
+    
+    json_str += "var layout = {title: 'Sequence error rate', xaxis:{title:'Position', automargin: true},";
+    json_str += "yaxis:{showline:false, zeroline:false, zerolinecolor:'transparent', zerolinewidth:2, title:'Error rate (%)', automargin:true}";
+    json_str += "};\n";
+    if(mOptions->mSex.baseErrorMapY.empty()){
+        json_str += "var data = [Xdata];\n";
+    } else {
+        json_str += "var data = [Ydata, Xdata];\n";
+    }
+    
+    json_str += "Plotly.newPlot('plot_sex_e" + divName + "', data, layout);\n";
+    ofs << json_str;
+    ofs << "</script>" << endl;
 }
 
 void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> &sortedAllGenotypeMapVec,
@@ -515,17 +606,13 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
     ofs << "<h1 style='text-align:left;'><a href='https://github.com/seq2sat' target='_blank' style='color:#009900;text-decoration:none;'>Seq2Sat Report</a </h1>" << endl;
     ofs << "<div style='font-size:12px;font-weight:normal;text-align:left;color:#666666;padding:5px;'>" << "Sample: " << basename(mOptions->prefix) << "</div>" << endl;
 
-    if (mOptions->mVarType == ssr) {
-        if (!mOptions->mSex.sexMarker.empty()) {
-            ofs << "<div class='section_div'>\n";
-            ofs << "<div class='section_title' onclick=showOrHide('sex')><a name='sex'>Sex loci <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
-            ofs << "<div id='sex'  style='display:none'>\n";
-            reportSex(ofs);
-            ofs << "</div>\n";
-            ofs << "</div>\n";
-        }
-    } else {
-        //reportAllSnps(ofs, allSnpsMap);
+    if (!mOptions->mSex.sexMarker.empty()){
+        ofs << "<div class='section_div'>\n";
+        ofs << "<div class='section_title' onclick=showOrHide('sex')><a name='sex'>Sex loci <font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
+        ofs << "<div id='sex'  style='display:none'>\n";
+        reportSex(ofs);
+        ofs << "</div>\n";
+        ofs << "</div>\n";
     }
 
     ofs << "<div class='section_div'>\n";
@@ -535,9 +622,7 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
     if (mOptions->mVarType == ssr) {
         reportAllGenotype(ofs, sortedAllGenotypeMapVec);
     } else {
-        //if(!allSnpsMap.empty()){
-            reportAllSnps(ofs);
-        //}
+        reportAllSnps(ofs);
     }
 
     ofs << "</div>\n";
@@ -1073,7 +1158,7 @@ void HtmlReporter::reportEachGenotype(ofstream& ofs, std::string marker,
     //    ofs << "</div>";
     //ofs << "<div class='figure' id='plot_" + divName + "'></div>\n";
 
-    ofs << "<div class='sub_section_tips'>SNPs are highlighted with red background. N. of Reads are in red are the warnings</div>\n";
+    ofs << "<div class='sub_section_tips'>SNPs/artifacts are highlighted in red. N. of Reads are in red are the warnings</div>\n";
     ofs << "<table class='summary_table'>\n";
     ofs << "<tr style='background:#cccccc'> <td>Marker</td><td>Repeat unit</td><td>MRA base</td><td>MRA size</td><td>Allele size</td><td>N. of Reads</td><td align = 'right'>Forward flanking region</td><td align='center'>MRA</td><td align='left'>Reverse flanking region</td></tr>\n";
     auto it = mOptions->mLocVars.refLocMap.find(marker);

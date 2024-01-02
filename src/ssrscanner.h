@@ -34,11 +34,9 @@ public:
     
     static std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>> report(Options * & mOptions, std::map<std::string, std::map<std::string, Genotype>> & allGenotypeMap);
     static std::map<std::string, std::map<std::string, Genotype>> merge(std::vector<std::map<std::string, std::map<std::string, Genotype>>> & totalGenotypeSsrMapVec);
-    void static merge(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions);
     inline std::map<std::string, std::map< std::string, Genotype>> getGenotypeMap() const {return tmpAllGenotypeMap;};
     static std::pair<std::map<int, std::string>, bool>  doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength);
     //inline std::map<std::string, std::vector<std::pair<std::string, Genotype>>> getSortedGenotypeMap() {return sortedAllGenotypeMap;};
-    inline std::map<std::string, std::map<std::string, int>> getSexLoc() const {return tmpSexMap;};
     
 private:
     
@@ -114,9 +112,7 @@ private:
     std::string readName;
     std::stringstream ss;
     std::map<std::string, std::map<std::string, Genotype>> tmpAllGenotypeMap;//marker, seq, geno
-    //Sex tmpSex;
-    std::map<std::string, std::map<std::string, int>> tmpSexMap;
-    //std::map<std::string, std::vector<std::pair<std::string, Genotype>>> sortedAllGenotypeMap;
+    //std::map<std::string, std::map<std::string, int>> tmpSexMap;
     int ffEndPos;
     int rfStartPos;
     std::string readWithoutFF;
@@ -128,9 +124,6 @@ private:
     uint32 mismachesFF;
     uint32 mismachesRF;
     int minReadLen;
-    int nnumberF;
-    int nnumberR;
-    int nnumber;
 };
 
 #endif /* SSRSCANNER_H */

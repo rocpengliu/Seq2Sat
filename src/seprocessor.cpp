@@ -142,9 +142,12 @@ bool SingleEndProcessor::process(){
         postStats.push_back(configs[t]->getPostStats1());
         filterResults.push_back(configs[t]->getFilterResult());
 
+        if (!mOptions->mSex.sexMarker.empty()) {
+            totalSexLocVec.emplace_back(configs[t]->getSexScanner()->getSexLoc());
+        }
+
         if (mOptions->mVarType == ssr) {
             totalGenotypeSsrMapVec.push_back(configs[t]->getSsrScanner()->getGenotypeMap());
-            totalSexLocVec.emplace_back(configs[t]->getSsrScanner()->getSexLoc());
         } else if (mOptions->mVarType == snp) {
             totalSnpSeqMapVec.push_back(configs[t]->getSnpScanner()->getSubSeqsMap());
             //totalSexLocVec.emplace_back(configs[t]->getSnpScanner()->getSexLoc());
@@ -160,11 +163,13 @@ bool SingleEndProcessor::process(){
     std::map<std::string, std::map < std::string, LocSnp>> allSnpsMap;
     //std::vector<std::map < std::string, std::vector<std::pair < std::string, LocSnp>>>> sortedAllSnpsMapVec;
 
+    if (!mOptions->mSex.sexMarker.empty()) {
+        SexScanner::merge(totalSexLocVec, mOptions);
+        SexScanner::report(mOptions);
+    }
+    
     if (mOptions->mVarType == ssr) {
         allGenotypeMap = SsrScanner::merge(totalGenotypeSsrMapVec);
-        if (!mOptions->mSex.sexMarker.empty()) {
-            SsrScanner::merge(totalSexLocVec, mOptions);
-        }
         sortedAllGenotypeMapVec = SsrScanner::report(mOptions, allGenotypeMap);
         if (!mOptions->samples.empty()) {
             for (auto & it : mOptions->samples) {
@@ -256,8 +261,8 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
 
         int frontTrimmed = 0;
         // trim in head and tail, and apply quality cut in sliding window
-        Read* r1 = mFilter->trimAndCut(or1, mOptions->trim.front1, mOptions->trim.tail1, frontTrimmed);
-        //Read* r1 = mFilter->trimAndCut(or1, 0, 0, frontTrimmed);
+        //Read* r1 = mFilter->trimAndCut(or1, mOptions->trim.front1, mOptions->trim.tail1, frontTrimmed);
+        Read* r1 = mFilter->trimAndCut(or1, 0, 0, frontTrimmed);
 
         if(r1 != NULL) {
             if(mOptions->polyGTrim.enabled)
@@ -291,16 +296,30 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
         if( r1 != NULL &&  result == PASS_FILTER) {
 
             locus.clear();
-
-            if (mOptions->mVarType == ssr) {     
-                locus = config->getSsrScanner()->scanVar(r1);
-                size_t found = locus.find("_failed");
-                if (found != std::string::npos && found == (locus.length() - 7)) {
-                    auto revReads = r1->reverseComplement();
-                    locus = config->getSsrScanner()->scanVar(revReads);
+            bool goGeno = false;
+            if (!mOptions->mSex.sexMarker.empty()) {
+                auto rep = config->getSexScanner()->sexScan(r1);
+                if (rep.first) {
+                    locus = rep.second;
+                    goGeno = false;
+                } else {
+                    goGeno = true;
                 }
             } else {
-                config->getSnpScanner()->scanVar(r1);
+                goGeno = true;
+            }
+
+            if (goGeno) {
+                if (mOptions->mVarType == ssr) {
+                    locus = config->getSsrScanner()->scanVar(r1);
+                    size_t found = locus.find("_failed");
+                    if (found != std::string::npos && found == (locus.length() - 7)) {
+                        auto revReads = r1->reverseComplement();
+                        locus = config->getSsrScanner()->scanVar(revReads);
+                    }
+                } else {
+                    config->getSnpScanner()->scanVar(r1);
+                }
             }
       
             if (!locus.empty()) {

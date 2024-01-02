@@ -224,10 +224,18 @@ public:
     Sequence refY;
     int readsX;
     int readsY;
-    int minTotalReadsX;
-    int minTotalReadsY;
-    int minReadsX;//each variant of x;
-    int minReadsY;//each variant of y;
+    int minReadsSexVariant;//each variant
+    int minReadsSexAllele;//for X and Y values;
+    std::tuple<std::string, int, bool> haploTupX;//seq, reads, haplo or not, if this is false, X2 must be false; should only be false if only y detected.
+    std::tuple<std::string, int, bool> haploTupX2;// could be true or false;// only true if female and ratio must be true;
+    std::tuple<std::string, int, bool> haploTupY;// true if male, 
+    double haploRatio;
+    bool haplotype;
+    std::map<int, std::string> haploSnpsMap; //for X haplotype snps;
+    std::map<int, std::string> snpsMapXR; //for X against ref;
+    std::map<int, std::string> snpsMapX2R; //for X2 against ref;
+    std::map<int, double> baseErrorMapX;// pos, error rate of percentage;
+    std::map<int, double> baseErrorMapY;
     int mismatchesPF;
     int mismatchesPR;
     unsigned int mismatchesRX;
@@ -240,7 +248,7 @@ public:
     std::string getFullRefX();
     std::string getFullRefY();
     std::vector<std::tuple<std::string, int, std::map<int, std::string>>> seqVecX;
-    std::vector<std::tuple<std::string, int, std::map<int, std::string>>> seqVecY;
+    std::vector<std::tuple<std::string, int, std::map<int, std::string>>> seqVecY;//seq, reads, snps map;
     std::set<int> snpsRefX;
     std::set<int> snpsRefY;
 };

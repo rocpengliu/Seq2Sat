@@ -244,12 +244,20 @@ Sex::Sex(){
     this->refY = Sequence("");
     this->readsX = 0;
     this->readsY = 0;
-    this->minTotalReadsX = 10;
-    this->minTotalReadsY = 10;
-    this->minReadsX = 5;
-    this->minReadsY = 5;
-    this->mismatchesPF = 1;
-    this->mismatchesPR = 1;
+    this->minReadsSexVariant = 5;
+    this->minReadsSexAllele = 10;
+    this->haploTupX = std::make_tuple("", 0, false);
+    this->haploTupX2 = std::make_tuple("", 0, false);
+    this->haploTupY = std::make_tuple("", 0, false);
+    this->haploRatio = 0.0;
+    this->haplotype = false;
+    this->haploSnpsMap.clear();
+    this->snpsMapXR.clear();
+    this->snpsMapX2R.clear();
+    this->baseErrorMapX.clear();
+    this->baseErrorMapY.clear();
+    this->mismatchesPF = 2;
+    this->mismatchesPR = 2;
     this->mismatchesRX = 2;
     this->mismatchesRY = 2;
     this->lengthEqual = false;
@@ -258,6 +266,8 @@ Sex::Sex(){
     this->sexMF = "Inconclusive";
     this->seqVecX.clear();
     this->seqVecY.clear();
+    this->snpsRefX.clear();
+    this->snpsRefY.clear();
 }
 
 void Sex::print(){

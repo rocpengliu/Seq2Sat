@@ -5,12 +5,14 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include "util.h"
 #include "stats.h"
 #include "writer.h"
 #include "options.h"
 #include "filterresult.h"
 #include "ssrscanner.h"
 #include "snpscanner.h"
+#include "sexscanner.h"
 
 using namespace std;
 
@@ -27,6 +29,7 @@ public:
     inline FilterResult* getFilterResult() {return mFilterResult;};
     inline SsrScanner* getSsrScanner() const {return mSsrScanner;};
     inline SnpScanner* getSnpScanner() const {return mSnpScanner;};
+    inline SexScanner* getSexScanner() const {return mSexScanner;};
 
     void initWriter(string filename1);
     void initWriter(string filename1, string filename2);
@@ -58,8 +61,8 @@ private:
     Options* mOptions;
     FilterResult* mFilterResult;
     SsrScanner* mSsrScanner;
-    SnpScanner * mSnpScanner;
-
+    SnpScanner* mSnpScanner;
+    SexScanner* mSexScanner;
     int mThreadId;
     bool mCanBeStopped;
 };

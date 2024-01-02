@@ -1,5 +1,4 @@
 #include "threadconfig.h"
-#include "util.h"
 
 ThreadConfig::ThreadConfig(Options* opt, int threadId, bool paired){
     mOptions = opt;
@@ -21,6 +20,7 @@ ThreadConfig::ThreadConfig(Options* opt, int threadId, bool paired){
     mCanBeStopped = false;
     mSsrScanner = new SsrScanner(mOptions);
     mSnpScanner = new SnpScanner(mOptions);
+    mSexScanner = new SexScanner(mOptions);
 }
 
 ThreadConfig::~ThreadConfig() {
@@ -32,6 +32,10 @@ ThreadConfig::~ThreadConfig() {
     if(mSsrScanner){
         delete mSsrScanner;
         mSsrScanner = NULL;
+    }
+    if(mSexScanner){
+        delete mSexScanner;
+        mSexScanner = nullptr;
     }
 }
 
