@@ -545,7 +545,7 @@ void SexScanner::report(Options * & mOptions) {
             *fout << "\t" << "haplotypeX2" << "\n";
 
             for (int i = 2; i < mOptions->mSex.seqVecX.size(); i++) {
-                *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.seqVecX[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << get<0>(mOptions->mSex.seqVecX[i]) << "\t";
+                *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.seqVecX[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << "N" << "\t" << get<0>(mOptions->mSex.seqVecX[i]) << "\t";
                 if (get<2>(mOptions->mSex.seqVecX[i]).empty()) {
                     *fout << "NA";
                 } else {
@@ -569,7 +569,7 @@ void SexScanner::report(Options * & mOptions) {
             *fout << "\t" << "haplotypeX" << "\n";
 
             for (int i = 1; i < mOptions->mSex.seqVecX.size(); i++) {
-                *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.seqVecX[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << get<0>(mOptions->mSex.seqVecX[i]) << "\t";
+                *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.seqVecX[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << "N" << "\t" << get<0>(mOptions->mSex.seqVecX[i]) << "\t";
                 if (get<2>(mOptions->mSex.seqVecX[i]).empty()) {
                     *fout << "NA";
                 } else {
@@ -621,7 +621,7 @@ void SexScanner::report(Options * & mOptions) {
             *fout << "\t" << "haplotypeX" << "\n";
 
             for (int i = 1; i < mOptions->mSex.seqVecX.size(); i++) {
-                *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.seqVecX[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << get<0>(mOptions->mSex.seqVecX[i]) << "\t";
+                *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.seqVecX[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << "N" << "\t" << get<0>(mOptions->mSex.seqVecX[i]) << "\t";
                 if (get<2>(mOptions->mSex.seqVecX[i]).empty()) {
                     *fout << "NA";
                 } else {

@@ -450,7 +450,7 @@ void HtmlReporter::reportSex(ofstream & ofs) {
                         note = "Inconclusive";
                     }
                 } else {
-                    note = "seq_error";
+                    note = "seq error";
                 }
                 
                 ofs << "<tr>";
@@ -488,10 +488,10 @@ void HtmlReporter::reportSex(ofstream & ofs) {
                         if(get<0>(*it) == get<0>(mOptions->mSex.haploTupX2)){
                             note = "haplotype";
                         } else {
-                            note = "seq_error";
+                            note = "seq error";
                         }
                     } else {
-                        note = "seq_error";
+                        note = "seq error";
                     }
                 }
                 
