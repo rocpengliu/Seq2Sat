@@ -317,7 +317,7 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
     }
     
     if(get<1>(mOptions->mSex.haploTupX) != 0){
-        mOptions->mSex.YXRatio = std::round(((double) get<1>(mOptions->mSex.haploTupY) / (double) get<1>(mOptions->mSex.haploTupX)) * 100.0) / 100.0;
+        mOptions->mSex.YXRatio = std::round(((double) get<1>(mOptions->mSex.haploTupY) / (double) get<1>(mOptions->mSex.haploTupX)) * 100.00) / 100.00;
 
         if (mOptions->mSex.YXRatio >= mOptions->mSex.YXRationCuttoff) {
             if (get<1>(mOptions->mSex.haploTupX) >= mOptions->mSex.minReadsSexAllele &&
@@ -334,8 +334,8 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                 mOptions->mSex.sexMF = "Female";
                 if (get<1>(mOptions->mSex.haploTupX2) != 0) {
                     
-                    double haploRatio = std::round((double) get<1>(mOptions->mSex.haploTupX2) / (double) (get<1>(mOptions->mSex.haploTupX) + get<1>(mOptions->mSex.haploTupX2)));
-
+                    double haploRatio = std::round(((double) get<1>(mOptions->mSex.haploTupX2) / (double) (get<1>(mOptions->mSex.haploTupX) + get<1>(mOptions->mSex.haploTupX2)))* 100.0)/100.0;
+                    
                     readSeq = get<0>(mOptions->mSex.haploTupX2).c_str();
                     readLength = get<0>(mOptions->mSex.haploTupX2).length();
                     target = get<0>(mOptions->mSex.haploTupX).c_str();
@@ -346,12 +346,7 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                     if (snpsMapXX.second) {//no indels
     
                         mOptions->mSex.haploRatio = haploRatio;
-
-                        target = mOptions->mSex.refX.mStr.c_str();
-                        targetLength = mOptions->mSex.refX.length();
                     
-                        auto snpsMapX2R = SexScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
-
                         if (snpsMapXX.first.size() < 2) {
                             mOptions->mLocSnps.mLocSnpOptions.hmPer = mOptions->mLocSnps.mLocSnpOptions.hmPerL;
                             
@@ -361,11 +356,12 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                                 get<2>(mOptions->mSex.haploTupX) = true;
                                 get<2>(mOptions->mSex.haploTupX2) = true;
                                 mOptions->mSex.haploSnpsMap = snpsMapXX.first;
-                                mOptions->mSex.snpsMapX2R = snpsMapX2R.first;
+                                mOptions->mSex.snpsMapX2R = get<2>(mOptions->mSex.seqVecX[1]);
                                 mOptions->mSex.haplotype = true;
                             } else {
                                 //inconclusive haplotype;
-                                mOptions->mSex.snpsMapX2R = snpsMapX2R.first;
+                                mOptions->mSex.haploSnpsMap = snpsMapXX.first;
+                                mOptions->mSex.snpsMapX2R = get<2>(mOptions->mSex.seqVecX[1]);
                             }
 
                         } else {
@@ -374,7 +370,7 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                             if(haploRatio <= mOptions->mLocSnps.mLocSnpOptions.hmPer){
                                 get<2>(mOptions->mSex.haploTupX2) = true;
                                 mOptions->mSex.haploSnpsMap = snpsMapXX.first;
-                                mOptions->mSex.snpsMapX2R = snpsMapX2R.first;
+                                mOptions->mSex.snpsMapX2R = get<2>(mOptions->mSex.seqVecX[1]);
                                 mOptions->mSex.haplotype = true;
                             }
                         }
@@ -457,7 +453,7 @@ void SexScanner::report(Options * & mOptions) {
     if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
     if (mOptions->verbose) loginfo("Starting to write sex identification loc file!");
     
-    *fout << "#SexLoc\tSexAllele\tNumReads\tRatio\tPutativeSex\tHaplotypeRatio\tPutativeHyaplotype\tAlleleSeq\tSNPs\tNote\n";
+    *fout << "#SexLoc\tSexAllele\tNumReads\tRatio\tPutativeSex\tHaplotypeRatio\tPutativeHaplotype\tAlleleSeq\tSNPs\tNote\n";
     
     if(mOptions->mSex.sexMF == "Male"){
         *fout << mOptions->mSex.sexMarker << "\t" << "Y" << "\t" << get<1>(mOptions->mSex.haploTupY) << "\t" << mOptions->mSex.YXRatio << "\t" << mOptions->mSex.sexMF << "\t" << 1 << "\t" << "Y" << "\t" << get<0>(mOptions->mSex.haploTupY) << "\t";
@@ -487,7 +483,7 @@ void SexScanner::report(Options * & mOptions) {
                 *fout << "NA";
             } else {
                 for (const auto & it : get<2>(mOptions->mSex.seqVecY[i])) {
-                    *fout << it.first << mOptions->mSex.refX.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecY[i])[it.first] << ";";
+                    *fout << it.first << mOptions->mSex.refY.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecY[i])[it.first] << ";";
                 }
             }
             *fout << "\t" << "seq_error" << "\n";
@@ -601,7 +597,7 @@ void SexScanner::report(Options * & mOptions) {
                     *fout << "NA";
                 } else {
                     for (const auto & it : mOptions->mSex.snpsRefY) {
-                        *fout << it << mOptions->mSex.refX.mStr[it] << "|" << get<0>(mOptions->mSex.seqVecY[i])[it] << ";";
+                        *fout << it << mOptions->mSex.refY.mStr[it] << "|" << get<0>(mOptions->mSex.seqVecY[i])[it] << ";";
                     }
                 }
                 *fout << "\t" << "seq_error" << "\n";
@@ -677,83 +673,6 @@ void SexScanner::report(Options * & mOptions) {
         fout = nullptr;
     }
 }
-
-//void SexScanner::report(Options * & mOptions) {
-//
-//    std::string foutName = mOptions->prefix + "_sex_loc_id.txt";
-//    std::ofstream* fout = new std::ofstream();
-//    fout->open(foutName.c_str(), std::ofstream::out);
-//
-//    if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
-//    if (mOptions->verbose) loginfo("Starting to write sex identification loc file!");
-//
-//    *fout << "#SexLoc\tNumReadsX\tNumReadsY\tRatio\tPutativeSex\tAlleleX\tSnpsX\tAlleleY\tSnpsY\tNote\n";
-//
-//    *fout << mOptions->mSex.sexMarker << "\t" << mOptions->mSex.readsX << "\t" << mOptions->mSex.readsY << "\t" << mOptions->mSex.YXRatio << "\t" <<
-//            mOptions->mSex.sexMF << "\t" << mOptions->mSex.getFullRefX() << "\t";
-//    if (mOptions->mSex.snpsRefX.empty()) {
-//        *fout << "NA\t";
-//    } else {
-//        for (const auto & its : mOptions->mSex.snpsRefX) {
-//            *fout << its << ";";
-//        }
-//        *fout << "\t";
-//    }
-//
-//    *fout << mOptions->mSex.getFullRefY() << "\t";
-//
-//    if (mOptions->mSex.snpsRefY.empty()) {
-//        *fout << "NA\t";
-//    } else {
-//        for (const auto & its : mOptions->mSex.snpsRefY) {
-//            *fout << its << ";";
-//        }
-//        *fout << "\t";
-//    }
-//
-//    *fout << "total\n";
-//
-//    std::map<int, std::string> tmpSnpMap;
-//    if (!mOptions->mSex.seqVecX.empty()) {
-//        for (const auto & its : mOptions->mSex.seqVecX) {
-//            *fout << "X\t" << get<1>(its) << "\t0\t0\tNA\t" << get<0>(its) << "\t";
-//            tmpSnpMap = get<2>(its);
-//            if (tmpSnpMap.empty()) {
-//                *fout << "NA";
-//            } else {
-//                for (const auto & itm : tmpSnpMap) {
-//                    *fout << itm.first << mOptions->mSex.getFullRefX()[itm.first] << "|" << get<0>(its)[itm.first] << ";";
-//                }
-//            }
-//            *fout << "\tNA\tNA\teach\n";
-//        }
-//    }
-//
-//    if (!mOptions->mSex.seqVecY.empty()) {
-//        for (const auto & its : mOptions->mSex.seqVecY) {
-//            *fout << "Y\t0\t" << get<1>(its) << "\t0\tNA\tNA\tNA\t" << get<0>(its) << "\t";
-//            tmpSnpMap = get<2>(its);
-//            if (tmpSnpMap.empty()) {
-//                *fout << "NA";
-//            } else {
-//                for (const auto & itm : tmpSnpMap) {
-//                    *fout << itm.first << mOptions->mSex.getFullRefY()[itm.first] << "|" << get<0>(its)[itm.first] << ";";
-//                }
-//            }
-//            *fout << "\teach\n";
-//        }
-//    }
-//
-//    tmpSnpMap.clear();
-//
-//    fout->flush();
-//    fout->clear();
-//    fout->close();
-//    if (fout) {
-//        delete fout;
-//        fout = NULL;
-//    }
-//}
 
 std::pair<std::map<int, std::string>, bool> SexScanner::doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength) {
     EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
