@@ -306,6 +306,7 @@ public:
         hmPer = 0.0;
         htJetter = 0.15;
         minReads4Filter = 50;
+        maxRows4Align = 5;
     };
 public:
     uint32 maxMismatchesPSeq;
@@ -315,6 +316,7 @@ public:
     int minReads4Filter;
     double hmPerL, hmPerH, htJetter;
     double hmPer; //the actual one, it is either hmPerL or hmPerH, depending on how many true snps there.
+    int maxRows4Align;
 };
 
 class MultiLocVars{

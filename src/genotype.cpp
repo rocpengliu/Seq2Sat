@@ -193,6 +193,13 @@ UnitedLocSnp::UnitedLocSnp(){
     heter = false;
 }
 
+SeqVar::SeqVar(){
+    this->seq = "";
+    this->numReads = 0;
+    this->indel = false;
+    this->snpSet.clear();
+}
+
 LocSnp2::LocSnp2(){
     this->name = "";
     this->fp = Sequence("");
@@ -214,9 +221,120 @@ LocSnp2::LocSnp2(){
     this->genoMap.clear();
     this->ft = Sequence("");
     this->rt = Sequence("");
+    this->ssnpsMap.clear();
     this->baseErrorMap.clear();
+    this->seqVarVec.clear();
+    this->status = std::make_pair(std::make_pair(false, false), false);
 }
 
+std::string LocSnp2::getHaploStr(bool snp2){
+    std::string snpStr = "";
+    if(ssnpsMap.empty()) return snpStr;
+    if(snp2) {
+        if (!status.first.second && genoStr3 != "homo") {
+            for (const auto & it : ssnpsMap) {
+                snpStr += it.second.snp2;
+            }
+        }
+    } else {
+        if(!status.first.first){
+            for(const auto & it : ssnpsMap){
+                snpStr += it.second.snp1;
+            }
+        }
+    }
+    return snpStr;
+}
+
+int LocSnp2::getNumSnps(){
+    int num = 0;
+    if (genoStr3 != "homo") {
+        for (const auto & it : ssnpsMap) {
+            if(seqVarVec.at(0).seq[it.first] != seqVarVec.at(1).seq[it.first]){
+                num++;
+            }
+        }
+    }
+    return num;
+}
+
+std::string LocSnp2::getHaploStr(int index){
+    std::string snpStr = "";
+    if(seqVarVec.empty() || seqVarVec.at(index).indel || index >= seqVarVec.size()) return snpStr;
+    for(const auto & it : seqVarVec.at(index).snpSet){
+        snpStr += seqVarVec.at(index).seq[it];
+    }
+    return snpStr;
+}
+
+std::string LocSnp2::getSnpStr(bool snp2){
+    std::string snpStr = "";
+    if(ref.mStr.empty()) return snpStr;
+    if(ssnpsMap.empty()) return snpStr;
+    if(snp2) {
+        if (!status.first.second && genoStr3 != "homo") {
+            for (const auto & it : ssnpsMap) {
+                snpStr += std::to_string(it.first + trimPos.first);
+                snpStr += "(";
+                snpStr += ref.mStr[it.first];
+                snpStr += "|";
+                snpStr += it.second.snp2;
+                snpStr += ")";
+            }
+        }
+    } else {
+        if(!status.first.first){
+            for(const auto & it : ssnpsMap){
+                snpStr += std::to_string(it.first + trimPos.first);
+                snpStr += "(";
+                snpStr += ref.mStr[it.first];
+                snpStr += "|";
+                snpStr += it.second.snp1;
+                snpStr += ")";
+            }
+        }
+    }
+    return snpStr;
+}
+
+std::string LocSnp2::getSnpStr(int index) {
+    std::string snpStr = "";
+    if (seqVarVec.empty() || seqVarVec.at(index).indel || index >= seqVarVec.size()) return snpStr;
+    for (const auto & it : seqVarVec.at(index).snpSet) {
+        snpStr += std::to_string(it + trimPos.first);
+        snpStr += "(";
+        snpStr += ref.mStr[it];
+        snpStr += "|";
+        snpStr += seqVarVec.at(index).seq[it];
+        snpStr += ")";
+    }
+    return snpStr;
+}
+
+int LocSnp2::getHaploReads(bool haplo2){
+    int num = 0;
+    if(totHaploReads == 0) return num;
+    if (genoStr3 == "homo") {
+        num =  totHaploReads / 2;
+    } else {
+        if(haplo2){
+            num = seqVarVec.at(1).numReads;
+        } else {
+            num = seqVarVec.at(0).numReads;
+        }
+    }
+    return num;
+}
+
+double LocSnp2::getHaploReadsPer(bool haplo2){
+    if(totHaploReads == 0 || totReads == 0) return 0.00;
+    return getPer(getHaploReads(haplo2), totReads);
+}
+
+double LocSnp2::getReadsVarPer(int index){
+    if(totReads == 0 || seqVarVec.at(index).numReads == 0) return 0.00;
+    return getPer(seqVarVec.at(index).numReads, totReads);
+}
 
 void LocSnp2::print(){
     std::string msg = "";
@@ -227,13 +345,6 @@ void LocSnp2::print(){
     msg += rt.mStr +  " :" + std::to_string(rt.mStr.length()) + "\n";
     msg += rp.mStr +  " :" + std::to_string(rp.mStr.length()) + "\n";
     cCout(msg, 'r');
-//    msg = "";
-//    if (!snpsMap.empty()) {
-//        for (const auto & it : snpsMap) {
-//            msg += std::to_string(it.first) + " : " + it.second.first.mStr + "|" + it.second.second.mStr + "\n";
-//        }
-//    }
-//    cCout(msg, 'b');
 }
 
 Sex::Sex(){

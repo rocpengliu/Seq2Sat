@@ -15,16 +15,14 @@ SexScanner::~SexScanner() {
 std::pair<bool, char> SexScanner::sexScan(Read* r1) {
     
     std::pair<bool, char> rep{false, 'U'};
-
     if (mOptions->mSex.sexMarker.empty() || (r1->length() < (mOptions->mSex.primerF.length() + mOptions->mSex.primerR.length() + std::min(mOptions->mSex.refX.length(), mOptions->mSex.refY.length())))) {
         return rep;
     }
     
     int trimPosF = 0;
-    int goRP = false;
+    bool goRP = false;
     
     int fpMismatches = (int) edit_distance(mOptions->mSex.primerF.mStr, r1->mSeq.mStr.substr(0, mOptions->mSex.primerF.length()));
-
     if (fpMismatches <= mOptions->mSex.mismatchesPF) {
         trimPosF = mOptions->mSex.primerF.length();
         goRP = true;
@@ -34,7 +32,7 @@ std::pair<bool, char> SexScanner::sexScan(Read* r1) {
         tData = r1->mSeq.mStr.c_str();
         tLen = r1->length();
         auto endBoolF = doPrimerAlignment(qData, qLen, mOptions->mSex.sexMarker, tData, tLen, r1->mName, true);
-        if (get<2>(endBoolF) && get<1>(endBoolF) <= r1->length()) {
+        if (get<2>(endBoolF) && (get<1>(endBoolF) <= r1->length())) {
             fpMismatches = get<0>(endBoolF);
             if (fpMismatches <= mOptions->mSex.mismatchesPF) {
                 if ((get<1>(endBoolF) + mOptions->mSex.primerR.length() + std::min(mOptions->mSex.refX.length(), mOptions->mSex.refY.length())) <= r1->length()) {
@@ -167,7 +165,7 @@ std::tuple<int, int, bool> SexScanner::doPrimerAlignment(const char* & qData, in
 
         int endPos = *(result.endLocations) + 1;
         edlibFreeAlignResult(result);
-        if (indelSet.empty() && snpsSet.size() <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq) {
+        if (indelSet.empty() && (snpsSet.size() <= mOptions->mLocVars.locVarOptions.maxMismatchesPSeq)) {
             return std::make_tuple(snpsSet.size(), endPos, true);
         } else {
             return std::make_tuple(0, 0, false);

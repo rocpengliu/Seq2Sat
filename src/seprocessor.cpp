@@ -180,7 +180,7 @@ bool SingleEndProcessor::process(){
             }
         }
     } else if (mOptions->mVarType == snp) {
-         SnpScanner::merge(mOptions, totalSnpSeqMapVec);
+         SnpScanner::merge2(mOptions, totalSnpSeqMapVec);
     }
 
     int* dupHist = NULL;

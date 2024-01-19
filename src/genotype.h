@@ -174,6 +174,29 @@ struct SimSnp{
     std::string genoStr3 = "inconclusive";//heter, homo, inconclusive;
 };
 
+struct SSimSnp {
+    char snp1;//if homo, tothaplotype reads and snp2 is 0;
+    char snp2;
+    char color;//g: green, homo with ref, r: red heter, o: orange new snps including CC (ref is AA);
+
+    // Default constructor
+    SSimSnp() : snp1('\0'), snp2('\0'), color('\0') {}
+    
+    // Parameterized constructor
+    SSimSnp(char s1, char s2, char c) : snp1(s1), snp2(s2), color(c) {}
+};
+
+class SeqVar{
+public:
+    SeqVar();
+    
+public:
+    std::string seq;
+    int numReads;
+    bool indel;
+    std::set<int> snpSet;//including seq errors;
+};
+
 class LocSnp2{
 public:
     LocSnp2();
@@ -200,12 +223,31 @@ public:
     //bool isHaplotype;//inconclusive is false;
     std::string genoStr3;//seqerr (ratio > homo and should regarded as seq errors), inconclusive (ratio between homo and heter), homo or heter;//homo also include CC against ref AA;;
     bool isIndel;
+    std::pair<std::pair<bool, bool>, bool> status;//isindel for hp1/ref, isindel for hp2/ref, isindel for hp1/hp2
     //for ref is only homo, heter and inconclusive, for each variants, it could be homo, heter, inconclusive and seqerr (if it homo, but has seq errors)
     std::map<std::string, SimSnps> genoMap;//read is the key
     std::map<int, SimSnp> snpsMap;//position, snps, only include snps in the haloptypes; also the inconclusive ones;
+    
+    std::map<int, SSimSnp> ssnpsMap;//position, snps, only include snps in the haloptypes; also the inconclusive ones;
+    std::vector<SeqVar> seqVarVec;// comprehensive seq var; if it is homo, get the first one; heter or incon get the first two;
     void print();
     std::map<int, double> baseErrorMap;//for error rate, int: pos, percentage error rate; 
+    std::string getHaploStr(bool snp2 = false);
+    int getNumSnps();
+    std::string getSnpStr(bool snp2 = false);
+    std::string getHaploStr(int index);//must > 1 for homo or 2 for heter
+    std::string getSnpStr(int index);
+    int getHaploReads(bool haplop2 = false);
+    double getHaploReadsPer(bool haplop2 = false);
+    double getReadsVarPer(int index);
 };
+
+struct MatchTrim {
+    int totMismatches = 0;
+    int trimF = 0;
+    int trimedRefLenth = 0;
+};
+
 
 struct ComparatorSnp {
     bool operator()( LocSnp& a,  LocSnp& b) const {

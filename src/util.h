@@ -14,15 +14,17 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <map>
+#include <cmath>
 #include "common.h"
 
 using namespace std;
 
 extern mutex logmtx;
-inline void loginfo(const string s){
+
+inline void loginfo(const string s) {
     logmtx.lock();
     time_t tt = time(NULL);
-    tm* t= localtime(&tt);
+    tm* t = localtime(&tt);
     //cerr<<"["<<t->tm_hour<<":"<<t->tm_min<<":"<<t->tm_sec<<"] "<<s<<endl;
     //fprintf(stderr, "[\033[1;35m%02d:%02d:%02d\033[0m] %s\n", t->tm_hour, t->tm_min, t->tm_sec, s.c_str());
     fprintf(stderr, "[%02d:%02d:%02d] %s\n", t->tm_hour, t->tm_min, t->tm_sec, s.c_str());
@@ -33,7 +35,7 @@ template <typename T>
 void cCout(const T & str, char color = 'd', bool newLine = true) {
     logmtx.lock();
     if (color == 'r') {
-        if(newLine){
+        if (newLine) {
             std::cout << "\033[1;31m" << str << "\033[0m" << std::endl;
         } else {
             std::cout << "\033[1;31m" << str << "\033[0m";
@@ -65,34 +67,34 @@ void cCout(const T & str, char color = 'd', bool newLine = true) {
         } else {
             std::cout << "\033[1;35m" << str << "\033[0m";
         }
-        
+
     } else if (color == 'c') {
         if (newLine) {
             std::cout << "\033[1;36m" << str << "\033[0m" << std::endl;
         } else {
             std::cout << "\033[1;36m" << str << "\033[0m";
         }
-        
+
     } else if (color == 'w') {
         if (newLine) {
             std::cout << "\033[1;37m" << str << "\033[0m" << std::endl;
         } else {
             std::cout << "\033[1;37m" << str << "\033[0m";
         }
-        
-    } else if(color = 'd') {
+
+    } else if (color = 'd') {
         if (newLine) {
             std::cout << str << std::endl;
         } else {
             std::cout << str;
         }
-//        if (newLine) {
-//            std::cout << "\033[1;30m" << str << "\033[0m" << std::endl;
-//        } else {
-//            std::cout << "\033[1;30m" << str << "\033[0m";
-//        }
+        //        if (newLine) {
+        //            std::cout << "\033[1;30m" << str << "\033[0m" << std::endl;
+        //        } else {
+        //            std::cout << "\033[1;30m" << str << "\033[0m";
+        //        }
     } else {
-        
+
     }
     logmtx.unlock();
 }
@@ -103,19 +105,19 @@ void cCout(const T1 & str1, const T2 & str2, char color = 'r') {
     if (color == 'r') {
         std::cout << "\033[1;31m" << str1 << " -> " << str2 << "\033[0m\n";
     } else if (color == 'g') {
-        std::cout << "\033[1;32m" << str1 << " -> " << str2  << "\033[0m\n";
+        std::cout << "\033[1;32m" << str1 << " -> " << str2 << "\033[0m\n";
     } else if (color == 'y') {
-        std::cout << "\033[1;33m" << str1 << " -> " << str2  << "\033[0m\n";
+        std::cout << "\033[1;33m" << str1 << " -> " << str2 << "\033[0m\n";
     } else if (color == 'b') {
-        std::cout << "\033[1;34m" << str1 << " -> " << str2  << "\033[0m\n";
+        std::cout << "\033[1;34m" << str1 << " -> " << str2 << "\033[0m\n";
     } else if (color == 'm') {
-        std::cout << "\033[1;35m" << str1 << " -> " << str2  << "\033[0m\n";
+        std::cout << "\033[1;35m" << str1 << " -> " << str2 << "\033[0m\n";
     } else if (color == 'c') {
-        std::cout << "\033[1;36m" << str1 << " -> " << str2  << "\033[0m\n";
+        std::cout << "\033[1;36m" << str1 << " -> " << str2 << "\033[0m\n";
     } else if (color == 'w') {
-        std::cout << "\033[1;37m" << str1 << " -> " << str2  << "\033[0m\n";
+        std::cout << "\033[1;37m" << str1 << " -> " << str2 << "\033[0m\n";
     } else {
-        std::cout << "\033[1;30m" << str1 << " -> " << str2  << "\033[0m\n";
+        std::cout << "\033[1;30m" << str1 << " -> " << str2 << "\033[0m\n";
     }
     logmtx.unlock();
 }
@@ -124,7 +126,7 @@ template <typename T>
 std::string addColor(const T & str, char color = 'd', bool newLine = true) {
     std::stringstream ss;
     if (color == 'r') {
-        if(newLine){
+        if (newLine) {
             ss << "\033[1;31m" << str << "\033[0m\n";
         } else {
             ss << "\033[1;31m" << str << "\033[0m";
@@ -156,31 +158,31 @@ std::string addColor(const T & str, char color = 'd', bool newLine = true) {
         } else {
             ss << "\033[1;35m" << str << "\033[0m";
         }
-        
+
     } else if (color == 'c') {
         if (newLine) {
             ss << "\033[1;36m" << str << "\033[0m\n";
         } else {
             ss << "\033[1;36m" << str << "\033[0m";
         }
-        
+
     } else if (color == 'w') {
         if (newLine) {
             ss << "\033[1;37m" << str << "\033[0m\n";
         } else {
             ss << "\033[1;37m" << str << "\033[0m";
         }
-        
-    } else if(color = 'd'){
+
+    } else if (color = 'd') {
         if (newLine) {
             ss << "\033[1;30m" << str << "\033[0m\n";
         } else {
             ss << "\033[1;30m" << str << "\033[0m";
         }
     } else {
-        
+
     }
-    
+
     return ss.str();
 }
 
@@ -190,7 +192,7 @@ inline void error_exit(const string& msg) {
 }
 
 inline char complement(char base) {
-    switch(base){
+    switch (base) {
         case 'A':
         case 'a':
             return 'T';
@@ -208,46 +210,39 @@ inline char complement(char base) {
     }
 }
 
-inline bool starts_with( string const & value,  string const & starting)
-{
+inline bool starts_with(string const & value, string const & starting) {
     if (starting.size() > value.size()) return false;
-    return  equal(starting.begin(), starting.end(), value.begin());
+    return equal(starting.begin(), starting.end(), value.begin());
 }
 
-inline bool ends_with( string const & value,  string const & ending)
-{
-	if (ending.size() > value.size()) return false;
-	return  equal(ending.rbegin(), ending.rend(), value.rbegin());
+inline bool ends_with(string const & value, string const & ending) {
+    if (ending.size() > value.size()) return false;
+    return equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
-inline string trim(const string& str)
-{
+inline string trim(const string& str) {
     string::size_type pos = str.find_first_not_of(' ');
-    if (pos == string::npos)
-    {
+    if (pos == string::npos) {
         return string("");
     }
     string::size_type pos2 = str.find_last_not_of(' ');
-    if (pos2 != string::npos)
-    {
+    if (pos2 != string::npos) {
         return str.substr(pos, pos2 - pos + 1);
     }
     return str.substr(pos);
 }
 
-inline string getPrefix(std::string & str){
-    for(const auto & it : fileTypes){
-        if(ends_with(str, it)){
+inline string getPrefix(std::string & str) {
+    for (const auto & it : fileTypes) {
+        if (ends_with(str, it)) {
             return str.substr(0, str.length() - it.length());
         }
     }
     return str;
 }
 
-inline int split(const string& str, vector<string>& ret_, string sep = ",")
-{
-    if (str.empty())
-    {
+inline int split(const string& str, vector<string>& ret_, string sep = ",") {
+    if (str.empty()) {
         return 0;
     }
 
@@ -255,16 +250,12 @@ inline int split(const string& str, vector<string>& ret_, string sep = ",")
     string::size_type pos_begin = str.find_first_not_of(sep);
     string::size_type comma_pos = 0;
 
-    while (pos_begin != string::npos)
-    {
+    while (pos_begin != string::npos) {
         comma_pos = str.find(sep, pos_begin);
-        if (comma_pos != string::npos)
-        {
+        if (comma_pos != string::npos) {
             tmp = str.substr(pos_begin, comma_pos - pos_begin);
             pos_begin = comma_pos + sep.length();
-        }
-        else
-        {
+        } else {
             tmp = str.substr(pos_begin);
             pos_begin = comma_pos;
         }
@@ -275,21 +266,18 @@ inline int split(const string& str, vector<string>& ret_, string sep = ",")
     return 0;
 }
 
-inline string replace(const string& str, const string& src, const string& dest)
-{
+inline string replace(const string& str, const string& src, const string& dest) {
     string ret;
 
     string::size_type pos_begin = 0;
-    string::size_type pos       = str.find(src);
-    while (pos != string::npos)
-    {
+    string::size_type pos = str.find(src);
+    while (pos != string::npos) {
         ret.append(str.data() + pos_begin, pos - pos_begin);
         ret += dest;
         pos_begin = pos + 1;
-        pos       = str.find(src, pos_begin);
+        pos = str.find(src, pos_begin);
     }
-    if (pos_begin < str.length())
-    {
+    if (pos_begin < str.length()) {
         ret.append(str.begin() + pos_begin, str.end());
     }
     return ret;
@@ -297,32 +285,32 @@ inline string replace(const string& str, const string& src, const string& dest)
 
 inline string reverse(const string& str) {
     string ret(str.length(), 0);
-    for(int pos=0; pos<str.length(); pos++) {
+    for (int pos = 0; pos < str.length(); pos++) {
         ret[pos] = str[str.length() - pos - 1];
     }
     return ret;
 }
 
-inline string basename(const string& filename){
+inline string basename(const string& filename) {
     string::size_type pos = filename.find_last_of('/');
     if (pos == string::npos)
         return filename;
-    else if(pos == filename.length()-1)
+    else if (pos == filename.length() - 1)
         return ""; // a bad filename
     else
-        return filename.substr(pos+1, filename.length() - pos - 1);
+        return filename.substr(pos + 1, filename.length() - pos - 1);
 }
 
-inline string dirname(const string& filename){
+inline string dirname(const string& filename) {
     string::size_type pos = filename.find_last_of('/');
     if (pos == string::npos) {
         return "./";
     } else
-        return filename.substr(0, pos+1);
+        return filename.substr(0, pos + 1);
 }
 
-inline string joinpath(const string& dirname, const string& basename){
-    if(dirname[dirname.length()-1] == '/'){
+inline string joinpath(const string& dirname, const string& basename) {
+    if (dirname[dirname.length() - 1] == '/') {
         return dirname + basename;
     } else {
         return dirname + "/" + basename;
@@ -330,13 +318,13 @@ inline string joinpath(const string& dirname, const string& basename){
 }
 
 //Check if a string is a file or directory
-inline bool file_exists(const  string& s)
-{
+
+inline bool file_exists(const string& s) {
     bool exists = false;
-    if(s.length() > 0) {
+    if (s.length() > 0) {
         struct stat status;
-        int result = stat( s.c_str(), &status );
-        if(result == 0) {
+        int result = stat(s.c_str(), &status);
+        if (result == 0) {
             exists = true;
         }
     }
@@ -345,8 +333,8 @@ inline bool file_exists(const  string& s)
 
 
 // check if a string is a directory
-inline bool is_directory(const  string& path)
-{
+
+inline bool is_directory(const string& path) {
     bool isdir = false;
     struct stat status;
     // visual studion use _S_IFDIR instead of S_IFDIR
@@ -354,43 +342,43 @@ inline bool is_directory(const  string& path)
 #ifdef _MSC_VER
 #define S_IFDIR _S_IFDIR
 #endif
-    stat( path.c_str(), &status );
-    if ( status.st_mode &  S_IFDIR  ) {
+    stat(path.c_str(), &status);
+    if (status.st_mode & S_IFDIR) {
         isdir = true;
     }
-// #endif
+    // #endif
     return isdir;
 }
 
-inline void check_file_valid(const  string& s) {
-    if(!file_exists(s)){
+inline void check_file_valid(const string& s) {
+    if (!file_exists(s)) {
         cerr << "ERROR: file '" << s << "' doesn't exist, quit now" << endl;
         exit(-1);
     }
-    if(is_directory(s)){
+    if (is_directory(s)) {
         cerr << "ERROR: '" << s << "' is a folder, not a file, quit now" << endl;
         exit(-1);
     }
 }
 
-inline void check_file_writable(const  string& s) {
+inline void check_file_writable(const string& s) {
     string dir = dirname(s);
-    if(!file_exists(dir)) {
+    if (!file_exists(dir)) {
         cerr << "ERROR: '" << dir << " doesn't exist. Create this folder and run this command again." << endl;
         exit(-1);
     }
-    if(is_directory(s)){
+    if (is_directory(s)) {
         cerr << "ERROR: '" << s << "' is not a writable file, quit now" << endl;
         exit(-1);
     }
 }
 
 // Remove non alphabetic characters from a string
-inline  string str_keep_alpha(const  string& s)
-{
-     string new_str;
-    for( size_t it =0; it < s.size(); it++) {
-        if(  isalpha(s[it]) ) {
+
+inline string str_keep_alpha(const string& s) {
+    string new_str;
+    for (size_t it = 0; it < s.size(); it++) {
+        if (isalpha(s[it])) {
             new_str += s[it];
         }
     }
@@ -399,25 +387,25 @@ inline  string str_keep_alpha(const  string& s)
 
 
 // Remove invalid sequence characters from a string
-inline void str_keep_valid_sequence(  string& s, bool forceUpperCase = false)
-{
+
+inline void str_keep_valid_sequence(string& s, bool forceUpperCase = false) {
     size_t total = 0;
     const char case_gap = 'a' - 'A';
-    for( size_t it =0; it < s.size(); it++) {
+    for (size_t it = 0; it < s.size(); it++) {
         char c = s[it];
-        if(forceUpperCase && c>='a' && c<='z') {
+        if (forceUpperCase && c >= 'a' && c <= 'z') {
             c -= case_gap;
         }
-        if(  isalpha(c) || c == '-' || c == '*' ) {
+        if (isalpha(c) || c == '-' || c == '*') {
             s[total] = c;
-            total ++;
+            total++;
         }
     }
 
     s.resize(total);
 }
 
-inline int find_with_right_pos(const string& str, const string& pattern, int start=0) {
+inline int find_with_right_pos(const string& str, const string& pattern, int start = 0) {
     int pos = str.find(pattern, start);
     if (pos < 0)
         return -1;
@@ -425,60 +413,61 @@ inline int find_with_right_pos(const string& str, const string& pattern, int sta
         return pos + pattern.length();
 }
 
-inline void str2upper(string& s){
+inline void str2upper(string& s) {
     transform(s.begin(), s.end(), s.begin(), (int (*)(int))toupper);
 }
 
-inline void str2lower(string& s){
+inline void str2lower(string& s) {
     transform(s.begin(), s.end(), s.begin(), (int (*)(int))tolower);
 }
 
 inline char num2qual(int num) {
-    if(num > 127 - 33)
+    if (num > 127 - 33)
         num = 127 - 33;
-    if(num < 0)
+    if (num < 0)
         num = 0;
 
     char c = num + 33;
     return c;
 }
-inline int extractIntegerWords(string & str){
-    stringstream ss;    
+
+inline int extractIntegerWords(string & str) {
+    stringstream ss;
     ss << str;
-  
+
     /* Running loop till the end of the stream */
     string temp;
     int max = 0;
     int found;
     while (!ss.eof()) {
-  
+
         /* extracting word by word from stream */
         ss >> temp;
-  
+
         /* Checking the given word is integer or not */
-        if (stringstream(temp) >> found){
+        if (stringstream(temp) >> found) {
             //cout << found << "\n";
-            if(found > max){
+            if (found > max) {
                 max = found;
             }
-        } 
+        }
         /* To save from space at the end of string */
         temp = "";
     }
-    
+
     return max;
 }
 
-inline void splitStr(const string & str, std::vector<std::string> & ret_, string sep = "\t"){
-    if(str.empty()) return;
-    
+inline void splitStr(const string & str, std::vector<std::string> & ret_, string sep = "\t") {
+    if (str.empty()) return;
+
     std::string tmp;
     std::string::size_type pos_begin = str.find_first_not_of(sep);
     std::string::size_type sep_pos = 0;
-    
-    while(pos_begin != std::string::npos){
+
+    while (pos_begin != std::string::npos) {
         sep_pos = str.find(sep, pos_begin);
-        if(sep_pos != std::string::npos){
+        if (sep_pos != std::string::npos) {
             tmp = str.substr(pos_begin, sep_pos - pos_begin);
             pos_begin = sep_pos + sep.length();
         } else {
@@ -489,14 +478,14 @@ inline void splitStr(const string & str, std::vector<std::string> & ret_, string
         tmp.clear();
     }
     ret_.shrink_to_fit();
-    
+
     return;
 }
 
-inline int findDigitLen(std::string str){
+inline int findDigitLen(std::string str) {
     int len = 0;
-    for(int i = 0; i < str.length(); i++){
-        if(isdigit(str[i])){
+    for (int i = 0; i < str.length(); i++) {
+        if (isdigit(str[i])) {
             len++;
         } else {
             break;
@@ -505,29 +494,29 @@ inline int findDigitLen(std::string str){
     return len;
 }
 
-inline std::string findSingSSR(std::string & cssr){
+inline std::string findSingSSR(std::string & cssr) {
     std::string newStr;
     int pos = 0;
-    while(pos < cssr.length()){
-        if(cssr[pos] == '('){
+    while (pos < cssr.length()) {
+        if (cssr[pos] == '(') {
             auto len = findDigitLen(cssr.substr(pos + 5));
             newStr += cssr.substr(pos, len + 5);
             pos += (5 + len);
         } else {
-            
-            if(pos < cssr.length() - 1){
-                if(cssr[pos] == cssr[pos + 1]){
+
+            if (pos < cssr.length() - 1) {
+                if (cssr[pos] == cssr[pos + 1]) {
                     newStr += "(";
                     newStr += cssr[pos];
                     int rep = 1;
-                    while(pos < cssr.length() - 1){
-                        if(cssr[pos] == cssr[pos + 1]){
+                    while (pos < cssr.length() - 1) {
+                        if (cssr[pos] == cssr[pos + 1]) {
                             rep++;
                             pos++;
-                            if(pos == cssr.length()- 1){
+                            if (pos == cssr.length() - 1) {
                                 newStr += ")";
                                 newStr += std::to_string(rep);
-                                return(newStr);
+                                return (newStr);
                             }
                         } else {
                             pos++;
@@ -536,20 +525,20 @@ inline std::string findSingSSR(std::string & cssr){
                             break;
                         }
                     }
-                    
+
                 } else {
                     newStr += cssr[pos];
                     pos++;
                 }
-                
+
             } else {
                 newStr += cssr[pos];
                 pos++;
             }
         }
-        
+
     }
-    
+
     return newStr;
 }
 
@@ -561,15 +550,15 @@ inline std::string getGenotype(std::string & mra, std::string & ssr, bool adp = 
     if (startPos != 0) {
         genStr.append(mra.substr(0, startPos));
     }
-    
+
     while (startPos != std::string::npos) {
         count++;
         endPos = mra.find(ssr, startPos + ssr.length());
         if (endPos != std::string::npos) {
             if (endPos - startPos == ssr.length()) {
-                
+
             } else {
-                if(adp){
+                if (adp) {
                     genStr.append("|(" + ssr + ")" + std::to_string(count) + "|" + mra.substr(startPos + ssr.length(), endPos - (startPos + ssr.length())));
                 } else {
                     genStr.append("(" + ssr + ")" + std::to_string(count) + mra.substr(startPos + ssr.length(), endPos - (startPos + ssr.length())));
@@ -577,7 +566,7 @@ inline std::string getGenotype(std::string & mra, std::string & ssr, bool adp = 
                 count = 0;
             }
         } else {
-            if(adp){
+            if (adp) {
                 genStr.append("|(" + ssr + ")" + std::to_string(count) + "|" + mra.substr(startPos + ssr.length()));
             } else {
                 genStr.append("(" + ssr + ")" + std::to_string(count) + mra.substr(startPos + ssr.length()));
@@ -586,13 +575,13 @@ inline std::string getGenotype(std::string & mra, std::string & ssr, bool adp = 
         }
         startPos = endPos;
     }
-    
+
     //if(adp){
-        return genStr;
+    return genStr;
     //} else {
-        //return findSingSSR(genStr);
+    //return findSingSSR(genStr);
     //}
-    
+
 }
 
 inline std::string getGenotype(std::string & mra, std::string & ssr, std::string & ssr2) {
@@ -614,40 +603,40 @@ inline std::string getGenotype(std::string & mra, std::string & ssr, std::string
     }
 }
 
-inline int getMaxNumRep(string & str){
+inline int getMaxNumRep(string & str) {
     int max = 0;
-    
+
     std::string tmpNum = "";
     size_t startPos = str.find(")");
     size_t endPos;
-    
-    while(startPos != std::string::npos){
+
+    while (startPos != std::string::npos) {
         auto it = str[startPos + 1];
-        if(isdigit(it)){
+        if (isdigit(it)) {
             tmpNum.push_back(it);
             startPos++;
-            if(startPos == str.size()){
+            if (startPos == str.size()) {
                 break;
             } else {
                 continue;
             }
         } else {
-            if(max < stoi(tmpNum)){
+            if (max < stoi(tmpNum)) {
                 max = stoi(tmpNum);
             }
             tmpNum = "";
             startPos = str.find(")", startPos);
         }
     }
-    
+
     return max;
 }
 
 inline std::string getMraBase(std::string & genStr) {
     std::stringstream ss;
-    for(int i = 0; i < genStr.length(); i++){
+    for (int i = 0; i < genStr.length(); i++) {
         auto tmp = genStr[i];
-        if(!isdigit(tmp)){
+        if (!isdigit(tmp)) {
             ss << tmp;
         }
     }
@@ -690,29 +679,29 @@ std::pair<K, V> getMaxKeyValue(const std::map<K, V> & map, bool reverse = false)
 }
 
 template<typename K, typename V>
-std::vector<std::pair<K,V>> getTop2MaxKeyValueVec(const std::map<K, V>& map){
+std::vector<std::pair<K, V>> getTop2MaxKeyValueVec(const std::map<K, V>& map) {
     std::map<K, V> tmp = map;
-    std::pair<K,V> m1 = getMaxKeyValue(tmp);
+    std::pair<K, V> m1 = getMaxKeyValue(tmp);
     tmp.erase(m1.first);
     std::vector<std::pair<K, V>> tmpVec;
-    
+
     tmpVec.push_back(m1);
-    
-    if (!tmp.empty()){
+
+    if (!tmp.empty()) {
         std::pair<K, V> m2 = getMaxKeyValue(tmp, true);
         tmp.clear();
         tmpVec.push_back(m2);
     }
-    
-    return(tmpVec);
+
+    return (tmpVec);
 }
 
 template<typename K, typename V>
-std::map<K,V> getTop2MaxKeyValue(const std::map<K, V> & map){
+std::map<K, V> getTop2MaxKeyValue(const std::map<K, V> & map) {
     std::map<K, V> tmp = map;
-    std::pair<K,V> m1 = getMaxKeyValue(tmp);
+    std::pair<K, V> m1 = getMaxKeyValue(tmp);
     tmp.erase(m1.first);
-    
+
     if (tmp.empty()) {
         tmp.clear();
         tmp = {m1};
@@ -721,8 +710,8 @@ std::map<K,V> getTop2MaxKeyValue(const std::map<K, V> & map){
         tmp.clear();
         tmp = {m1, m2};
     }
-    
-    return(tmp);
+
+    return (tmp);
 }
 
 template<typename K, typename V>
@@ -767,17 +756,17 @@ std::map<K, V> get2Peaks(const std::map<K, V> & map, double hlRatio, double hlRa
         } else {
             cont = true;
         }
-        
-    } else if(i == map.size() - 1) {
+
+    } else if (i == map.size() - 1) {
         i++;
         std::advance(it, 1);
-        if((double) nReads / nReadsPeak >= hlRatio && (double) (it->second) / nReadsPeak >= hlRatio2){
-            if(nReads > it->second){
+        if ((double) nReads / nReadsPeak >= hlRatio && (double) (it->second) / nReadsPeak >= hlRatio2) {
+            if (nReads > it->second) {
                 res[loc] = nReads;
             } else {
                 res[it->first] = it->second;
             }
-            
+
             return (res);
         } else {
             cont = true;
@@ -809,5 +798,17 @@ std::map<K, V> get2Peaks(const std::map<K, V> & map, double hlRatio, double hlRa
         res.insert(getMaxKeyValue(map2, true));
     }
     return (res);
+}
+
+template<typename K, typename V>
+double getPer(K k, V v, bool per = true){
+    if(v == 0) return 0.00;
+    double res = 0.0;
+    if(per){
+        res = std::round((static_cast<double>(k) / v) * 10000.0) / 100.0;
+    } else {
+        res = std::round((static_cast<double>(k) / v) * 100.0) / 100.0;
+    }
+    return res;
 }
 #endif /* UTIL_H */
