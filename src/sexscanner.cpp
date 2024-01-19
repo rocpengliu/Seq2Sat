@@ -224,15 +224,13 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
         target = mOptions->mSex.refX.mStr.c_str();
         targetLength = mOptions->mSex.refX.length();
         for (const auto & it : seqMapX) {
-
+              for (int i = 0; i < it.first.length(); i++) {
+                  baseFreqMapX[i][it.first[i]] += it.second;
+              }
+            
             if(maxReadX >= mOptions->mLocSnps.mLocSnpOptions.minReads4Filter) {
                 if (it.second >= mOptions->mSex.minReadsSexVariant) {
-                     mOptions->mSex.readsX += it.second;
-
-                    for (int i = 0; i < it.first.length(); i++) {
-                        baseFreqMapX[i][it.first[i]] += it.second;
-                    }
-                    
+                     mOptions->mSex.readsX += it.second;                    
                     readSeq = it.first.c_str();
                     readLength = it.first.length();
                     auto snpsMapX = SexScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
@@ -273,15 +271,12 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
         target = mOptions->mSex.refY.mStr.c_str();
         targetLength = mOptions->mSex.refY.mStr.length();
         for (auto & it : seqMapY) {
-
-            if (maxReadY >= mOptions->mLocSnps.mLocSnpOptions.minReads4Filter) {
-                
-                if (it.second >= mOptions->mSex.minReadsSexVariant) {
-                    mOptions->mSex.readsY += it.second;
-                    for (int i = 0; i < it.first.length(); i++) {
+            for (int i = 0; i < it.first.length(); i++) {
                         baseFreqMapY[i][it.first[i]] += it.second;
-                    }
-                                
+            }
+            if (maxReadY >= mOptions->mLocSnps.mLocSnpOptions.minReads4Filter) { 
+                if (it.second >= mOptions->mSex.minReadsSexVariant) {
+                    mOptions->mSex.readsY += it.second;    
                     readSeq = it.first.c_str();
                     readLength = it.first.length();
                     auto snpsMapY = SexScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
