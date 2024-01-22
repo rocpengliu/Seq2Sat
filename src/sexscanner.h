@@ -25,7 +25,7 @@ public:
     void static merge(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions);
     void static report(Options * & mOptions);
     static std::pair<std::map<int, std::string>, bool>  doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength);
-
+    static std::pair<bool, std::set<int>> doAlignment2(Options * & mOptions, std::string readName, const char* & qData, int qLength, std::string targetName, const char* & tData, int tLength);
 private:
     std::tuple<int, int, bool> doPrimerAlignment(const char* & qData, int qLen, const std::string & qName,
                      const char* & tData, int tLen, const std::string & tName, 

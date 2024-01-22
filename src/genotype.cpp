@@ -353,18 +353,16 @@ Sex::Sex(){
     this->primerR = Sequence("");
     this->refX = Sequence("");
     this->refY = Sequence("");
-    this->readsX = 0;
-    this->readsY = 0;
+    this->maxReadsX = 0;
+    this->maxReadsY = 0;
+    this->totReadsX = 0;
+    this->totReadsY = 0;
     this->minReadsSexVariant = 5;
     this->minReadsSexAllele = 10;
-    this->haploTupX = std::make_tuple("", 0, false);
-    this->haploTupX2 = std::make_tuple("", 0, false);
-    this->haploTupY = std::make_tuple("", 0, false);
     this->haploRatio = 0.0;
     this->haplotype = false;
-    this->haploSnpsMap.clear();
-    this->snpsMapXR.clear();
-    this->snpsMapX2R.clear();
+    this->haploIndel = false;
+    this->haploStr = "inconclusive";
     this->baseErrorMapX.clear();
     this->baseErrorMapY.clear();
     this->mismatchesPF = 2;
@@ -375,16 +373,46 @@ Sex::Sex(){
     this->YXRatio = 0;
     this->YXRationCuttoff = 0.0001;
     this->sexMF = "Inconclusive";
-    this->seqVecX.clear();
-    this->seqVecY.clear();
-    this->snpsRefX.clear();
-    this->snpsRefY.clear();
+    this->seqVarVecX.clear();
+    this->seqVarVecY.clear();
 }
 
 void Sex::print(){
     std::cout << "name: " << sexMarker << "; primerF: " << primerF.mStr << "; primerR: " << primerR.mStr << 
             ";\n refx: " << refX.mStr << "; refy: " << refY.mStr << 
-            ";\n readsx: " << readsX << "; readsy: " << readsY << "\n"; 
+            ";\n readsX: " << maxReadsX << "; readsY: " << maxReadsY << "\n"; 
+}
+
+SeqVar Sex::getHaploVar(char sex, int index){
+    SeqVar tmpSeqVar;
+    if(sex == 'y' && !seqVarVecY.empty() && index < seqVarVecY.size()){
+        tmpSeqVar =  seqVarVecY.at(index);
+    } else if(sex == 'x' && !seqVarVecX.empty() && index < seqVarVecX.size()){
+        tmpSeqVar =  seqVarVecX.at(index);
+    }
+    return tmpSeqVar;
+}
+
+std::string Sex::getSnpStr(char sex, int index){
+    std::string snpStr = "";
+    SeqVar tmp = getHaploVar(sex, index);
+    
+    if(tmp.snpSet.empty()){
+        snpStr = "NA";
+    } else {
+        for (const auto & it : tmp.snpSet) {
+            snpStr += std::to_string(it);
+            snpStr += "(";
+            snpStr += (sex == 'x' ? refX.mStr[it] : refY.mStr[it]);
+            snpStr += "|";
+            snpStr += tmp.seq[it];
+            snpStr += ");";
+            //            if(&it != &(*seqVarVecY.at(index).snpSet.rbegin())){
+            //                snpStr += ";";
+            //            }
+        }
+    }
+    return snpStr;
 }
 
 std::string Sex::getFullRefX(){

@@ -508,13 +508,12 @@ void HtmlReporter::reportSex(ofstream & ofs) {
     ofs << "<div id='sex'  style='display:none'>\n";
 
     std::vector<std::string> x_vec{"X", "Y"};
-    std::vector<int> y_vec{mOptions->mSex.readsX, mOptions->mSex.readsY};
+    std::vector<int> y_vec{mOptions->mSex.getHaploVar('x', 0).numReads, mOptions->mSex.getHaploVar('y', 0).numReads};
     std::vector<double> bar_width_vec{0.5, 0.5};
 
     std::string subsection = "Sex loci: " + mOptions->mSex.sexMarker;
     std::string divName = replace(subsection, " ", "_");
     divName = replace(divName, ":", "_");
-    //std::string title = mOptions->mSex.sexMarker;
     std::string title = "Sex: " + mOptions->mSex.sexMF + (mOptions->mSex.sexMF == "Male" ? "<br>Y/X = " + std::to_string(mOptions->mSex.YXRatio) : "");
 
     ofs << "<div class='subsection_title' onclick=showOrHide('" + divName + "')><a name='" + subsection + "'>" + subsection + "<font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
@@ -522,32 +521,33 @@ void HtmlReporter::reportSex(ofstream & ofs) {
     ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
 
     ofs << "<div class='figurefull' id='plot_" + divName + "'></div>\n";
-    if (!(mOptions->mSex.baseErrorMapX.empty() && mOptions->mSex.baseErrorMapY.empty())) {
+    if (!mOptions->mSex.baseErrorMapX.empty() || !mOptions->mSex.baseErrorMapY.empty()) {
         ofs << "<div class='figurehalf' id='plot_sex_e" + divName + "'></div>\n";
     }
 
     ofs << "<div class='sub_section_tips'>SNPs/artifacts are highlighted in red</div>\n";
     ofs << "<pre overflow: scroll>\n";
     ofs << "<table class='summary_table' style='width:100%'>\n";
-    ofs << "<tr style='background:#cccccc'> <td>Sex allele</td><td>N. of Reads</td><td>Percentage(%)</td><td>Haplotype</td><td>Allele Size</td><td align='center'>Sequence</td></tr>\n";
+    ofs << "<tr style='background:#cccccc'> <td>Sex allele</td><td>N. reads</td><td>Total reads</td><td>Percentage(%)</td><td>Haplotype</td><td>Allele Size</td><td align='center'>Sequence</td></tr>\n";
 
     if (!mOptions->mSex.sexMarker.empty()) {
-        if (!mOptions->mSex.seqVecY.empty()) {
+        if (!mOptions->mSex.seqVarVecY.empty()) {
             ofs << "<tr style='color:blue'>";
             ofs << "<td>Ref. Y</td>" <<
                     "<td>N.A.</td>" <<
                     "<td>N.A.</td>" <<
                     "<td>N.A.</td>" <<
+                    "<td>N.A.</td>" <<
                     "<td>" + std::to_string(mOptions->mSex.refY.length()) + "</td>" <<
-                    "<td align='center'>" + highligher(mOptions->mSex.refY.mStr, mOptions->mSex.snpsRefY) + "</td>";
+                    "<td align='center'>" + highligher(mOptions->mSex.refY.mStr, mOptions->mSex.totSnpSetY) + "</td>";
             ofs << "</tr>";
             
             int ii = 1;
-            for (auto it = mOptions->mSex.seqVecY.begin(); it != mOptions->mSex.seqVecY.end(); ++it) {
+            for (auto it = mOptions->mSex.seqVarVecY.begin(); it != mOptions->mSex.seqVarVecY.end(); ++it) {
                 if(ii > mOptions->mLocSnps.mLocSnpOptions.maxRows4Align) break;
                 ii++;
                 std::string note = "";
-                if (it == mOptions->mSex.seqVecY.begin()) {
+                if (it == mOptions->mSex.seqVarVecY.begin()) {
                     if (mOptions->mSex.sexMF == "Male") {
                         note = "haplotype";
                     } else if (mOptions->mSex.sexMF == "Female") {
@@ -561,31 +561,33 @@ void HtmlReporter::reportSex(ofstream & ofs) {
 
                 ofs << "<tr>";
                 ofs << "<td>Y</td>" <<
-                        "<td>" + std::to_string(get<1>(*it)) + "</td>" <<
-                        "<td>" + std::to_string((double) get<1>(*it) * 100.00 / (double) mOptions->mSex.readsY) + "</td>" <<
+                        "<td>" + std::to_string(it->numReads) + "</td>" <<
+                        "<td>" + std::to_string(mOptions->mSex.totReadsY) + "</td>" <<
+                        "<td>" + std::to_string(getPer(it->numReads, mOptions->mSex.totReadsY)) + "</td>" <<
                         "<td>" + note + "</td>" <<
-                        "<td>" + std::to_string(get<0>(*it).length()) + "</td>" <<
-                        "<td align='center'>" + highligher(get<0>(*it), get<2>(*it)) + "</td>";
+                        "<td>" + std::to_string(it->seq.length()) + "</td>" <<
+                        "<td align='center'>" + highligher(it->seq, it->snpSet) + "</td>";
                 ofs << "</tr>";
             }
         }
 
-        if (!mOptions->mSex.seqVecX.empty()) {
+        if (!mOptions->mSex.seqVarVecX.empty()) {
             ofs << "<tr style='color:blue'>";
             ofs << "<td>Ref. X</td>" <<
                     "<td>N.A.</td>" <<
                     "<td>N.A.</td>" <<
                     "<td>N.A.</td>" <<
+                    "<td>N.A.</td>" <<
                     "<td>" + std::to_string(mOptions->mSex.refX.length()) + "</td>" <<
-                    "<td align='center'>" + highligher(mOptions->mSex.refX.mStr, mOptions->mSex.snpsRefX) + "</td>";
+                    "<td align='center'>" + highligher(mOptions->mSex.refX.mStr, mOptions->mSex.totSnpSetX) + "</td>";
             ofs << "</tr>";
             
             int ii = 1;
-            for (auto it = mOptions->mSex.seqVecX.begin(); it != mOptions->mSex.seqVecX.end(); ++it) {
+            for (auto it = mOptions->mSex.seqVarVecX.begin(); it != mOptions->mSex.seqVarVecX.end(); ++it) {
                 if(ii > mOptions->mLocSnps.mLocSnpOptions.maxRows4Align) break;
                 ii++;
                 std::string note = "";
-                if (it == mOptions->mSex.seqVecX.begin()) {
+                if (it == mOptions->mSex.seqVarVecX.begin()) {
                     if (mOptions->mSex.sexMF == "Male") {
                         note = "haplotype";
                     } else if (mOptions->mSex.sexMF == "Female") {
@@ -595,7 +597,7 @@ void HtmlReporter::reportSex(ofstream & ofs) {
                     }
                 } else {
                     if (mOptions->mSex.haplotype) {
-                        if (get<0>(*it) == get<0>(mOptions->mSex.haploTupX2)) {
+                        if (it->seq == mOptions->mSex.getHaploVar('x', 1).seq) {
                             note = "haplotype";
                         } else {
                             note = "seq error";
@@ -607,11 +609,12 @@ void HtmlReporter::reportSex(ofstream & ofs) {
 
                 ofs << "<tr>";
                 ofs << "<td>X</td>" <<
-                        "<td>" + std::to_string(get<1>(*it)) + "</td>" <<
-                        "<td>" + std::to_string((double) get<1>(*it) * 100.00 / (double) mOptions->mSex.readsX) + "</td>" <<
+                        "<td>" + std::to_string(it->numReads) + "</td>" <<
+                        "<td>" + std::to_string(mOptions->mSex.totReadsX) + "</td>" <<
+                        "<td>" + std::to_string(getPer(it->numReads, mOptions->mSex.totReadsX)) + "</td>" <<
                         "<td>" + note + "</td>" <<
-                        "<td>" + std::to_string(get<0>(*it).length()) + "</td>" <<
-                        "<td align='center'>" + highligher(get<0>(*it), get<2>(*it)) + "</td>";
+                        "<td>" + std::to_string(it->seq.length()) + "</td>" <<
+                        "<td align='center'>" + highligher(it->seq, it->snpSet) + "</td>";
                 ofs << "</tr>";
             }
         }
@@ -668,8 +671,8 @@ void HtmlReporter::reportSeqError(ofstream& ofs, std::string & divName) {
         }
 
         json_str += "var Ydata = {";
-        json_str += "x:[" + Stats::list2string2(keyV, keyV.size()) + "],";
-        json_str += "y:[" + Stats::list2string2(valueV, valueV.size()) + "],";
+        json_str += "x:[" + Stats::list2string2(keyV, keyV.size()) + "],\n";
+        json_str += "y:[" + Stats::list2string2(valueV, valueV.size()) + "],\n";
         json_str += "type: 'scatter', mode: 'markers', marker:{color: 'blue'}, textposition: 'auto', name: 'Y allele'";
         json_str += "};\n";
     }
@@ -689,8 +692,8 @@ void HtmlReporter::reportSeqError(ofstream& ofs, std::string & divName) {
         }
 
         json_str += "var Xdata = {";
-        json_str += "x:[" + Stats::list2string2(keyV, keyV.size()) + "],";
-        json_str += "y:[" + Stats::list2string2(valueV, valueV.size()) + "],";
+        json_str += "x:[" + Stats::list2string2(keyV, keyV.size()) + "],\n";
+        json_str += "y:[" + Stats::list2string2(valueV, valueV.size()) + "],\n";
         json_str += "type: 'scatter', mode: 'markers', marker:{color: 'red'}, textposition: 'auto', name: 'X allele'";
         json_str += "};\n";
     }
