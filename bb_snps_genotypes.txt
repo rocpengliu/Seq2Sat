@@ -1,1 +1,0 @@
-#Locus	Position	Genotype	NumReads	ReadsRatio	TotalReads	NewSnp	Conclusive

@@ -1,1 +1,0 @@
-#Locus	NumReads	TotalReads	ReadRatio	SNP	Amplicon
