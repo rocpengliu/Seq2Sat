@@ -1,0 +1,1 @@
+#Locus	Haplotype	NumHaploReads	HaploReadsRatio	HaploReadsPer	TotalReads	Zegosity	Indel	MicroHaplotype

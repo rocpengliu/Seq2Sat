@@ -209,7 +209,7 @@ public:
     std::pair<int, int> trimPos;//  trim front and back for reference and reads
     Sequence ft;//forward trimming region
     Sequence rt;//reverse trimming region;
-    std::set<int> snpPosSetTrueHaplo;//for haplotype; including ref, true haplotype; not the inconclusive ones; not used
+    //std::set<int> snpPosSetTrueHaplo;//for haplotype; including ref, true haplotype; not the inconclusive ones; not used
     std::set<int> snpPosSetHaplo;//only for true haplotype snp positions. including ref snps; also include the inconclusive ones; for snp table;
     std::set<int> snpPosSet;//snps poitions including seq errors; for alignment table reference
     std::set<int> refSnpPosSet;//reference target snps

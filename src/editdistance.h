@@ -10,6 +10,7 @@
 #include <vector>
 #include <iostream>
 #include <bitset>
+#include <set>
 using namespace std;
 
 unsigned int edit_distance(const char *a, const unsigned int asize, const char *b, const unsigned int bsize);
@@ -17,6 +18,8 @@ unsigned int edit_distance(const char *a, const unsigned int asize, const char *
 // unsigned int edit_distance_by_patternmap(struct PatternMap *mp, const int64_t *b, const unsigned int size);
 
 unsigned int edit_distance(string a, string b);
+
+std::pair<bool, std::set<int>> edit_distance2(string a, string b);
 
 unsigned int hamming_distance(const char *a, const unsigned int asize, const char *b, const unsigned int bsize);
 

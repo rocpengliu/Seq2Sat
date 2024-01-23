@@ -23,8 +23,10 @@ public:
     bool sexScan(Read* r1, Read* r2);
     inline std::map<std::string, std::map<std::string, int>> getSexLoc() const {return tmpSexMap;};
     void static merge(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions);
+    void static merge2(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions);
     void static report(Options * & mOptions);
-    static std::pair<std::map<int, std::string>, bool>  doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength);
+    //static std::pair<std::map<int, std::string>, bool>  doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength);
+    //static void doScanVariance(Options * & mOptions, EdlibAlignResult & result, Variance & variance, const char* & qData, const char* & tData, const int position);
     static std::pair<bool, std::set<int>> doAlignment2(Options * & mOptions, std::string readName, const char* & qData, int qLength, std::string targetName, const char* & tData, int tLength);
 private:
     std::tuple<int, int, bool> doPrimerAlignment(const char* & qData, int qLen, const std::string & qName,

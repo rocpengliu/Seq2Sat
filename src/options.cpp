@@ -510,7 +510,6 @@ void Options::readLocFile(){
                     if (pos > tmpLocSnp.trimPos.first && pos < (tmpLocSnp.trimPos.first + tmpLocSnp.ref.length())) {
                         pos -= tmpLocSnp.trimPos.first;
                         tmpLocSnp.refSnpPosSet.insert(pos);
-                        tmpLocSnp.snpPosSetTrueHaplo.insert(pos);
                         tmpLocSnp.snpPosSetHaplo.insert(pos);
                         tmpLocSnp.totPosSet.insert(pos);
                     }

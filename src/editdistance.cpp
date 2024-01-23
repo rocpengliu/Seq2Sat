@@ -105,6 +105,22 @@ unsigned int edit_distance(string a, string b) {
     return edit_distance(a.c_str(), a.length(), b.c_str(), b.length());
 }
 
+std::pair<bool, std::set<int>> edit_distance2(string a, string b) {
+    std::pair<bool, std::set<int>> snpsSetPair;
+    
+    for (unsigned int i = 0; i < min(a.length(), b.length()); i++) {
+        if (a[i] != b[i]){
+            snpsSetPair.second.insert(i);
+        }
+    }
+    if(snpsSetPair.second.empty()){
+        snpsSetPair.first = false;
+    } else {
+        snpsSetPair.first = true;
+    }
+    return snpsSetPair;
+}
+
 unsigned int hamming_distance(const char *a, const unsigned int asize, const char *b, const unsigned int bsize) {
     int dis = 0;
     for(unsigned int i=0; i<min(asize, bsize); i++) {

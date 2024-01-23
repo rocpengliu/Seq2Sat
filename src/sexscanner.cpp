@@ -176,267 +176,6 @@ std::tuple<int, int, bool> SexScanner::doPrimerAlignment(const char* & qData, in
     }
 }
 
-//void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions) {
-//    std::map<std::string, int> seqMapX;
-//    std::map<std::string, int> seqMapY;
-//
-//    for (auto & it : totalSexLocVec) {
-//        for (const auto & it2 : it["X"]) {
-//            mOptions->isPaired() ? (seqMapX[it2.first] += it2.second * 2) : (seqMapX[it2.first] += it2.second);
-//        }
-//
-//        for (const auto & it2 : it["Y"]) {
-//            mOptions->isPaired() ? (seqMapY[it2.first] += it2.second * 2) : seqMapY[it2.first] += it2.second;
-//        }
-//    }
-//
-//    totalSexLocVec.clear();
-//    totalSexLocVec.shrink_to_fit();
-//    
-//    int maxReadX = 0;//determine if the reads for x is deep or shallow, which is used for filter the low abundance read variants or not default 50:
-//    if (!seqMapX.empty()){
-//        for (auto & it : seqMapX) {
-//            if(it.second > maxReadX){
-//                maxReadX = it.second;
-//            }
-//        }
-//    }
-//
-//    int maxReadY = 0;
-//    if (!seqMapY.empty()) {
-//        for (auto & it : seqMapY) {
-//            if (it.second > maxReadY) {
-//                maxReadY = it.second;
-//            }
-//        }
-//    }
-//    
-//    //Calculate error rate
-//    std::map<int, std::map<char, int>> baseFreqMapX;
-//    std::map<int, std::map<char, int>> baseFreqMapY;
-//
-//    const char* target;
-//    int targetLength;
-//    const char* readSeq;
-//    int readLength;
-//
-//    if (!seqMapX.empty()) {
-//        target = mOptions->mSex.refX.mStr.c_str();
-//        targetLength = mOptions->mSex.refX.length();
-//        for (const auto & it : seqMapX) {
-//              for (int i = 0; i < it.first.length(); i++) {
-//                  baseFreqMapX[i][it.first[i]] += it.second;
-//              }
-//            
-//            if(maxReadX >= mOptions->mLocSnps.mLocSnpOptions.minReads4Filter) {
-//                if (it.second >= mOptions->mSex.minReadsSexVariant) {
-//                     mOptions->mSex.readsX += it.second;                    
-//                    readSeq = it.first.c_str();
-//                    readLength = it.first.length();
-//                    auto snpsMapX = SexScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
-//                    for (auto & it2 : snpsMapX.first) {
-//                        mOptions->mSex.snpsRefX.insert(it2.first);
-//                    }
-//                    mOptions->mSex.seqVecX.emplace_back(std::make_tuple(it.first, it.second, snpsMapX.first));
-//                }
-//            } else {
-//                mOptions->mSex.readsX += it.second;
-//                for (int i = 0; i < it.first.length(); i++) {
-//                    baseFreqMapX[i][it.first[i]] += it.second;
-//                }
-//
-//                readSeq = it.first.c_str();
-//                readLength = it.first.length();
-//                auto snpsMapX = SexScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
-//                for (auto & it2 : snpsMapX.first) {
-//                    mOptions->mSex.snpsRefX.insert(it2.first);
-//                }
-//                mOptions->mSex.seqVecX.emplace_back(std::make_tuple(it.first, it.second, snpsMapX.first));
-//            }
-//        }
-//
-//        std::sort(mOptions->mSex.seqVecX.begin(), mOptions->mSex.seqVecX.end(),
-//                [](const std::tuple<std::string, int, std::map<int, std::string>> &l,
-//                const std::tuple<std::string, int, std::map<int, std::string>> &r) {
-//                    return get<1>(l) > get<1>(r);
-//                });
-//
-//        mOptions->mSex.haploTupX = std::make_tuple(get<0>(mOptions->mSex.seqVecX.front()), get<1>(mOptions->mSex.seqVecX.front()), false);
-//        if(mOptions->mSex.seqVecX.size() > 1){
-//            mOptions->mSex.haploTupX2 = std::make_tuple(get<0>(mOptions->mSex.seqVecX[1]), get<1>(mOptions->mSex.seqVecX[1]), false);
-//        }
-//    }
-//
-//    if (!seqMapY.empty()) {
-//        target = mOptions->mSex.refY.mStr.c_str();
-//        targetLength = mOptions->mSex.refY.mStr.length();
-//        for (auto & it : seqMapY) {
-//            for (int i = 0; i < it.first.length(); i++) {
-//                        baseFreqMapY[i][it.first[i]] += it.second;
-//            }
-//            if (maxReadY >= mOptions->mLocSnps.mLocSnpOptions.minReads4Filter) { 
-//                if (it.second >= mOptions->mSex.minReadsSexVariant) {
-//                    mOptions->mSex.readsY += it.second;    
-//                    readSeq = it.first.c_str();
-//                    readLength = it.first.length();
-//                    auto snpsMapY = SexScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
-//                    for (auto & it2 : snpsMapY.first) {
-//                        mOptions->mSex.snpsRefY.insert(it2.first);
-//                    }
-//                    mOptions->mSex.seqVecY.emplace_back(std::make_tuple(it.first, it.second, snpsMapY.first));
-//                }
-//
-//            } else {
-//                mOptions->mSex.readsY += it.second;
-//                for (int i = 0; i < it.first.length(); i++) {
-//                    baseFreqMapY[i][it.first[i]] += it.second;
-//                }
-//                
-//                readSeq = it.first.c_str();
-//                readLength = it.first.length();
-//                auto snpsMapY = SexScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
-//                for (auto & it2 : snpsMapY.first) {
-//                    mOptions->mSex.snpsRefY.insert(it2.first);
-//                }
-//                mOptions->mSex.seqVecY.emplace_back(std::make_tuple(it.first, it.second, snpsMapY.first));
-//            }
-//        }
-//        std::sort(mOptions->mSex.seqVecY.begin(), mOptions->mSex.seqVecY.end(),
-//                [](const std::tuple<std::string, int, std::map<int, std::string>> &l,
-//                const std::tuple<std::string, int, std::map<int, std::string>> &r) {
-//                    return get<1>(l) > get<1>(r);
-//                });
-//        mOptions->mSex.haploTupY = std::make_tuple(get<0>(mOptions->mSex.seqVecY.front()), get<1>(mOptions->mSex.seqVecY.front()), false);
-//    }
-//    
-//    if(get<1>(mOptions->mSex.haploTupX) != 0){
-//        mOptions->mSex.YXRatio = std::round(((double) get<1>(mOptions->mSex.haploTupY) / (double) get<1>(mOptions->mSex.haploTupX)) * 100.00) / 100.00;
-//
-//        if (mOptions->mSex.YXRatio >= mOptions->mSex.YXRationCuttoff) {
-//            if (get<1>(mOptions->mSex.haploTupX) >= mOptions->mSex.minReadsSexAllele &&
-//                    get<1>(mOptions->mSex.haploTupY) >= mOptions->mSex.minReadsSexAllele) {
-//                mOptions->mSex.sexMF = "Male";
-//                get<2>(mOptions->mSex.haploTupX) = true;
-//                get<2>(mOptions->mSex.haploTupX2) = false;
-//                get<2>(mOptions->mSex.haploTupY) = true;
-//            } else {
-//                mOptions->mSex.sexMF = "Inconclusive";
-//            }
-//        } else {
-//            if (get<1>(mOptions->mSex.haploTupX) >= mOptions->mSex.minReadsSexAllele) {
-//                mOptions->mSex.sexMF = "Female";
-//                if (get<1>(mOptions->mSex.haploTupX2) != 0) {
-//                    
-//                    double haploRatio = std::round(((double) get<1>(mOptions->mSex.haploTupX2) / (double) (get<1>(mOptions->mSex.haploTupX) + get<1>(mOptions->mSex.haploTupX2)))* 100.0)/100.0;
-//                    
-//                    readSeq = get<0>(mOptions->mSex.haploTupX2).c_str();
-//                    readLength = get<0>(mOptions->mSex.haploTupX2).length();
-//                    target = get<0>(mOptions->mSex.haploTupX).c_str();
-//                    targetLength = get<0>(mOptions->mSex.haploTupX).length();
-//                
-//                    auto snpsMapXX = SexScanner::doSimpleAlignment(mOptions, readSeq, readLength, target, targetLength);
-//                    
-//                    if (snpsMapXX.second) {//no indels
-//    
-//                        mOptions->mSex.haploRatio = haploRatio;
-//                    
-//                        if (snpsMapXX.first.size() < 2) {
-//                            mOptions->mLocSnps.mLocSnpOptions.hmPer = mOptions->mLocSnps.mLocSnpOptions.hmPerL;
-//                            
-//                            if(haploRatio > mOptions->mLocSnps.mLocSnpOptions.hmPer){
-//                                get<2>(mOptions->mSex.haploTupX) = true;
-//                            } else if (abs(haploRatio - 0.5) <= mOptions->mLocSnps.mLocSnpOptions.htJetter) {
-//                                get<2>(mOptions->mSex.haploTupX) = true;
-//                                get<2>(mOptions->mSex.haploTupX2) = true;
-//                                mOptions->mSex.haploSnpsMap = snpsMapXX.first;
-//                                mOptions->mSex.snpsMapX2R = get<2>(mOptions->mSex.seqVecX[1]);
-//                                mOptions->mSex.haplotype = true;
-//                            } else {
-//                                //inconclusive haplotype;
-//                                mOptions->mSex.haploSnpsMap = snpsMapXX.first;
-//                                mOptions->mSex.snpsMapX2R = get<2>(mOptions->mSex.seqVecX[1]);
-//                            }
-//
-//                        } else {
-//                            get<2>(mOptions->mSex.haploTupX) = true;
-//                            mOptions->mLocSnps.mLocSnpOptions.hmPer = mOptions->mLocSnps.mLocSnpOptions.hmPerH;
-//                            if(haploRatio <= mOptions->mLocSnps.mLocSnpOptions.hmPer){
-//                                get<2>(mOptions->mSex.haploTupX2) = true;
-//                                mOptions->mSex.haploSnpsMap = snpsMapXX.first;
-//                                mOptions->mSex.snpsMapX2R = get<2>(mOptions->mSex.seqVecX[1]);
-//                                mOptions->mSex.haplotype = true;
-//                            }
-//                        }
-//                    } else {// has indels; could have a bug if indels can also be haplo
-//                        mOptions->mLocSnps.mLocSnpOptions.hmPer = mOptions->mLocSnps.mLocSnpOptions.hmPerH;
-//                        get<2>(mOptions->mSex.haploTupX) = true;
-//                    }
-//
-//                } else {
-//                    get<2>(mOptions->mSex.haploTupX) = true;
-//                }
-//            } else {
-//                mOptions->mSex.YXRatio = 0;
-//                mOptions->mSex.sexMF = "Inconclusive";
-//            }
-//        }
-//    } else {
-//        mOptions->mSex.YXRatio = 0;
-//        mOptions->mSex.sexMF = "Inconclusive";
-//    }
-//    
-//    if(!baseFreqMapY.empty() && mOptions->mSex.sexMF != "Inconclusive"){
-//        
-//        std::string sexStrY = get<0>(mOptions->mSex.haploTupY);
-//        for(int i = 0; i < baseFreqMapY.size(); i++){
-//            for(const auto & ii : baseFreqMapY[i]){
-//                if(ii.first == sexStrY[i]){
-//                    mOptions->mSex.baseErrorMapY[i] = static_cast<double>((mOptions->mSex.readsY - ii.second) * 100) / static_cast<double>(mOptions->mSex.readsY);
-//                    break;
-//                }
-//            }
-//        }
-//    }
-//
-//    if (!baseFreqMapX.empty() && mOptions->mSex.sexMF != "Inconclusive") {
-//        
-//        if(!get<2>(mOptions->mSex.haploTupX2)){//male or female;
-//
-//            std::string sexStrX = get<0>(mOptions->mSex.haploTupX);
-//            for (int i = 0; i < baseFreqMapX.size(); i++) {
-//                for (const auto & ii : baseFreqMapX[i]) {
-//                    if (ii.first == sexStrX[i]) {
-//                        mOptions->mSex.baseErrorMapX[i] = static_cast<double> ( (mOptions->mSex.readsX - ii.second) * 100) / static_cast<double> (mOptions->mSex.readsX);
-//                        break;
-//                    }
-//                }
-//            }
-//            
-//        } else {//female;
-//            std::string sexStrX = get<0>(mOptions->mSex.haploTupX);
-//            std::string sexStrX2 = get<0>(mOptions->mSex.haploTupX2);
-//            for (int i = 0; i < baseFreqMapX.size(); i++) {
-//                if(sexStrX[i] == sexStrX2[i]){
-//                    for (const auto & ii : baseFreqMapX[i]) {
-//                        if (ii.first == sexStrX[i]) {
-//                            mOptions->mSex.baseErrorMapX[i] = static_cast<double> ( (mOptions->mSex.readsX - ii.second) * 100) / static_cast<double> (mOptions->mSex.readsX);
-//                            break;
-//                        }
-//                    }
-//                } else {
-//                    int sum = 0;
-//                    for (const auto & ii : baseFreqMapX[i]) {
-//                        if (ii.first == sexStrX[i] || ii.first == sexStrX2[i]) {
-//                            sum += ii.second;
-//                        }
-//                    }
-//                    mOptions->mSex.baseErrorMapX[i] = static_cast<double> ( (mOptions->mSex.readsX - sum) * 100) / static_cast<double> (mOptions->mSex.readsX);
-//                }
-//            }
-//        }
-//    }
-//}
-
 void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions) {
     std::map<std::string, int> seqMapX;
     std::map<std::string, int> seqMapY;
@@ -461,7 +200,7 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
     const char* target;
     int targetLength;
     const char* readSeq;
-    int readLength;
+    int readLength;  
 
     if (!seqMapX.empty()) {
         target = mOptions->mSex.refX.mStr.c_str();
@@ -475,14 +214,13 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
 
             readSeq = it.first.c_str();
             readLength = it.first.length();
-            auto mapPair = doAlignment2(mOptions, "read", readSeq, readLength, mOptions->mSex.sexMarker, target, targetLength);
-
+            auto mapPair1 = doAlignment2(mOptions, "read", readSeq, readLength, mOptions->mSex.sexMarker, target, targetLength);
             SeqVar tmpSeqVar;
             tmpSeqVar.seq = it.first;
             tmpSeqVar.numReads = it.second;
 
-            if (mapPair.first) {
-                tmpSeqVar.snpSet = mapPair.second;
+            if (mapPair1.first) {
+                tmpSeqVar.snpSet = mapPair1.second;
                 for (int i = 0; i < it.first.length(); i++) {
                     baseFreqMapX[i][it.first[i]] += it.second;
                 }
@@ -517,14 +255,13 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
 
             readSeq = it.first.c_str();
             readLength = it.first.length();
-            auto mapPair = doAlignment2(mOptions, "read", readSeq, readLength, mOptions->mSex.sexMarker, target, targetLength);
-
+            auto mapPairY = doAlignment2(mOptions, "read", readSeq, readLength, mOptions->mSex.sexMarker, target, targetLength);
             SeqVar tmpSeqVar;
             tmpSeqVar.seq = it.first;
             tmpSeqVar.numReads = it.second;
 
-            if (mapPair.first) {
-                tmpSeqVar.snpSet = mapPair.second;
+            if (mapPairY.first) {
+                tmpSeqVar.snpSet = mapPairY.second;
                 for (int i = 0; i < it.first.length(); i++) {
                     baseFreqMapY[i][it.first[i]] += it.second;
                 }
@@ -540,7 +277,7 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
 
         int keepInt = 0;
         for(int i = 0; i < mOptions->mSex.seqVarVecY.size(); i++){
-            if(i == 0 || mOptions->mSex.seqVarVecY.at(i).numReads >= mOptions->mSex.minReadsSexVariant){
+            if(i < 2 || mOptions->mSex.seqVarVecY.at(i).numReads >= mOptions->mSex.minReadsSexVariant){
                 mOptions->mSex.totSnpSetY.insert(mOptions->mSex.seqVarVecY.at(i).snpSet.begin(), mOptions->mSex.seqVarVecY.at(i).snpSet.end());
                 keepInt++;
             } else {
@@ -569,21 +306,18 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                 mOptions->mSex.haploRatio = getPer(mOptions->mSex.getHaploVar('x', 0).numReads, 
                 (mOptions->mSex.getHaploVar('x', 0).numReads + mOptions->mSex.getHaploVar('x', 1).numReads),
                  false);
-                readSeq = mOptions->mSex.getHaploVar('x', 0).seq.c_str();
-                readLength = mOptions->mSex.getHaploVar('x', 0).seq.length();
-                target = mOptions->mSex.getHaploVar('x', 1).seq.c_str();
-                targetLength = mOptions->mSex.getHaploVar('x', 1).seq.length();
-                auto mapPair = doAlignment2(mOptions, "x2", readSeq, readLength, "x1", target, targetLength);
 
-                if(mapPair.first){//no indel
-                    if (mapPair.second.size() == 1){//1 snp;
+                auto mapPair2 = edit_distance2(mOptions->mSex.getHaploVar('x', 0).seq, mOptions->mSex.getHaploVar('x', 1).seq);
+
+                if(mapPair2.first){//no indel
+                    if (mapPair2.second.size() == 1){//1 snp;
                         if (mOptions->mSex.haploRatio >= mOptions->mLocSnps.mLocSnpOptions.hmPerL) {
                             mOptions->mSex.haploStr = "homo";
                         } else if (abs(mOptions->mSex.haploRatio - 0.5) <= mOptions->mLocSnps.mLocSnpOptions.htJetter) {
                             if( mOptions->mSex.getHaploVar('x', 1).numReads >= mOptions->mSex.minReadsSexVariant) {
                                 mOptions->mSex.haplotype = true;
                                 mOptions->mSex.haploStr = "heter";
-                                mOptions->mSex.hyploSnpSetX = mapPair.second;
+                                mOptions->mSex.hyploSnpSetX = mapPair2.second;
                                 mOptions->mSex.totSnpSetX.insert(mOptions->mSex.hyploSnpSetX.begin(), mOptions->mSex.hyploSnpSetX.end());
                             } else {
                                 
@@ -599,7 +333,7 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                             if( mOptions->mSex.getHaploVar('x', 1).numReads >= mOptions->mSex.minReadsSexVariant) {
                                 mOptions->mSex.haplotype = true;
                                 mOptions->mSex.haploStr = "heter";
-                                mOptions->mSex.hyploSnpSetX = mapPair.second;
+                                mOptions->mSex.hyploSnpSetX = mapPair2.second;
                                 mOptions->mSex.totSnpSetX.insert(mOptions->mSex.hyploSnpSetX.begin(), mOptions->mSex.hyploSnpSetX.end());
                             } else {
                                 
@@ -652,6 +386,228 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
         }
     }
 }
+
+//void SexScanner::merge2(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions) {
+//    std::map<std::string, int> seqMapX;
+//    std::map<std::string, int> seqMapY;
+//
+//    for (auto & it : totalSexLocVec) {
+//        for (const auto & it2 : it["X"]) {
+//            mOptions->isPaired() ? (seqMapX[it2.first] += it2.second * 2) : (seqMapX[it2.first] += it2.second);
+//        }
+//
+//        for (const auto & it2 : it["Y"]) {
+//            mOptions->isPaired() ? (seqMapY[it2.first] += it2.second * 2) : seqMapY[it2.first] += it2.second;
+//        }
+//    }
+//
+//    totalSexLocVec.clear();
+//    totalSexLocVec.shrink_to_fit();
+//    
+//        //Calculate error rate
+//    std::map<int, std::map<char, int>> baseFreqMapX;
+//    std::map<int, std::map<char, int>> baseFreqMapY;
+//
+//    const char* target;
+//    int targetLength;
+//    const char* readSeq;
+//    int readLength;  
+//
+//    if (!seqMapX.empty()) {
+//        target = mOptions->mSex.refX.mStr.c_str();
+//        targetLength = mOptions->mSex.refX.length();
+//        mOptions->mSex.seqVarVecX.reserve(seqMapY.size());
+//        for (const auto & it : seqMapX) {
+//            mOptions->mSex.totReadsX += it.second;
+//            if (it.second > mOptions->mSex.maxReadsX) {
+//                mOptions->mSex.maxReadsX = it.second;
+//            }
+//
+//            readSeq = it.first.c_str();
+//            readLength = it.first.length();
+//            auto mapPair1 = doAlignment2(mOptions, "read", readSeq, readLength, mOptions->mSex.sexMarker, target, targetLength);
+//            cCout("sexxxxxxxxxxxxxxxx111111111111111", mapPair1.second.size(), 'b');
+//            SeqVar tmpSeqVar;
+//            tmpSeqVar.seq = it.first;
+//            tmpSeqVar.numReads = it.second;
+//
+//            if (mapPair1.first) {
+//                tmpSeqVar.snpSet = mapPair1.second;
+//                for (int i = 0; i < it.first.length(); i++) {
+//                    baseFreqMapX[i][it.first[i]] += it.second;
+//                }
+//            } else {
+//                tmpSeqVar.indel = true;
+//            }
+//            mOptions->mSex.seqVarVecX.push_back(tmpSeqVar);
+//        }
+//        std::sort(mOptions->mSex.seqVarVecX.begin(), mOptions->mSex.seqVarVecX.end(), [](const SeqVar &L, const SeqVar &R){ return L.numReads > R.numReads;});
+//        
+//        int keepInt = 0;
+//        for(int i = 0; i < mOptions->mSex.seqVarVecX.size(); i++){
+//            if(i < 2 || mOptions->mSex.seqVarVecX.at(i).numReads >= mOptions->mSex.minReadsSexVariant){
+//                mOptions->mSex.totSnpSetX.insert(mOptions->mSex.seqVarVecX.at(i).snpSet.begin(), mOptions->mSex.seqVarVecX.at(i).snpSet.end());
+//                keepInt++;
+//            } else {
+//                break;
+//            }
+//        }
+//        mOptions->mSex.seqVarVecX.erase(mOptions->mSex.seqVarVecX.begin() + keepInt, mOptions->mSex.seqVarVecX.end());
+//        
+//        for(const auto & it : mOptions->mSex.seqVarVecX){
+//            cCout(it.seq, it.numReads, 'g');
+//        }
+//    }
+//    
+//    if (!seqMapY.empty()){
+//        target = mOptions->mSex.refY.mStr.c_str();
+//        targetLength = mOptions->mSex.refY.length();
+//        mOptions->mSex.seqVarVecY.reserve(seqMapY.size());
+//        for (auto & it : seqMapY) {
+//            mOptions->mSex.totReadsY += it.second;
+//            if(it.second > mOptions->mSex.maxReadsY){
+//                mOptions->mSex.maxReadsY = it.second;
+//            }
+//
+//            readSeq = it.first.c_str();
+//            readLength = it.first.length();
+//            auto mapPairY = doAlignment2(mOptions, "read", readSeq, readLength, mOptions->mSex.sexMarker, target, targetLength);
+//            cCout("sexYYYYYYYYYYYYYYYYYYYYY111111111111111", mapPairY.second.size(), 'b');
+//            SeqVar tmpSeqVar;
+//            tmpSeqVar.seq = it.first;
+//            tmpSeqVar.numReads = it.second;
+//
+//            if (mapPairY.first) {
+//                tmpSeqVar.snpSet = mapPairY.second;
+//                for (int i = 0; i < it.first.length(); i++) {
+//                    baseFreqMapY[i][it.first[i]] += it.second;
+//                }
+//            } else {
+//                tmpSeqVar.indel = true;
+//            }
+//            mOptions->mSex.seqVarVecY.push_back(tmpSeqVar);
+//        }
+//        mOptions->mSex.seqVarVecY.shrink_to_fit();
+//        std::sort(mOptions->mSex.seqVarVecY.begin(), mOptions->mSex.seqVarVecY.end(), [](const SeqVar & L, const SeqVar & R) {
+//            return L.numReads > R.numReads;
+//        });
+//
+//        int keepInt = 0;
+//        for(int i = 0; i < mOptions->mSex.seqVarVecY.size(); i++){
+//            if(i == 0 || mOptions->mSex.seqVarVecY.at(i).numReads >= mOptions->mSex.minReadsSexVariant){
+//                mOptions->mSex.totSnpSetY.insert(mOptions->mSex.seqVarVecY.at(i).snpSet.begin(), mOptions->mSex.seqVarVecY.at(i).snpSet.end());
+//                keepInt++;
+//            } else {
+//                break;
+//            }
+//        }
+//        mOptions->mSex.seqVarVecY.erase(mOptions->mSex.seqVarVecY.begin() + keepInt, mOptions->mSex.seqVarVecY.end());
+//    }
+//    
+//    if(mOptions->mSex.maxReadsY >= mOptions->mSex.minReadsSexAllele){//male; or inconclusive;
+//        if(mOptions->mSex.maxReadsX >= mOptions->mSex.minReadsSexAllele){
+//            mOptions->mSex.YXRatio = getPer(mOptions->mSex.getHaploVar('y', 0).numReads, mOptions->mSex.getHaploVar('x', 0).numReads, false);
+//            if (mOptions->mSex.YXRatio >= mOptions->mSex.YXRationCuttoff){
+//                mOptions->mSex.sexMF = "Male";
+//                mOptions->mSex.haploStr = "homo";
+//            } else {
+//                mOptions->mSex.sexMF = "Inconclusive";
+//            }
+//        } else {
+//            mOptions->mSex.sexMF = "Inconclusive";
+//        }
+//    } else {//female;
+//        if (mOptions->mSex.maxReadsX >= mOptions->mSex.minReadsSexAllele){
+//            mOptions->mSex.sexMF = "Female";
+//            if (mOptions->mSex.getHaploVar('x', 1).numReads > 0){
+//                mOptions->mSex.haploRatio = getPer(mOptions->mSex.getHaploVar('x', 0).numReads, 
+//                (mOptions->mSex.getHaploVar('x', 0).numReads + mOptions->mSex.getHaploVar('x', 1).numReads),
+//                 false);
+//                const char* readSeq2 = mOptions->mSex.getHaploVar('x', 0).seq.c_str();
+//                int readLength2 = mOptions->mSex.getHaploVar('x', 0).seq.length();
+//                const char* target2 = mOptions->mSex.getHaploVar('x', 1).seq.c_str();
+//                int targetLength2 = mOptions->mSex.getHaploVar('x', 1).seq.length();
+//                
+//                cCout(mOptions->mSex.getHaploVar('x', 0).seq, mOptions->mSex.getHaploVar('x', 1).seq, 'b');
+//                std::pair<bool, std::set<int>> mapPair2 = doAlignment2(mOptions, "x2", readSeq2, readLength2, "x1", target2, targetLength2);
+//                cCout(mOptions->mSex.haploRatio, mapPair2.second.size(), 'b');
+//                if(mapPair2.first){//no indel
+//                    if (mapPair2.second.size() == 1){//1 snp;
+//                        if (mOptions->mSex.haploRatio >= mOptions->mLocSnps.mLocSnpOptions.hmPerL) {
+//                            mOptions->mSex.haploStr = "homo";
+//                        } else if (abs(mOptions->mSex.haploRatio - 0.5) <= mOptions->mLocSnps.mLocSnpOptions.htJetter) {
+//                            if( mOptions->mSex.getHaploVar('x', 1).numReads >= mOptions->mSex.minReadsSexVariant) {
+//                                mOptions->mSex.haplotype = true;
+//                                mOptions->mSex.haploStr = "heter";
+//                                mOptions->mSex.hyploSnpSetX = mapPair2.second;
+//                                mOptions->mSex.totSnpSetX.insert(mOptions->mSex.hyploSnpSetX.begin(), mOptions->mSex.hyploSnpSetX.end());
+//                            } else {
+//                                
+//                            }
+//                            
+//                        } else {
+//                            //mOptions->mSex.haploStr = "inconclusive";
+//                        }
+//                    } else {// >= 2 snps;
+//                        if (mOptions->mSex.haploRatio >= mOptions->mLocSnps.mLocSnpOptions.hmPerH){
+//                            mOptions->mSex.haploStr = "homo";
+//                        } else {
+//                            if( mOptions->mSex.getHaploVar('x', 1).numReads >= mOptions->mSex.minReadsSexVariant) {
+//                                mOptions->mSex.haplotype = true;
+//                                mOptions->mSex.haploStr = "heter";
+//                                mOptions->mSex.hyploSnpSetX = mapPair2.second;
+//                                mOptions->mSex.totSnpSetX.insert(mOptions->mSex.hyploSnpSetX.begin(), mOptions->mSex.hyploSnpSetX.end());
+//                            } else {
+//                                
+//                            }
+//                        }
+//                    }
+//                } else {// indel;
+//                    if (mOptions->mSex.haploRatio >= mOptions->mLocSnps.mLocSnpOptions.hmPerH){
+//                        mOptions->mSex.haploStr = "homo";
+//                    } else {
+//                        if( mOptions->mSex.getHaploVar('x', 1).numReads >= mOptions->mSex.minReadsSexVariant){
+//                            mOptions->mSex.haploStr = "heter";
+//                        } else {
+//                            
+//                        }
+//                    }
+//                    mOptions->mSex.haploIndel = true;
+//                }
+//            } else {
+//                mOptions->mSex.haploStr = "homo";
+//            }
+//        } else {
+//            mOptions->mSex.sexMF = "Inconclusive";
+//        }
+//    }
+//    
+//    if(!mOptions->mSex.getHaploVar('y', 0).indel){
+//        for (int i = 0; i < mOptions->mSex.getHaploVar('y', 0).seq.length(); i++) {
+//            mOptions->mSex.baseErrorMapY[i] = getPer((mOptions->mSex.totReadsY - baseFreqMapY[i][mOptions->mSex.getHaploVar('y', 0).seq[i]]),
+//                                                     mOptions->mSex.totReadsY);
+//        }
+//    }
+//
+//    if (!mOptions->mSex.getHaploVar('x', 0).indel){
+//        if (mOptions->mSex.haploStr == "homo" && !mOptions->mSex.getHaploVar('x', 0).indel){
+//            for (int i = 0; i < mOptions->mSex.getHaploVar('x', 0).seq.length(); i++) {
+//                mOptions->mSex.baseErrorMapX[i] = getPer((mOptions->mSex.totReadsX - baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 0).seq[i]]),
+//                                                        mOptions->mSex.totReadsX);
+//            }
+//        } else if (mOptions->mSex.haploStr == "heter") {
+//            if (!mOptions->mSex.getHaploVar('x', 0).indel && !mOptions->mSex.getHaploVar('x', 1).indel){
+//                for (int i = 0; i < mOptions->mSex.getHaploVar('x', 0).seq.length(); i++){
+//                    int tot = baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 0).seq[i]] + baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 1).seq[i]];
+//                    mOptions->mSex.baseErrorMapX[i] = getPer((mOptions->mSex.totReadsX - tot),
+//                                                             mOptions->mSex.totReadsX);
+//                }
+//            }
+//        } else {
+//            
+//        }
+//    }
+//}
 
 void SexScanner::report(Options *& mOptions) {
 
@@ -881,271 +837,41 @@ void SexScanner::report(Options *& mOptions) {
     }
 }
 
-//void SexScanner::report(Options *& mOptions) {
+//std::pair<std::map<int, std::string>, bool> SexScanner::doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength) {
+//    EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
+//            edlibNewAlignConfig(mOptions->mLocVars.locVarOptions.maxScorePrimer,
+//            mOptions->mEdOptions.modeCode,
+//            mOptions->mEdOptions.alignTask,
+//            NULL, 0));
 //
-//    std::string foutName = mOptions->prefix + "_sex_loc_id.txt";
-//    std::ofstream* fout = new std::ofstream();
-//    fout->open(foutName.c_str(), std::ofstream::out);
+//    std::map<int, std::string> snpsMap;
+//    std::set<int> indelSet;
+//    if (result.status == EDLIB_STATUS_OK) {
+//        for (int i = 0; i < result.alignmentLength; i++) {
+//            auto cur = result.alignment[i];
+//            if (cur == EDLIB_EDOP_MATCH) {
 //
-//    if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
-//    if (mOptions->verbose) loginfo("Starting to write sex identification loc file!");
-//    
-//    *fout << "#SexLoc\tSexAllele\tNumReads\tRatio\tPutativeSex\tHaplotypeRatio\tPutativeHaplotype\tAlleleSeq\tSNPs\tNote\n";
-//    
-//    if(mOptions->mSex.sexMF == "Male"){
-//        *fout << mOptions->mSex.sexMarker << "\t" << "Y" << "\t" << get<1>(mOptions->mSex.haploTupY) << "\t" << mOptions->mSex.YXRatio << "\t" << mOptions->mSex.sexMF << "\t" << 1 << "\t" << "Y" << "\t" << get<0>(mOptions->mSex.haploTupY) << "\t";
-//        
-//        if(get<2>(mOptions->mSex.seqVecY.front()).empty()){
-//            *fout << "NA";
-//        } else {
-//            for (const auto & it : get<2>(mOptions->mSex.seqVecY.front())) {
-//                *fout << it.first << mOptions->mSex.refY.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecY.front())[it.first] << ";";
+//            } else if (cur == EDLIB_EDOP_MISMATCH) {
+//                snpsMap[i] = tData[i];
+//            } else if (cur == EDLIB_EDOP_INSERT) {
+//                indelSet.insert(i);
+//            } else if (cur == EDLIB_EDOP_DELETE) {
+//                indelSet.insert(i);
 //            }
 //        }
-//        *fout << "\t" << "haplotypeY" << "\n";
-//        
-//        *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.haploTupX) << "\t" << mOptions->mSex.YXRatio << "\t" << mOptions->mSex.sexMF << "\t" << 1 << "\t" << 'Y' << "\t" << get<0>(mOptions->mSex.haploTupX) << "\t";
-//        if (get<2>(mOptions->mSex.seqVecX.front()).empty()) {
-//            *fout << "NA";
-//        } else {
-//            for (const auto & it : get<2>(mOptions->mSex.seqVecX.front())) {
-//                *fout << it.first << mOptions->mSex.refX.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecX.front())[it.first] << ";";
-//            }
-//        }
-//        *fout << "\t" << "haplotypeX" << "\n";
 //
-//        for (int i = 1; i < mOptions->mSex.seqVecY.size(); i++) {
-//            *fout << mOptions->mSex.sexMarker << "\t" << "Y" << "\t" << get<1>(mOptions->mSex.seqVecY[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << "N" << "\t" << get<0>(mOptions->mSex.seqVecY[i]) << "\t";
-//            if (get<2>(mOptions->mSex.seqVecY[i]).empty()) {
-//                *fout << "NA";
-//            } else {
-//                for (const auto & it : get<2>(mOptions->mSex.seqVecY[i])) {
-//                    *fout << it.first << mOptions->mSex.refY.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecY[i])[it.first] << ";";
-//                }
-//            }
-//            *fout << "\t" << "seq_error" << "\n";
-//        }
-//       
-//        for (int i = 1; i < mOptions->mSex.seqVecX.size(); i++) {
-//            *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.seqVecX[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << "N" << "\t" << get<0>(mOptions->mSex.seqVecX[i]) << "\t";
-//            if (get<2>(mOptions->mSex.seqVecX[i]).empty()) {
-//                *fout << "NA";
-//            } else {
-//                for (const auto & it : get<2>(mOptions->mSex.seqVecX[i])) {
-//                    *fout << it.first << mOptions->mSex.refX.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecX[i])[it.first] << ";";
-//                }
-//            }
-//            *fout << "\t" << "seq_error" << "\n";
-//        }
-//
-//    } else if(mOptions->mSex.sexMF == "Female"){
-//        
-//        if(get<2>(mOptions->mSex.haploTupX2)) {
-//            std::set<int> hapRefSet;
-//            if(!get<2>(mOptions->mSex.seqVecX.front()).empty()){
-//                for (const auto & it : get<2>(mOptions->mSex.seqVecX.front())) {
-//                    hapRefSet.insert(it.first);
-//                }
-//            }
-//            if (!mOptions->mSex.snpsMapX2R.empty()) {
-//                for (const auto & it : mOptions->mSex.snpsMapX2R) {
-//                    hapRefSet.insert(it.first);
-//                }
-//            }
-//            if(!mOptions->mSex.haploSnpsMap.empty()) {
-//                for (const auto & it : mOptions->mSex.haploSnpsMap) {
-//                    hapRefSet.insert(it.first);
-//                }
-//            }
-//            *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.haploTupX) << "\t" << mOptions->mSex.YXRatio << "\t" << mOptions->mSex.sexMF << "\t" << mOptions->mSex.haploRatio << "\t" << (mOptions->mSex.haplotype ? "Y" : "N") << "\t" << get<0>(mOptions->mSex.haploTupX) << "\t";
-//            if (hapRefSet.empty()) {
-//                *fout << "NA";
-//            } else {
-//                for (const auto & it : hapRefSet) {
-//                    *fout << it << mOptions->mSex.refX.mStr[it] << "|" << get<0>(mOptions->mSex.haploTupX)[it] << get<0>(mOptions->mSex.haploTupX2)[it] << ";";
-//                }
-//            }
-//            *fout << "\t" << "haplotypeX1" << "\n";
-//
-//            *fout << mOptions->mSex.sexMarker << "\t" << "X2" << "\t" << get<1>(mOptions->mSex.haploTupX2) << "\t" << mOptions->mSex.YXRatio << "\t" << mOptions->mSex.sexMF << "\t" << mOptions->mSex.haploRatio << "\t" << (mOptions->mSex.haplotype ? "Y" : "N") << "\t" << get<0>(mOptions->mSex.haploTupX2) << "\t";
-//            if (hapRefSet.empty()) {
-//                *fout << "NA";
-//            } else {
-//                for (const auto & it : hapRefSet) {
-//                    *fout << it << mOptions->mSex.refX.mStr[it] << "|" << get<0>(mOptions->mSex.haploTupX)[it] << get<0>(mOptions->mSex.haploTupX2)[it] << ";";
-//                }
-//            }
-//            *fout << "\t" << "haplotypeX2" << "\n";
-//
-//            for (int i = 2; i < mOptions->mSex.seqVecX.size(); i++) {
-//                *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.seqVecX[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << "N" << "\t" << get<0>(mOptions->mSex.seqVecX[i]) << "\t";
-//                if (get<2>(mOptions->mSex.seqVecX[i]).empty()) {
-//                    *fout << "NA";
-//                } else {
-//                    for (const auto & it : get<2>(mOptions->mSex.seqVecX[i])) {
-//                        *fout << it.first << mOptions->mSex.refX.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecX[i])[it.first] << ";";
-//                    }
-//                }
-//                *fout << "\t" << "seq_error" << "\n";
-//            }
-//
-//        } else {
-//
-//            *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.haploTupX) << "\t" << mOptions->mSex.YXRatio << "\t" << mOptions->mSex.sexMF << "\t" << mOptions->mSex.haploRatio << "\t" << "Y" << "\t" << get<0>(mOptions->mSex.haploTupX) << "\t";
-//            if (get<2>(mOptions->mSex.seqVecX.front()).empty()) {
-//                *fout << "NA";
-//            } else {
-//                for (const auto & it : get<2>(mOptions->mSex.seqVecX.front())) {
-//                    *fout << it.first << mOptions->mSex.refX.mStr[it.first] << "|" << get<0>(mOptions->mSex.haploTupX)[it.first] << ";";
-//                }
-//            }
-//            *fout << "\t" << "haplotypeX" << "\n";
-//
-//            for (int i = 1; i < mOptions->mSex.seqVecX.size(); i++) {
-//                *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.seqVecX[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << "N" << "\t" << get<0>(mOptions->mSex.seqVecX[i]) << "\t";
-//                if (get<2>(mOptions->mSex.seqVecX[i]).empty()) {
-//                    *fout << "NA";
-//                } else {
-//                    for (const auto & it : get<2>(mOptions->mSex.seqVecX[i])) {
-//                        *fout << it.first << mOptions->mSex.refX.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecX[i])[it.first] << ";";
-//                    }
-//                }
-//                *fout << "\t" << "seq_error" << "\n";
-//            }
-//        }
-//        
+//    }
+//    edlibFreeAlignResult(result);
+//    if (indelSet.empty()) {
+//        return std::make_pair(snpsMap, true);
 //    } else {
-//
-//        if (!mOptions->mSex.seqVecY.empty()) {
-//            *fout << mOptions->mSex.sexMarker << "\t" << "Y" << "\t" << get<1>(mOptions->mSex.haploTupY) << "\t" << mOptions->mSex.YXRatio << "\t" << mOptions->mSex.sexMF << "\t" << "NA" << "\t" << "N" << "\t" << get<0>(mOptions->mSex.haploTupY) << "\t";
-//
-//            if (get<2>(mOptions->mSex.seqVecY.front()).empty()) {
-//                *fout << "NA";
-//            } else {
-//                for (const auto & it : get<2>(mOptions->mSex.seqVecY.front())) {
-//                    *fout << it.first << mOptions->mSex.refY.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecY.front())[it.first] << ";";
-//                }
-//            }
-//            *fout << "\t" << "haplotypeY" << "\n";
-//
-//            for (int i = 1; i < mOptions->mSex.seqVecY.size(); i++) {
-//                *fout << mOptions->mSex.sexMarker << "\t" << "Y" << "\t" << get<1>(mOptions->mSex.seqVecY[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << "N" << "\t" << get<0>(mOptions->mSex.seqVecY[i]) << "\t";
-//                if (get<2>(mOptions->mSex.seqVecY[i]).empty()) {
-//                    *fout << "NA";
-//                } else {
-//                    for (const auto & it : mOptions->mSex.snpsRefY) {
-//                        *fout << it << mOptions->mSex.refY.mStr[it] << "|" << get<0>(mOptions->mSex.seqVecY[i])[it] << ";";
-//                    }
-//                }
-//                *fout << "\t" << "seq_error" << "\n";
-//            }
+//        if(qLength == tLength){
+//            return std::make_pair(snpsMap, true);
+//        } else {
+//            return std::make_pair(snpsMap, false);
 //        }
-//        
-//        if(!mOptions->mSex.seqVecX.empty()){
-//
-//            *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.haploTupX) << "\t" << mOptions->mSex.YXRatio << "\t" << mOptions->mSex.sexMF << "\t" << mOptions->mSex.haploRatio << "\t" << "N" << "\t" << get<0>(mOptions->mSex.haploTupX) << "\t";
-//            if (get<2>(mOptions->mSex.seqVecX.front()).empty()) {
-//                *fout << "NA";
-//            } else {
-//                for (const auto & it : get<2>(mOptions->mSex.seqVecX.front())) {
-//                    *fout << it.first << mOptions->mSex.refX.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecX.front())[it.first] << ";";
-//                }
-//            }
-//            *fout << "\t" << "haplotypeX" << "\n";
-//
-//            for (int i = 1; i < mOptions->mSex.seqVecX.size(); i++) {
-//                *fout << mOptions->mSex.sexMarker << "\t" << "X" << "\t" << get<1>(mOptions->mSex.seqVecX[i]) << "\t" << "NA" << "\t" << "NA" << "\t" << "NA" << "\t" << "N" << "\t" << get<0>(mOptions->mSex.seqVecX[i]) << "\t";
-//                if (get<2>(mOptions->mSex.seqVecX[i]).empty()) {
-//                    *fout << "NA";
-//                } else {
-//                    for (const auto & it : get<2>(mOptions->mSex.seqVecX[i])) {
-//                        *fout << it.first << mOptions->mSex.refX.mStr[it.first] << "|" << get<0>(mOptions->mSex.seqVecX[i])[it.first] << ";";
-//                    }
-//                }
-//                *fout << "\t" << "seq_error" << "\n";
-//            }
-//        }
-//    }
-//
-//    fout->flush();
-//    fout->clear();
-//    fout->close();
-//    
-//    foutName = mOptions->prefix + "_sex_error_rate.txt";
-//    fout->open(foutName.c_str(), std::ofstream::out);
-//
-//    if (!fout->is_open()) error_exit("Can not open output file: " + foutName);
-//    if (mOptions->verbose) loginfo("Starting to write sex error rate file!");
-//    *fout << "#Locus\tErrorRate\tTotalEffectiveReads\n";
-//    if (!mOptions->mSex.baseErrorMapY.empty()) {
-//        *fout << "Y" << "\t";
-//        for (const auto & it : mOptions->mSex.baseErrorMapY) {
-//            if (it.first == mOptions->mSex.baseErrorMapY.rbegin()->first) {
-//                *fout << it.second;
-//            } else {
-//                *fout << it.second << ";";
-//            }
-//        }
-//        *fout << "\t" << mOptions->mSex.totReadsY << "\n";
-//    }
-//
-//    if (!mOptions->mSex.baseErrorMapX.empty()) {
-//        *fout << "X" << "\t";
-//        for (const auto & it : mOptions->mSex.baseErrorMapX) {
-//            if (it.first == mOptions->mSex.baseErrorMapX.rbegin()->first) {
-//                *fout << it.second;
-//            } else {
-//                *fout << it.second << ";";
-//            }
-//        }
-//        *fout << "\t" << mOptions->mSex.totReadsX << "\n";
-//    }
-//
-//    fout->flush();
-//    fout->clear();
-//    fout->close();
-//    
-//    if (fout) {
-//        delete fout;
-//        fout = nullptr;
 //    }
 //}
-
-std::pair<std::map<int, std::string>, bool> SexScanner::doSimpleAlignment(Options * & mOptions, const char* & qData, int qLength, const char* & tData, int tLength) {
-    EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
-            edlibNewAlignConfig(mOptions->mLocVars.locVarOptions.maxScorePrimer,
-            mOptions->mEdOptions.modeCode,
-            mOptions->mEdOptions.alignTask,
-            NULL, 0));
-
-    std::map<int, std::string> snpsMap;
-    std::set<int> indelSet;
-    if (result.status == EDLIB_STATUS_OK) {
-        for (int i = 0; i < result.alignmentLength; i++) {
-            auto cur = result.alignment[i];
-            if (cur == EDLIB_EDOP_MATCH) {
-
-            } else if (cur == EDLIB_EDOP_MISMATCH) {
-                snpsMap[i] = tData[i];
-            } else if (cur == EDLIB_EDOP_INSERT) {
-                indelSet.insert(i);
-            } else if (cur == EDLIB_EDOP_DELETE) {
-                indelSet.insert(i);
-            }
-        }
-
-    }
-    edlibFreeAlignResult(result);
-    if (indelSet.empty()) {
-        return std::make_pair(snpsMap, true);
-    } else {
-        if(qLength == tLength){
-            return std::make_pair(snpsMap, true);
-        } else {
-            return std::make_pair(snpsMap, false);
-        }
-    }
-}
 
 std::pair<bool, std::set<int>> SexScanner::doAlignment2(Options * & mOptions, std::string readName, const char* & qData, int qLength, std::string targetName, const char* & tData, int tLength) {
     EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
@@ -1155,7 +881,7 @@ std::pair<bool, std::set<int>> SexScanner::doAlignment2(Options * & mOptions, st
             NULL, 0));
 
     std::pair<bool, std::set<int>> snpsSetPair;
-
+    
     if (result.status == EDLIB_STATUS_OK) {
         bool snps = true;
         for (int i = 0; i < result.alignmentLength; i++) {

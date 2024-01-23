@@ -205,7 +205,6 @@ LocSnp2::LocSnp2(){
     this->fp = Sequence("");
     this->rp = Sequence("");
     this->ref = Sequence("");
-    this->snpPosSetTrueHaplo.clear();
     this->snpPosSetHaplo.clear();
     this->snpPosSet.clear();
     this->refSnpPosSet.clear();
