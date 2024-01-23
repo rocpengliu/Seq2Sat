@@ -740,7 +740,7 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
                     }
                 } else {
                     if (locSnpIt->status.first.first && locSnpIt->status.first.second) {
-                            baseFreqMap.clear();
+                        baseFreqMap.clear();
                     } else if (locSnpIt->status.first.first && !locSnpIt->status.first.second) {// h1 Y, h2, N
                         baseFreqMap.clear();
                     } else if (!locSnpIt->status.first.first && locSnpIt->status.first.second) {
@@ -807,9 +807,7 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
             }
 
             bool go = false;
-            if (i == 0) {
-                go = true;
-            } else if (i == 1) {
+            if (i < 2) {
                 go = true;
             } else {
                 if (locSnpIt->maxReads >= mOptions->mLocSnps.mLocSnpOptions.minReads4Filter) {

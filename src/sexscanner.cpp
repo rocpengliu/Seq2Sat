@@ -299,10 +299,10 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
         } else {
             mOptions->mSex.sexMF = "Inconclusive";
         }
-    } else {//female;
+    } else {//female; or inconclusive;
         if (mOptions->mSex.maxReadsX >= mOptions->mSex.minReadsSexAllele){
             mOptions->mSex.sexMF = "Female";
-            if (mOptions->mSex.getHaploVar('x', 1).numReads > 0){
+            if (mOptions->mSex.getHaploVar('x', 1).numReads >= mOptions->mSex.minReadsSexVariant){
                 mOptions->mSex.haploRatio = getPer(mOptions->mSex.getHaploVar('x', 0).numReads, 
                 (mOptions->mSex.getHaploVar('x', 0).numReads + mOptions->mSex.getHaploVar('x', 1).numReads),
                  false);
@@ -314,15 +314,10 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                         if (mOptions->mSex.haploRatio >= mOptions->mLocSnps.mLocSnpOptions.hmPerL) {
                             mOptions->mSex.haploStr = "homo";
                         } else if (abs(mOptions->mSex.haploRatio - 0.5) <= mOptions->mLocSnps.mLocSnpOptions.htJetter) {
-                            if( mOptions->mSex.getHaploVar('x', 1).numReads >= mOptions->mSex.minReadsSexVariant) {
-                                mOptions->mSex.haplotype = true;
-                                mOptions->mSex.haploStr = "heter";
-                                mOptions->mSex.hyploSnpSetX = mapPair2.second;
-                                mOptions->mSex.totSnpSetX.insert(mOptions->mSex.hyploSnpSetX.begin(), mOptions->mSex.hyploSnpSetX.end());
-                            } else {
-                                
-                            }
-                            
+                            mOptions->mSex.haplotype = true;
+                            mOptions->mSex.haploStr = "heter";
+                            mOptions->mSex.hyploSnpSetX = mapPair2.second;
+                            mOptions->mSex.totSnpSetX.insert(mOptions->mSex.hyploSnpSetX.begin(), mOptions->mSex.hyploSnpSetX.end());
                         } else {
                             //mOptions->mSex.haploStr = "inconclusive";
                         }
@@ -330,14 +325,10 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                         if (mOptions->mSex.haploRatio >= mOptions->mLocSnps.mLocSnpOptions.hmPerH){
                             mOptions->mSex.haploStr = "homo";
                         } else {
-                            if( mOptions->mSex.getHaploVar('x', 1).numReads >= mOptions->mSex.minReadsSexVariant) {
-                                mOptions->mSex.haplotype = true;
-                                mOptions->mSex.haploStr = "heter";
-                                mOptions->mSex.hyploSnpSetX = mapPair2.second;
-                                mOptions->mSex.totSnpSetX.insert(mOptions->mSex.hyploSnpSetX.begin(), mOptions->mSex.hyploSnpSetX.end());
-                            } else {
-                                
-                            }
+                            mOptions->mSex.haplotype = true;
+                            mOptions->mSex.haploStr = "heter";
+                            mOptions->mSex.hyploSnpSetX = mapPair2.second;
+                            mOptions->mSex.totSnpSetX.insert(mOptions->mSex.hyploSnpSetX.begin(), mOptions->mSex.hyploSnpSetX.end());
                         }
                     }
                 } else {// indel;
@@ -360,23 +351,29 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
         }
     }
     
-    if(!mOptions->mSex.getHaploVar('y', 0).indel){
+    if(!mOptions->mSex.getHaploVar('y', 0).indel && mOptions->mSex.sexMF != "Inconclusive"){
         for (int i = 0; i < mOptions->mSex.getHaploVar('y', 0).seq.length(); i++) {
             mOptions->mSex.baseErrorMapY[i] = getPer((mOptions->mSex.totReadsY - baseFreqMapY[i][mOptions->mSex.getHaploVar('y', 0).seq[i]]),
                                                      mOptions->mSex.totReadsY);
         }
     }
 
-    if (!mOptions->mSex.getHaploVar('x', 0).indel){
-        if (mOptions->mSex.haploStr == "homo" && !mOptions->mSex.getHaploVar('x', 0).indel){
+    if (!mOptions->mSex.getHaploVar('x', 0).indel && mOptions->mSex.sexMF != "Inconclusive"){
+        if (mOptions->mSex.haploStr == "homo" ){
             for (int i = 0; i < mOptions->mSex.getHaploVar('x', 0).seq.length(); i++) {
                 mOptions->mSex.baseErrorMapX[i] = getPer((mOptions->mSex.totReadsX - baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 0).seq[i]]),
                                                         mOptions->mSex.totReadsX);
             }
         } else if (mOptions->mSex.haploStr == "heter") {
-            if (!mOptions->mSex.getHaploVar('x', 0).indel && !mOptions->mSex.getHaploVar('x', 1).indel){
+            if (!mOptions->mSex.getHaploVar('x', 1).indel){
                 for (int i = 0; i < mOptions->mSex.getHaploVar('x', 0).seq.length(); i++){
-                    int tot = baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 0).seq[i]] + baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 1).seq[i]];
+                    
+                    int tot = 0;
+                    if(mOptions->mSex.getHaploVar('x', 0).seq[i] == mOptions->mSex.getHaploVar('x', 1).seq[i]){
+                       tot = baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 0).seq[i]];
+                    } else {
+                       tot = baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 0).seq[i]] + baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 1).seq[i]];
+                    }
                     mOptions->mSex.baseErrorMapX[i] = getPer((mOptions->mSex.totReadsX - tot),
                                                              mOptions->mSex.totReadsX);
                 }
