@@ -66,8 +66,8 @@ int main(int argc, char* argv[]){
     cmd.add<int>("minSeqsPerSnp", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%)", false, 10);
     cmd.add<int>("minReads4Filter", 0, "minimum reads for filtering read variant. if the maximum reads of haplotype is more than this, the low abundance read variants will be filtered, otherwise will be kept. This is used for the shallow sequencing. default: 50", false, 50);
     cmd.add<int>("maxRows4Align", 0, "maximum rows for alignment table, must be > 2 rows. default: 6", false, 6);
-    cmd.add("noSnpPlot", 0, "If specified, plot SNPs");
-    cmd.add("noErrorPlot", 0, "If specified, plot error rate");
+    cmd.add("noSnpPlot", 0, "If specified, do not plot SNPs");
+    cmd.add("noErrorPlot", 0, "If specified, do not plot error rate");
     
     //for sex
     cmd.add<string>("sex", 0, "sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by '\t", false, "");
