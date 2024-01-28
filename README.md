@@ -221,9 +221,10 @@ options:
 To inform us of any bugs or requests, please open a new issue or send an email to peng.liu@ec.gc.ca
 
 ## Seq2Sate History & Updates
+01/027/2024 - added functions to support optional SNP ploting to reduce html size  
 01/01/2024 - redeveloped sex identification and supported sequenceing error and haplotype analysis in sex allele  
 08/05/2023 - supported SNPs genotyping and sequencing error analysis  
-02/20/2023 - added function to support reverse complmentary reverse primer sequence  
+02/20/2023 - added functions to support reverse complmentary reverse primer sequence  
 01/20/2023 - added example data  
 12/20/2022 - first version released  
 10/11/2022 - added functions to generate 3d plot  
