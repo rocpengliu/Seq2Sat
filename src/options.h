@@ -306,7 +306,7 @@ public:
         hmPer = 0.0;
         htJetter = 0.15;
         minReads4Filter = 50;
-        maxRows4Align = 5;
+        maxRows4Align = 6;
     };
 public:
     uint32 maxMismatchesPSeq;
@@ -481,6 +481,9 @@ public:
     bool mergerOverlappedPE;
     std::vector<Sample> samples;
     Sex mSex;
+    
+    bool noErrorPlot;// not to show error plot in html report for sex and snp id;
+    bool noSnpPlot; // not to show snp plot in html report;
 };
 
 #endif

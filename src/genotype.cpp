@@ -208,7 +208,7 @@ LocSnp2::LocSnp2(){
     this->snpPosSetHaplo.clear();
     this->snpPosSet.clear();
     this->refSnpPosSet.clear();
-    this->totPosSet.clear();
+    //this->totPosSet.clear();
     this->totReads = 0;
     this->maxReads = 0;
     this->totHaploReads = 0;
@@ -230,10 +230,19 @@ std::string LocSnp2::getHaploStr(bool snp2){
     std::string snpStr = "";
     if(ssnpsMap.empty()) return snpStr;
     if(snp2) {
-        if (!status.first.second && genoStr3 != "homo") {
-            for (const auto & it : ssnpsMap) {
-                snpStr += it.second.snp2;
+        if (!status.first.second) {
+            if (genoStr3 == "homo"){
+                for (const auto &it : ssnpsMap)
+                {
+                    snpStr += it.second.snp1;
+                }
+            } else {
+                for (const auto &it : ssnpsMap)
+                {
+                    snpStr += it.second.snp2;
+                }
             }
+                
         }
     } else {
         if(!status.first.first){

@@ -40,7 +40,6 @@ public:
     static void doScanVariance(Options * & mOptions, EdlibAlignResult & result, Variance & variance, const char* & qData, const char* & tData, const int position);
     static void printVariance(Options * & mOptions, EdlibAlignResult & result, Variance & variance,
             const char* & qData, const std::string & qName, const char* & tData, const std::string & tName, const int position);
-    inline Sex getSexLoc(){return *tmpSex;};
     
 private:
     std::tuple<int, int, bool> doPrimerAlignment(const char* & qData, int qLength, const std::string & qName,
@@ -62,7 +61,6 @@ private:
     int readLength;
     std::string readName;
     std::stringstream ss;
-    Sex* tmpSex;
     std::string returnedlocus;
 };
 

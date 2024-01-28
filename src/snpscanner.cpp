@@ -556,7 +556,8 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
         loginfo("Starting to write error rate table!");
     *fout4 << "#Locus\tErrorRate\tTotalReads\n";
 
-    for (const auto &it : tmpSnpSeqsMap) {
+    for (const auto &it : tmpSnpSeqsMap)
+    {
         if (mOptions->mLocSnps.refLocMap.find(it.first) == mOptions->mLocSnps.refLocMap.end()) {
             continue;
         }
@@ -600,12 +601,14 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
                 tmpMap[str] += it2.second;
             }
         }
-        
+
         if(tmpMap.empty()) continue;
         
         locSnpIt->seqVarVec.reserve(tmpMap.size());
         std::map<int, std::map<char, int>> baseFreqMap;
+
         for (const auto &it2 : tmpMap) {
+            
             locSnpIt->totReads += it2.second;
             if (it2.second > locSnpIt->maxReads) {
                 locSnpIt->maxReads = it2.second;
@@ -629,12 +632,13 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
             }
             locSnpIt->seqVarVec.push_back(tmpSeqVar);
         }
-        
-        if (locSnpIt->maxReads < mOptions->mLocSnps.mLocSnpOptions.minSeqs) {
+
+        if (locSnpIt->maxReads < mOptions->mLocSnps.mLocSnpOptions.minSeqs || locSnpIt->seqVarVec.empty()) {
             locSnpIt->seqVarVec.clear();
             baseFreqMap.clear();
             continue;
         }
+
         std::sort(locSnpIt->seqVarVec.begin(), locSnpIt->seqVarVec.end(), [](const SeqVar & L, const SeqVar & R) {return L.numReads > R.numReads;});
 
         if (locSnpIt->seqVarVec.size() == 1) {
@@ -799,41 +803,67 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
             }
         }
 
-        size_t rmPos = 0;
+//        for (size_t i = 0; i < locSnpIt->seqVarVec.size(); i++) {
+//            if (locSnpIt->seqVarVec.at(i).indel) {
+//                continue;
+//            }
+//
+//            bool go = false;
+//            if (i < 2) {
+//                go = true;
+//            } else {
+//                if (locSnpIt->maxReads >= mOptions->mLocSnps.mLocSnpOptions.minReads4Filter) {
+//                    if (locSnpIt->seqVarVec.at(i).numReads >= std::max(mOptions->mLocSnps.mLocSnpOptions.minSeqs, (uint32)(mOptions->mLocSnps.mLocSnpOptions.minSeqsPer * locSnpIt->maxReads))) {
+//                        go = true;
+//                    }
+//                } else {
+//                    if (locSnpIt->genoStr3 == "homo") {
+//                        if (locSnpIt->seqVarVec.at(i).numReads >= std::max(mOptions->mLocSnps.mLocSnpOptions.minSeqs, (uint32)(mOptions->mLocSnps.mLocSnpOptions.minSeqsPer * locSnpIt->maxReads))) {
+//                            go = true;
+//                        }
+//                    } else {
+//                        go = true;
+//                    }
+//                }
+//            }
+//            
+//            if((i+1) > mOptions->mLocSnps.mLocSnpOptions.maxRows4Align){
+//                go = false;
+//            }
+//            
+//            cCout(i, mOptions->mLocSnps.mLocSnpOptions.maxRows4Align, 'g');
+//            cCout(i+1, go, 'y');
+//            
+//            if (go) {
+//                locSnpIt->snpPosSet.insert(locSnpIt->seqVarVec.at(i).snpSet.begin(), locSnpIt->seqVarVec.at(i).snpSet.end());
+//            } else {
+//                break;
+//            }
+//        }
+
         for (size_t i = 0; i < locSnpIt->seqVarVec.size(); i++) {
-            rmPos = i;
             if (locSnpIt->seqVarVec.at(i).indel) {
                 continue;
             }
-
-            bool go = false;
             if (i < 2) {
-                go = true;
-            } else {
-                if (locSnpIt->maxReads >= mOptions->mLocSnps.mLocSnpOptions.minReads4Filter) {
-                    if (locSnpIt->seqVarVec.at(i).numReads >= std::max(mOptions->mLocSnps.mLocSnpOptions.minSeqs, (uint32)(mOptions->mLocSnps.mLocSnpOptions.minSeqsPer * locSnpIt->maxReads))) {
-                        go = true;
-                    }
-                } else {
-                    if (locSnpIt->genoStr3 == "homo") {
-                        if (locSnpIt->seqVarVec.at(i).numReads >= std::max(mOptions->mLocSnps.mLocSnpOptions.minSeqs, (uint32)(mOptions->mLocSnps.mLocSnpOptions.minSeqsPer * locSnpIt->maxReads))) {
-                            go = true;
-                        }
-                    } else {
-                        go = true;
-                    }
-                }
-            }
-
-            if (go) {
                 locSnpIt->snpPosSet.insert(locSnpIt->seqVarVec.at(i).snpSet.begin(), locSnpIt->seqVarVec.at(i).snpSet.end());
             } else {
-                break;
-            }
+                if (i < mOptions->mLocSnps.mLocSnpOptions.maxRows4Align) {
+                    locSnpIt->snpPosSet.insert(locSnpIt->seqVarVec.at(i).snpSet.begin(), locSnpIt->seqVarVec.at(i).snpSet.end());
+                } else {
+                    break;
+                }
+            }   
         }
-        
-        locSnpIt->seqVarVec.erase(locSnpIt->seqVarVec.begin() + (rmPos++), locSnpIt->seqVarVec.end());
+
+        if (mOptions->mLocSnps.mLocSnpOptions.maxRows4Align <= locSnpIt->seqVarVec.size()){
+            locSnpIt->seqVarVec.erase(locSnpIt->seqVarVec.begin() + mOptions->mLocSnps.mLocSnpOptions.maxRows4Align, locSnpIt->seqVarVec.end());
+        }
         locSnpIt->seqVarVec.shrink_to_fit();
+
+        if(mOptions->verbose) loginfo("will keep " + std::to_string(mOptions->mLocSnps.mLocSnpOptions.maxRows4Align) + " read variants and vector size is " + std::to_string(locSnpIt->seqVarVec.size()) + "!");
+        
+        if(locSnpIt->seqVarVec.empty()) continue;
 
         if(!locSnpIt->ssnpsMap.empty()){
             for(const auto & itss : locSnpIt->ssnpsMap){

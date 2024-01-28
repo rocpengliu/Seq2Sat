@@ -788,7 +788,7 @@ void HtmlReporter::reportAllSnps(ofstream& ofs) {
         ofs << "<div id='" + divName + "'>\n";
         ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
         reportSnpAlignmentTable(ofs, divName, it.second);
-        if (!it.second.status.first.second) {
+        if (!it.second.status.first.second && !it.second.snpPosSetHaplo.empty() && !mOptions->noSnpPlot) {
             reportSnpTablePlot(ofs, divName, it.second);
         }
         ofs << "</div>\n";
@@ -797,7 +797,7 @@ void HtmlReporter::reportAllSnps(ofstream& ofs) {
 
 void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName, LocSnp2 & locSnp) {
     ofs << "<div class='figurehalf' id='plot_h" + divName + "'></div>\n";
-    if (!locSnp.baseErrorMap.empty()) {
+    if (!locSnp.baseErrorMap.empty() && !mOptions->noErrorPlot) {
         ofs << "<div class='figurefull' id='plot_e" + divName + "'></div>\n";
     }
 
@@ -829,8 +829,8 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName,
     //for bar plot of haplotype;
     string json_str = "var data=[{";
     json_str += "x:['Allele', 'Allele'],";
-    json_str += "y:[" + std::to_string(locSnp.getHaploReads()) + ", " + std::to_string(locSnp.getHaploReads()) + "],";
-    json_str += "text: ['" + locSnp.getHaploStr() + "', '" + locSnp.getHaploStr() + "'],";
+    json_str += "y:[" + std::to_string(locSnp.getHaploReads()) + ", " + std::to_string(locSnp.getHaploReads(true)) + "],";
+    json_str += "text: ['" + locSnp.getHaploStr() + "', '" + locSnp.getHaploStr(true) + "'],";
     json_str += "width: [0.5, 0.5],";
     json_str += "type:'bar', textposition: 'auto', ";
 
@@ -850,7 +850,7 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName,
 
     //for error rate line char
 
-    if (!locSnp.baseErrorMap.empty()) {
+    if (!locSnp.baseErrorMap.empty() && !mOptions->noErrorPlot) {
         std::vector<int> keyV;
         keyV.reserve(locSnp.baseErrorMap.size());
         std::vector<double> valueV;

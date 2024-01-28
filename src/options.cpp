@@ -39,6 +39,8 @@ Options::Options(){
     samples.clear();
     minAmpliconEffectiveLen = 6;
     revCom = false;
+    noErrorPlot = false;
+    noSnpPlot = false;
 }
 
 void Options::init() {
@@ -307,8 +309,6 @@ bool Options::validate() {
     } else {
         error_exit("--minSeqsPerSnp must be < 100");
     }
-    
-    
 
     if (locFile.empty()) {
         error_exit("locus file is empty, please provide a valid file!");
@@ -340,6 +340,11 @@ bool Options::validate() {
         mEdOptions.alignTask = EDLIB_TASK_PATH;
     } else {
         mEdOptions.alignTask = EDLIB_TASK_DISTANCE;
+    }
+    
+    if(mLocSnps.mLocSnpOptions.maxRows4Align < 2){
+        cerr << "maxRows4Align " << mLocSnps.mLocSnpOptions.maxRows4Align << " is less than the minimum 2, and it is going to be set to 2!" << endl;
+        mLocSnps.mLocSnpOptions.maxRows4Align = 2;
     }
     
     return true;
@@ -511,7 +516,7 @@ void Options::readLocFile(){
                         pos -= tmpLocSnp.trimPos.first;
                         tmpLocSnp.refSnpPosSet.insert(pos);
                         tmpLocSnp.snpPosSetHaplo.insert(pos);
-                        tmpLocSnp.totPosSet.insert(pos);
+                        //tmpLocSnp.totPosSet.insert(pos);
                     }
                 }
                 posVec.clear();
@@ -521,7 +526,7 @@ void Options::readLocFile(){
                 error_exit("Your locus " + lineStr + " does not have 7 columns!");
             }
             splitVec.clear();
-        }
+        }       
     } else {
         error_exit("You have to use --var to specify ssr or snp");
     }

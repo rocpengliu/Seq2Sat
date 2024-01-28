@@ -65,8 +65,10 @@ int main(int argc, char* argv[]){
     cmd.add<int>("hmPerL", 0, "allele is considered as homo when its reads against total reads is > 80 % and there are at most 1 true SNP, must be coupled with htJetter and hmPerH, must be < hmPerH and > htJetter + 50. default: 80", false, 80);
     cmd.add<int>("minSeqsPerSnp", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%)", false, 10);
     cmd.add<int>("minReads4Filter", 0, "minimum reads for filtering read variant. if the maximum reads of haplotype is more than this, the low abundance read variants will be filtered, otherwise will be kept. This is used for the shallow sequencing. default: 50", false, 50);
-    cmd.add<int>("maxRows4Align", 0, "maximum rows for alignment table, must be > 2 rows. default: 5", false, 5);
-
+    cmd.add<int>("maxRows4Align", 0, "maximum rows for alignment table, must be > 2 rows. default: 6", false, 6);
+    cmd.add("noSnpPlot", 0, "If specified, plot SNPs");
+    cmd.add("noErrorPlot", 0, "If specified, plot error rate");
+    
     //for sex
     cmd.add<string>("sex", 0, "sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by '\t", false, "");
     cmd.add<unsigned int>("maxMismatchesSexPSeq", 0, "maximum number of mismatches for sex primers, default: 2", false, 2);
@@ -209,6 +211,8 @@ int main(int argc, char* argv[]){
         opt->mLocSnps.mLocSnpOptions.hmPerL = (double) cmd.get<int>("hmPerL") / 100.00;
         opt->mLocSnps.mLocSnpOptions.minReads4Filter = cmd.get<int>("minReads4Filter");
         opt->mLocSnps.mLocSnpOptions.maxRows4Align = cmd.get<int>("maxRows4Align");
+        opt->noSnpPlot = cmd.exist("noSnpPlot");
+        opt->noErrorPlot = cmd.exist("noErrorPlot");
     } else {
         opt->mLocVars.locVarOptions.maxMismatchesPSeq = cmd.get<int>("maxMismatchesPSeq");
         opt->mLocVars.locVarOptions.maxMismatchesPer4FR = cmd.get<double>("maxMismatchesPer4FR");
@@ -456,7 +460,11 @@ int main(int argc, char* argv[]){
         }
         
         opt->readLocFile();
-        opt->readSexLoc();
+        
+        if(!opt->sexFile.empty()){
+             opt->readSexLoc();
+        }
+       
         Processor* p = new Processor(opt);
         p->process();
         //Processor p(opt);

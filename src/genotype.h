@@ -213,7 +213,7 @@ public:
     std::set<int> snpPosSetHaplo;//only for true haplotype snp positions. including ref snps; also include the inconclusive ones; for snp table;
     std::set<int> snpPosSet;//snps poitions including seq errors; for alignment table reference
     std::set<int> refSnpPosSet;//reference target snps
-    std::set<int> totPosSet;//all the snps pos including ref, combine snpPosSet and refSnpPosSet;
+    //std::set<int> totPosSet;//all the snps pos including ref, combine snpPosSet and refSnpPosSet;
     int totReads;
     int maxReads;
     int totHaploReads;
