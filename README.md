@@ -114,7 +114,7 @@ ZFXY	GGAAATCATTCATGAATATCAC	GTACTGTCTGGAATCAGGTCT	TGAATTCTTAAAATTATATTTTTAAATTCA
 ```
 Use seq2sat or seq2sat --help to show the full usage options
 options:
-      --var                           genetic variance, must be either ssr or snp (string [=])
+      --var                           genetic variance, must be either microsatellite/ssr or snp (string [=])
   -i, --in1                           read1 input file name (string [=])
   -I, --in2                           read2 input file name (string [=])
   -X, --prefix                        prefix name for output files, eg: sample01 (string [=])
@@ -122,15 +122,9 @@ options:
   -o, --out1                          file name to store read1 with on-target sequences (string [=])
   -O, --out2                          file name to store read2 with on-target sequences (string [=])
       --loc                           loci file containing loci names, 5'primer sequence, reverse complement of 3'primer sequence, 5'flank region, 3'flank region, repeat unit and reference microsatellite repeat array, separated by '	 (string [=])
-      --revCom                        if your reverse primer sequence in the loc file is not reverse complementary, please specify it
-      --maxMismatchesPSeq             maximum mismatches for primer sequences 2 (int [=2])
-      --maxMismatchesPer4FR           maximum percentage mismatches for the forward and reverse flanking regions, default 0.3 (30%)  (double [=0.1])
+      --revCom                        if your reverse primer sequence in the loc file is not reverse complentary, please specify it
       --minSeqs                       minimum number of reads for a genotype, default: 5 (int [=5])
-      --minWarningSeqs                minimum number of reads for warning a genotype, default: 50 (int [=50])
-      --minSeqsPercentage             minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%) (int [=5])
-      --hlRatio1                      ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.4 (double [=0.4])
-      --hlRatio2                      ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 0.2 (double [=0.2])
-      --maxVarRatio                   ratio of two heter alleles based on variations either in flanking regions or MRA, the ideal is 1, default: 1.5 (double [=1.5])
+      --maxMismatchesPSeq             maximum mismatches for primer sequences 2 (int [=2])
       --mode                          specify the sequence alignment mode: NW (default) | HW | SHW (string [=NW])
       --maxScore                      specify the maximum score of sequence alignment with sore > maxScore will be discarded, default value is -1, and no sequence will be discarded. (int [=-1])
       --numBestSeqs                   Score will be calculated only for N best sequences (best = with smallest score). If N = 0 then all sequences will be calculated. (int [=0])
@@ -140,16 +134,27 @@ options:
       --core                          Core part of calculation will be repeated N times. This is useful only for performance measurement, when single execution is too short to measure. (int [=1])
       --silentAlignment               If specified, there will be no score or alignment output
       --printResults                  If specified, alignment results will be printed but with only 1 thread
-      --sex                           sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by ' (string [=])
+      --maxMismatchesPer4FR           maximum percentage mismatches for the forward and reverse flanking regions, default 0.3 (30%)  (double [=0.3])
+      --minSeqsPercentage             minimum percentage (%) reads against largest peak for a genotype, default: 5 (5%) (int [=5])
+      --minWarningSeqs                minimum number of reads for warning a genotype, default: 50 (int [=50])
+      --hlRatio1                      ratio of loci sizes of largest and second largest numbers of reads when the length difference = 1 ssr unit, default: 0.4 (double [=0.4])
+      --hlRatio2                      ratio of loci sizes of largest and second largest numbers of reads when the length difference = 2 ssr unit, default: 0.2 (double [=0.2])
+      --maxVarRatio                   ratio of two heter alleles based on variations either in flanking regions or MRA, the ideal is 1, default: 1.5 (double [=1.5])
+      --htJetter                      jetter rate for heter loci, eg 15 means the percentage of reads with SNPs to total reads are from 35 - 65 %, must be coupled with hmPer, default: 15 (int [=15])
+      --hmPerH                        allele is considered as homo when its reads against total reads is > 90 % and there are at least 2 true SNPs, must be coupled with htJetter and hmPerL, must be > hmPerL. default: 90 (int [=90])
+      --hmPerL                        allele is considered as homo when its reads against total reads is > 80 % and there are at most 1 true SNP, must be coupled with htJetter and hmPerH, must be < hmPerH and > htJetter + 50. default: 80 (int [=80])
+      --minSeqsPerSnp                 minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%) (int [=10])
+      --minReads4Filter               minimum reads for filtering read variant. if the maximum reads of haplotype is more than this, the low abundance read variants will be filtered, otherwise will be kept. This is used for the shallow sequencing. default: 50 (int [=50])
+      --maxRows4Align                 maximum rows for alignment table, must be > 2 rows. default: 6 (int [=6])
+      --noSnpPlot                     If specified, do not plot SNPs
+      --noErrorPlot                   If specified, do not plot error rate
+      --sex                           sex loci file containing sex locus names, 5'primer sequence, reverse complement of 3'primer sequence, X/Z reference sequence, Y/W reference sequence, separated by '	 (string [=])
       --maxMismatchesSexPSeq          maximum number of mismatches for sex primers, default: 2 (unsigned int [=2])
       --maxMismatchesSexRefSeq        maximum number of mismatches for sex reference sequences, default: 2 (unsigned int [=2])
       --yxRatio                       minimum ratio of numbers of reads Y/X to W/Z, default: 0.001 (double [=0.001])
-      --minTotalReadsX                minimum number of reads assigned to X; default: 10 (int [=10])
-      --minTotalReadsY                minimum number of reads assigned to Y; default: 10 (int [=10])
-      --minReadsX                     minimum number of reads assigned to each variant of X; default: 5 (int [=5])
-      --minReadsY                     minimum number of reads assigned to each variant of Y; default: 5 (int [=5])
+      --minReadsSexAllele             minimum number of reads assigned to each sex allele of X or Y; default: 10 (int [=10])
+      --minReadsSexVariant            minimum number of reads assigned to each sex variant of X or Y; default: 5 (int [=5])
       --debug                         If specified, print debug
-      --dont_merge_overlapped_PE      don't merge the overlapped PE reads; this is off by default
   -j, --json                          the json format report file name (string [=seq2sat.json])
   -h, --html                          the html format report file name (string [=seq2sat.html])
   -R, --report_title                  should be quoted with ' or ", default is "seq2sat report" (string [=seq2sat report])
@@ -189,7 +194,7 @@ options:
       --cut_right_window_size         the window size option of cut_right, default to cut_window_size if not specified (int [=4])
       --cut_right_mean_quality        the mean quality requirement option for cut_right, default to cut_mean_quality if not specified (int [=20])
   -Q, --disable_quality_filtering     quality filtering is enabled by default. If this option is specified, quality filtering is disabled
-  -q, --qualified_quality_phred       the quality value that a base is qualified. Default 20 means phred quality >=Q15 is qualified. (int [=20])
+  -q, --qualified_quality_phred       the quality value that a base is qualified. Default 20 means phred quality >=Q20 is qualified. (int [=20])
   -u, --unqualified_percent_limit     how many percents of bases are allowed to be unqualified (0~100). Default 40 means 40% (int [=40])
   -n, --n_base_limit                  if one read's number of N base is >n_base_limit, then this read/pair is discarded. Default is 5 (int [=5])
   -e, --average_qual                  if one read's average quality score <avg_qual, then this read/pair is discarded. Default 0 means no requirement (int [=0])
@@ -211,7 +216,6 @@ options:
       --umi_prefix                    if specified, an underline will be used to connect prefix and UMI (i.e. prefix=UMI, UMI=AATTCG, final=UMI_AATTCG). No prefix by default (string [=])
       --umi_skip                      if the UMI is in read1/read2, seq2sat can skip several bases following UMI, default is 0 (int [=0])
   -?, --help                          print this message
-
 
 ```
 
