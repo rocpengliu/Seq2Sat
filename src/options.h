@@ -484,6 +484,7 @@ public:
     
     bool noErrorPlot;// not to show error plot in html report for sex and snp id;
     bool noSnpPlot; // not to show snp plot in html report;
+    bool noPlot;// not to plot any figures;
 };
 
 #endif

@@ -40,6 +40,7 @@ int main(int argc, char* argv[]){
     cmd.add("revCom", 0, "if your reverse primer sequence in the loc file is not reverse complentary, please specify it");
     cmd.add<int>("minSeqs", 0, "minimum number of reads for a genotype, default: 5", false, 5);
     cmd.add<int>("maxMismatchesPSeq", 0, "maximum mismatches for primer sequences 2", false, 2);
+    cmd.add("noPlot", 0, "If specified, do not plot");
     
     cmd.add<string>("mode", 0, "specify the sequence alignment mode: NW (default) | HW | SHW", false, "NW");
     cmd.add<int>("maxScore", 0, "specify the maximum score of sequence alignment with sore > maxScore will be discarded, default value is -1, and no sequence will be discarded.",false, -1);
@@ -202,6 +203,7 @@ int main(int argc, char* argv[]){
     opt->mLocVars.locVarOptions.maxScore = cmd.get<int>("maxScore");
     opt->mLocVars.locVarOptions.numBestSeqs = cmd.get<int>("numBestSeqs");
     opt->mLocVars.locVarOptions.coreRep = cmd.get<int>("core");
+    opt->noPlot = cmd.exist("noPlot");
         
     if (opt->var == "snp" || opt->sexFile != "") {
         opt->mLocSnps.mLocSnpOptions.minSeqs = cmd.get<int>("minSeqs");
@@ -467,9 +469,6 @@ int main(int argc, char* argv[]){
        
         Processor* p = new Processor(opt);
         p->process();
-        //Processor p(opt);
-        //p.process();
-        
 
         if (p) {
             delete p;

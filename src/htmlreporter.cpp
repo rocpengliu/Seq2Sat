@@ -733,7 +733,7 @@ void HtmlReporter::report(std::vector<std::map<std::string, std::vector<std::pai
     if (mOptions->mVarType == ssr) {
         reportAllGenotype(ofs, sortedAllGenotypeMapVec);
     } else {
-        reportAllSnps(ofs);
+        if(!mOptions->noPlot) reportAllSnps(ofs);
     }
 
     ofs << "</div>\n";

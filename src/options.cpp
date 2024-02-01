@@ -41,6 +41,7 @@ Options::Options(){
     revCom = false;
     noErrorPlot = false;
     noSnpPlot = false;
+    noPlot = false;
 }
 
 void Options::init() {
