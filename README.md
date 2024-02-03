@@ -235,3 +235,8 @@ To inform us of any bugs or requests, please open a new issue or send an email t
 08/10/2022 - added functions for sex identification   
 07/27/2022 - added functions to generate html report  
 05/03/2022 - first realse
+
+## Please cite
+
+Liu, P., Wilson, P., Redquest, B., Keobouasone, S., & Manseau, M. (2023). Seq2Sat & SatAnalyzer toolkit: towards comprehensive microsatellite genotyping from sequencing data. Molecular Ecology Resources. https://doi.org/10.1111/1755-0998.13929
+
