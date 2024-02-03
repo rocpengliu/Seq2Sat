@@ -238,5 +238,5 @@ To inform us of any bugs or requests, please open a new issue or send an email t
 
 ## Please cite
 
-Liu, P., Wilson, P., Redquest, B., Keobouasone, S., & Manseau, M. (2023). Seq2Sat & SatAnalyzer toolkit: towards comprehensive microsatellite genotyping from sequencing data. Molecular Ecology Resources. https://doi.org/10.1111/1755-0998.13929
+Liu, P., Wilson, P., Redquest, B., Keobouasone, S., & Manseau, M. (2024). Seq2Sat & SatAnalyzer toolkit: towards comprehensive microsatellite genotyping from sequencing data. Molecular Ecology Resources. https://doi.org/10.1111/1755-0998.13929
 
