@@ -303,7 +303,14 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
                     locus = rep.second;
                     goGeno = false;
                 } else {
-                    goGeno = true;
+                    auto revReads = r1->reverseComplement();
+                    rep = config->getSexScanner()->sexScan(revReads);
+                    if (rep.first) {
+                        locus = rep.second;
+                        goGeno = false;
+                    } else {
+                        goGeno = true;
+                    }
                 }
             } else {
                 goGeno = true;
@@ -318,7 +325,11 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
                         locus = config->getSsrScanner()->scanVar(revReads);
                     }
                 } else {
-                    config->getSnpScanner()->scanVar(r1);
+                    locus = config->getSnpScanner()->scanVar(r1);
+                    if(locus.empty()){
+                        auto revReads = r1->reverseComplement();
+                        locus = config->getSnpScanner()->scanVar(revReads);
+                    }
                 }
             }
       

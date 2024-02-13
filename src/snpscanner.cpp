@@ -638,7 +638,7 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
         std::sort(locSnpIt->seqVarVec.begin(), locSnpIt->seqVarVec.end(), [](const SeqVar & L, const SeqVar & R) {
             return L.numReads > R.numReads;
         });
-
+        
         if (locSnpIt->seqVarVec.size() == 1) {
             locSnpIt->genoStr3 = "homo";
             locSnpIt->ratioHaplo = 1;
@@ -871,7 +871,7 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
                     *fout4 << per << ";";
                 }
             }
-            locSnpIt->aveErrorRate = stot / baseFreqMap.size();
+            locSnpIt->aveErrorRate = getPer(stot, baseFreqMap.size(), false);
             *fout4 << (locSnpIt->aveErrorRate) << "\t" << locSnpIt->totReads << "\n";
         }
     }

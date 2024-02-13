@@ -12,7 +12,7 @@ SexScanner::SexScanner(Options* opt) {
 SexScanner::~SexScanner() {
 }
 
-std::pair<bool, char> SexScanner::sexScan(Read* r1) {
+std::pair<bool, char> SexScanner::sexScan(Read* & r1) {
     
     std::pair<bool, char> rep{false, 'U'};
     if (mOptions->mSex.sexMarker.empty() || (r1->length() < (mOptions->mSex.primerF.length() + mOptions->mSex.primerR.length() + std::min(mOptions->mSex.refX.length(), mOptions->mSex.refY.length())))) {
@@ -179,12 +179,10 @@ std::tuple<int, int, bool> SexScanner::doPrimerAlignment(const char* & qData, in
 void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions) {
     std::map<std::string, int> seqMapX;
     std::map<std::string, int> seqMapY;
-
     for (auto & it : totalSexLocVec) {
         for (const auto & it2 : it["X"]) {
             mOptions->isPaired() ? (seqMapX[it2.first] += it2.second * 2) : (seqMapX[it2.first] += it2.second);
         }
-
         for (const auto & it2 : it["Y"]) {
             mOptions->isPaired() ? (seqMapY[it2.first] += it2.second * 2) : seqMapY[it2.first] += it2.second;
         }
@@ -352,13 +350,15 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
     }
     
     if(!mOptions->mSex.getHaploVar('y', 0).indel && mOptions->mSex.sexMF != "Inconclusive"){
-        int stot = 0.0000;
+        int stot = 0.00;
         for (int i = 0; i < mOptions->mSex.getHaploVar('y', 0).seq.length(); i++) {
             mOptions->mSex.baseErrorMapY[i] = getPer((mOptions->mSex.totReadsY - baseFreqMapY[i][mOptions->mSex.getHaploVar('y', 0).seq[i]]),
                                                      mOptions->mSex.totReadsY);
             stot += mOptions->mSex.baseErrorMapY[i];
         }
-        mOptions->mSex.aveErrorRateY = stot / mOptions->mSex.baseErrorMapY.size();
+        if(!mOptions->mSex.baseErrorMapY.empty()){
+            mOptions->mSex.aveErrorRateY = getPer(stot, mOptions->mSex.baseErrorMapY.size(), false);
+        }
     }
 
     if (!mOptions->mSex.getHaploVar('x', 0).indel && mOptions->mSex.sexMF != "Inconclusive"){
@@ -369,7 +369,9 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                                                         mOptions->mSex.totReadsX);
                 stot += mOptions->mSex.baseErrorMapX[i];
             }
-            mOptions->mSex.aveErrorRateX = stot / mOptions->mSex.baseErrorMapX.size();
+            if(!mOptions->mSex.baseErrorMapX.empty()){
+                mOptions->mSex.aveErrorRateX = getPer(stot, mOptions->mSex.baseErrorMapX.size(), false);
+            }
         } else if (mOptions->mSex.haploStr == "heter") {
             if (!mOptions->mSex.getHaploVar('x', 1).indel){
                 int stot = 0.0000;
@@ -384,7 +386,9 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                                                              mOptions->mSex.totReadsX);
                     stot += mOptions->mSex.baseErrorMapX[i];
                 }
-                mOptions->mSex.aveErrorRateX = stot / mOptions->mSex.baseErrorMapX.size();
+                if (!mOptions->mSex.baseErrorMapX.empty()) {
+                    mOptions->mSex.aveErrorRateX = getPer(stot, mOptions->mSex.baseErrorMapX.size(), false);
+                }
             }
         } else {
             
@@ -807,7 +811,7 @@ void SexScanner::report(Options *& mOptions) {
         error_exit("Can not open output file: " + foutName);
     if (mOptions->verbose)
         loginfo("Starting to write sex error rate file!");
-    *fout << "#Locus\tErrorRate\tTotalReads\n";
+    *fout << "#Locus\tErrorRate\tAverageError\tTotalReads\n";
     if (!mOptions->mSex.baseErrorMapY.empty()) {
         *fout << "Y" << "\t";
         for (const auto &it : mOptions->mSex.baseErrorMapY) {
@@ -816,10 +820,10 @@ void SexScanner::report(Options *& mOptions) {
             } else {
                 *fout << it.second << ";";
             }
-        }
-        *fout << "\t" << mOptions->mSex.totReadsY << "\n";
+        } 
+        *fout << "\t" << mOptions->mSex.aveErrorRateY << "\t" << mOptions->mSex.totReadsY << "\n";
     }
-
+    
     if (!mOptions->mSex.baseErrorMapX.empty()) {
         *fout << "X" << "\t";
         for (const auto &it : mOptions->mSex.baseErrorMapX) {
@@ -829,7 +833,7 @@ void SexScanner::report(Options *& mOptions) {
                 *fout << it.second << ";";
             }
         }
-        *fout << "\t" << mOptions->mSex.totReadsX << "\n";
+        *fout << "\t" << mOptions->mSex.aveErrorRateX << "\t" << mOptions->mSex.totReadsX << "\n";
     }
 
     fout->flush();

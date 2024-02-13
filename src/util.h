@@ -805,7 +805,7 @@ double getPer(K k, V v, bool per = true){
     if(v == 0) return 0.00;
     double res = 0.0;
     if(per){
-        res = std::round((static_cast<double>(k) / v) * 1000000.0) / 10000.0;
+        res = std::round((static_cast<double>(k * 100.0) / v) * 10000.0) / 10000.0;
     } else {
         res = std::round((static_cast<double>(k) / v) * 10000.0) / 10000.0;
     }

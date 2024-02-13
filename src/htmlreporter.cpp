@@ -697,22 +697,40 @@ void HtmlReporter::reportSeqError(ofstream& ofs, std::string & divName) {
         json_str += "type: 'scatter', mode: 'markers', marker:{color: 'red'}, textposition: 'auto', name: 'X allele'";
         json_str += "};\n";
     }
-
-    json_str += "var layout = {title: 'Sequence error rate', xaxis:{title:'Position', automargin: true},";
-    json_str += "yaxis:{showline:false, zeroline:false, zerolinecolor:'transparent', zerolinewidth:2, title:'Error rate (%)', automargin:true}";
-    json_str += "shapes: [";
-    json_str += "{ type: 'line', xref: 'paper', ";
-    json_str += "x0: 0, ";
-    json_str += "y0: " + std::to_string(mOptions->mSex.baseErrorMapY.empty()? mOptions->mSex.aveErrorRateX : mOptions->mSex.aveErrorRateY) + ", ";
-    json_str += "line:{color: 'orange', width: 4, dash: 'line'}";
-    json_str += "},";
-    json_str += "};\n";
+    
     if (mOptions->mSex.baseErrorMapY.empty()) {
+        json_str += "var layout = { title: 'Sequence error rate', xaxis:{title:'Position', automargin: true},";
+        json_str += "yaxis:{showline:false, zeroline:false, zerolinecolor:'transparent', zerolinewidth:2, title:'Error rate (%)', automargin:true},";
+        json_str += "shapes: [";
+        json_str += "{ type: 'line', xref: 'paper', ";
+        json_str += "x0: 0, ";
+        json_str += "y0: " + std::to_string(mOptions->mSex.aveErrorRateX) + ", ";
+        json_str += "x1: 1, ";
+        json_str += "y1: " + std::to_string(mOptions->mSex.aveErrorRateX) + ", ";
+        json_str += "line:{color: 'gray', width: 2, dash: 'dash'}";
+        json_str += "}]";
+        json_str += "};\n";
         json_str += "var data = [Xdata];\n";
     } else {
+        json_str += "var layout = { title: 'Sequence error rate', xaxis:{title:'Position', automargin: true},";
+        json_str += "yaxis:{showline:false, zeroline:false, zerolinecolor:'transparent', zerolinewidth:2, title:'Error rate (%)', automargin:true},";
+        json_str += "shapes: [";
+        json_str += "{ type: 'line', xref: 'paper', ";
+        json_str += "x0: 0, ";
+        json_str += "y0: " + std::to_string(mOptions->mSex.aveErrorRateY) + ", ";
+        json_str += "x1: 1, ";
+        json_str += "y1: " + std::to_string(mOptions->mSex.aveErrorRateY) + ", ";
+        json_str += "line:{color: 'gray', width: 2, dash: 'dash'}},\n";
+        json_str += "{ type: 'line', xref: 'paper', ";
+        json_str += "x0: 0, ";
+        json_str += "y0: " + std::to_string(-mOptions->mSex.aveErrorRateX) + ", ";
+        json_str += "x1: 1, ";
+        json_str += "y1: " + std::to_string(-mOptions->mSex.aveErrorRateX) + ", ";
+        json_str += "line:{color: 'gray', width: 2, dash: 'dash'}";
+        json_str += "}]";
+        json_str += "};\n";
         json_str += "var data = [Ydata, Xdata];\n";
     }
-
     json_str += "Plotly.newPlot('plot_sex_e" + divName + "', data, layout);\n";
     ofs << json_str;
     ofs << "</script>" << endl;

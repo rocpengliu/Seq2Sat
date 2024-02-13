@@ -19,8 +19,8 @@ public:
     virtual ~SexScanner();
     
 public:
-    std::pair<bool, char> sexScan(Read* r1);
-    bool sexScan(Read* r1, Read* r2);
+    std::pair<bool, char> sexScan(Read* & r1);
+    bool sexScan(Read* & r1, Read* & r2);
     inline std::map<std::string, std::map<std::string, int>> getSexLoc() const {return tmpSexMap;};
     void static merge(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions);
     void static merge2(std::vector<std::map<std::string, std::map<std::string, int>>> & totalSexLocVec, Options * & mOptions);

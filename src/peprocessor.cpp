@@ -124,12 +124,9 @@ bool PairEndProcessor::process(){
     vector<Stats*> postStats2;
     vector<FilterResult*> filterResults;
     std::vector<std::map<std::string, std::map<std::string, Genotype>>> totalGenotypeSsrMapVec;
-    
     std::vector<std::map<std::string, std::map<std::string, uint32>>> totalSnpSeqMapVec;
-    
     std::vector<std::map<std::string, std::map<std::string, int>>> totalSexLocVec;
     totalSexLocVec.reserve(mOptions->thread);
-    
     if (mOptions->mVarType == ssr) {
         totalGenotypeSsrMapVec.reserve(mOptions->thread);
     } else if (mOptions->mVarType == snp) {
@@ -158,8 +155,6 @@ bool PairEndProcessor::process(){
 
     std::map<std::string, std::map< std::string, Genotype>> allGenotypeMap;//marker, seq, geno
     std::vector<std::map <std::string, std::vector<std::pair<std::string, Genotype>>>> sortedAllGenotypeMapVec;
-    //std::map<std::string, std::map<std::string, LocSnp2>> allSnpsMap;
-    //std::vector<std::map<std::string, std::vector<std::pair < std::string, LocSnp2>>>> sortedAllSnpsMapVec;
 
     if (!mOptions->mSex.sexMarker.empty()) {
         SexScanner::merge(totalSexLocVec, mOptions);
@@ -372,7 +367,14 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                                 locus = rep.second;
                                 goGeno = false;
                             } else {
-                                goGeno = true;
+                                auto revReads = merged->reverseComplement();
+                                rep = config->getSexScanner()->sexScan(revReads);
+                                if(rep.first){
+                                    locus = rep.second;
+                                    goGeno = false;
+                                } else {
+                                    goGeno = true;
+                                }
                             }
                         } else {
                             goGeno = true;
@@ -388,6 +390,10 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                                 }
                             } else {
                                 locus = config->getSnpScanner()->scanVar(merged);
+                                if(locus.empty()){
+                                    auto revReads = merged->reverseComplement();
+                                    locus = config->getSnpScanner()->scanVar(revReads);
+                                }
                             }
                         }
 
