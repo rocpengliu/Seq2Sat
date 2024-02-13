@@ -352,22 +352,28 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
     }
     
     if(!mOptions->mSex.getHaploVar('y', 0).indel && mOptions->mSex.sexMF != "Inconclusive"){
+        int stot = 0.0000;
         for (int i = 0; i < mOptions->mSex.getHaploVar('y', 0).seq.length(); i++) {
             mOptions->mSex.baseErrorMapY[i] = getPer((mOptions->mSex.totReadsY - baseFreqMapY[i][mOptions->mSex.getHaploVar('y', 0).seq[i]]),
                                                      mOptions->mSex.totReadsY);
+            stot += mOptions->mSex.baseErrorMapY[i];
         }
+        mOptions->mSex.aveErrorRateY = stot / mOptions->mSex.baseErrorMapY.size();
     }
 
     if (!mOptions->mSex.getHaploVar('x', 0).indel && mOptions->mSex.sexMF != "Inconclusive"){
         if (mOptions->mSex.haploStr == "homo" ){
+            int stot = 0.0000;
             for (int i = 0; i < mOptions->mSex.getHaploVar('x', 0).seq.length(); i++) {
                 mOptions->mSex.baseErrorMapX[i] = getPer((mOptions->mSex.totReadsX - baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 0).seq[i]]),
                                                         mOptions->mSex.totReadsX);
+                stot += mOptions->mSex.baseErrorMapX[i];
             }
+            mOptions->mSex.aveErrorRateX = stot / mOptions->mSex.baseErrorMapX.size();
         } else if (mOptions->mSex.haploStr == "heter") {
             if (!mOptions->mSex.getHaploVar('x', 1).indel){
+                int stot = 0.0000;
                 for (int i = 0; i < mOptions->mSex.getHaploVar('x', 0).seq.length(); i++){
-                    
                     int tot = 0;
                     if(mOptions->mSex.getHaploVar('x', 0).seq[i] == mOptions->mSex.getHaploVar('x', 1).seq[i]){
                        tot = baseFreqMapX[i][mOptions->mSex.getHaploVar('x', 0).seq[i]];
@@ -376,7 +382,9 @@ void SexScanner::merge(std::vector<std::map<std::string, std::map<std::string, i
                     }
                     mOptions->mSex.baseErrorMapX[i] = getPer((mOptions->mSex.totReadsX - tot),
                                                              mOptions->mSex.totReadsX);
+                    stot += mOptions->mSex.baseErrorMapX[i];
                 }
+                mOptions->mSex.aveErrorRateX = stot / mOptions->mSex.baseErrorMapX.size();
             }
         } else {
             

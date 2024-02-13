@@ -217,28 +217,31 @@ public:
     int totReads;
     int maxReads;
     int totHaploReads;
-    int totEffectReads;//total reads after filtering, used to calculate error rate;
+    //int totEffectReads;//total reads after filtering, used to calculate error rate;
     double ratioHaplo; //ratio = big one / big one + small one; if 1 is homo,  if < jetter is heter, is <homo > jetter is inconclusive.
-    std::vector<std::tuple<std::string, std::string, int, double, char, char>> haploVec;//seq, haplotype, num reads, num reads/totlhaploreads, conclusive or not (if CC  against ref AA with other heter is inconclusive; eg CA -> ref CG (A|G is inconclusive)), last is indel;
+    //std::vector<std::tuple<std::string, std::string, int, double, char, char>> haploVec;//seq, haplotype, num reads, num reads/totlhaploreads, conclusive or not (if CC  against ref AA with other heter is inconclusive; eg CA -> ref CG (A|G is inconclusive)), last is indel;
     //bool isHaplotype;//inconclusive is false;
     std::string genoStr3;//seqerr (ratio > homo and should regarded as seq errors), inconclusive (ratio between homo and heter), homo or heter;//homo also include CC against ref AA;;
     bool isIndel;
     std::pair<std::pair<bool, bool>, bool> status;//isindel for hp1/ref, isindel for hp2/ref, isindel for hp1/hp2
     //for ref is only homo, heter and inconclusive, for each variants, it could be homo, heter, inconclusive and seqerr (if it homo, but has seq errors)
-    std::map<std::string, SimSnps> genoMap;//read is the key
-    std::map<int, SimSnp> snpsMap;//position, snps, only include snps in the haloptypes; also the inconclusive ones;
+    //std::map<std::string, SimSnps> genoMap;//read is the key
+    //std::map<int, SimSnp> snpsMap;//position, snps, only include snps in the haloptypes; also the inconclusive ones;
     
     std::map<int, SSimSnp> ssnpsMap;//position, snps, only include snps in the haloptypes; also the inconclusive ones;
     std::vector<SeqVar> seqVarVec;// comprehensive seq var; if it is homo, get the first one; heter or incon get the first two;
     void print();
-    std::map<int, double> baseErrorMap;//for error rate, int: pos, percentage error rate; 
+    std::map<int, double> baseErrorMap;//for error rate, int: pos, percentage error rate;
+    double aveErrorRate;// sum of error rate of each position / total length
     std::string getHaploStr(bool snp2 = false);
+    std::string getHaploStr(int index); // must > 1 for homo or 2 for heter
     int getNumSnps();
     std::string getSnpStr(bool snp2 = false);
-    std::string getHaploStr(int index);//must > 1 for homo or 2 for heter
     std::string getSnpStr(int index);
     int getHaploReads(bool haplop2 = false);
-    double getHaploReadsPer(bool haplop2 = false);
+    int getVarReads(int index);
+    double getHaploReadsRatio(bool haplot2 = false); // top 2 reads;
+    double getHaploReadsPer(bool haplop2 = false);   // against totoal reads;
     double getReadsVarPer(int index);
 };
 
@@ -290,6 +293,8 @@ public:
     
     std::map<int, double> baseErrorMapX;// pos, error rate of percentage;
     std::map<int, double> baseErrorMapY;
+    double aveErrorRateX;
+    double aveErrorRateY;
     void print();
     std::string getFullRefX();
     std::string getFullRefY();

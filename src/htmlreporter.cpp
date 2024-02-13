@@ -88,7 +88,7 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true, 
                 } else {
                     zygosity = locSnp.genoStr3;
                     fc = "white";
-                    haploRatio = std::to_string(locSnp.ratioHaplo);
+                    haploRatio = std::to_string(1 - locSnp.ratioHaplo);
                     if (locSnp.status.first.second) {
                         hap = "indel";
                         bc = "gray";
@@ -700,6 +700,12 @@ void HtmlReporter::reportSeqError(ofstream& ofs, std::string & divName) {
 
     json_str += "var layout = {title: 'Sequence error rate', xaxis:{title:'Position', automargin: true},";
     json_str += "yaxis:{showline:false, zeroline:false, zerolinecolor:'transparent', zerolinewidth:2, title:'Error rate (%)', automargin:true}";
+    json_str += "shapes: [";
+    json_str += "{ type: 'line', xref: 'paper', ";
+    json_str += "x0: 0, ";
+    json_str += "y0: " + std::to_string(mOptions->mSex.baseErrorMapY.empty()? mOptions->mSex.aveErrorRateX : mOptions->mSex.aveErrorRateY) + ", ";
+    json_str += "line:{color: 'orange', width: 4, dash: 'line'}";
+    json_str += "},";
     json_str += "};\n";
     if (mOptions->mSex.baseErrorMapY.empty()) {
         json_str += "var data = [Xdata];\n";
@@ -805,7 +811,7 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName,
     ofs << "<div class='sub_section_tips'><font color='red'>Target heter SNPs are highlighted red, </font> <font color='green'>while target homo SNPs are highlighted green, </font> <font color='orange'>new potential SNPs are orange, </font><font color='gray'>sequence artifacts (errors) are gray!</font></div>\n";
     ofs << "<pre overflow: scroll>\n";
     ofs << "<table class='summary_table' style='width:100%'>\n";
-    ofs << "<tr style='background:#cccccc'> <td>ID</td><td>Marker</td><td>SNPs</td><td>Haplotype</td><td>N. of Reads</td><td>HaplotypeRatio</td><td>Zygosity</td><td>Reads(%)</td><td>Total Reads</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
+    ofs << "<tr style='background:#cccccc'> <td>ID</td><td>Marker</td><td>SNV</td><td>Haplotype</td><td>N. of Reads</td><td>Haplotype Ratio</td><td>Zygosity</td><td>Reads(%)</td><td>Total Reads</td><td>Length</td><td align='center'>Sequence</td></tr>\n";
 
     ofs << "<tr style='color:blue'>";
     ofs << "<td>0</td>" <<
@@ -867,7 +873,15 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName,
         json_str += "type:'scatter', mode: 'markers', marker:{color: 'red'}, textposition: 'auto'";
         json_str += "}];\n";
         json_str += "var layout = {xaxis:{title:'Position', automargin: true},";
-        json_str += "yaxis:{title:'Error rate (%)', automargin: true}";
+        json_str += "yaxis:{title:'Error rate (%)', automargin: true},";
+        json_str += "shapes: [";
+        json_str += "{ type: 'line', xref: 'paper', ";
+        json_str += "x0: 0, ";
+        json_str += "y0: " + std::to_string(locSnp.aveErrorRate) + ", ";
+        json_str += "x1: 1, ";
+        json_str += "y1: " + std::to_string(locSnp.aveErrorRate) + ", ";
+        json_str += "line:{color: 'gray', width: 2, dash: 'dash'}";
+        json_str += "}],";
         json_str += "};\n";
         json_str += "Plotly.newPlot('plot_e" + divName + "', data, layout);\n";
         ofs << json_str;
@@ -896,9 +910,7 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string & divName, LocS
 
     int i = 0;
     for (auto & it2 : locSnp.ssnpsMap) {
-
         x_vec[i] = x_vec_2[i] = x_vec_3[i] = x_vec_4[i] = (std::to_string(it2.first + locSnp.ft.length()) + it2.second.snp1 + "|" + it2.second.snp2);
-
         if (it2.second.snp1 == it2.second.snp2) {
             if (it2.second.snp1 == 'A') {
                 y_vec[i] = locSnp.totHaploReads;
@@ -1026,7 +1038,6 @@ void HtmlReporter::reportSnpTablePlot(ofstream& ofs, std::string & divName, LocS
     json_str += "var layout={autosize: true, title:'" + locSnp.name + "',";
 
     json_str += "shapes: [";
-
     json_str += "{ type: 'line', xref: 'paper', ";
     json_str += "x0: 0, ";
     json_str += "y0: " + std::to_string((double) locSnp.totHaploReads / 2) + ", ";
@@ -1395,19 +1406,6 @@ std::string HtmlReporter::highligher(LocSnp2 & locSnp, bool ref, std::string ref
                 hstr.insert(*it + 1, "</mark4>");
                 hstr.insert(*it, "<mark4>");
             }
-
-            //            if(locSnp.refSnpPosSet.find(*it) == locSnp.refSnpPosSet.end()){
-            //                hstr.insert(*it + 1, "</mark2>");
-            //                hstr.insert(*it, "<mark2>");
-            //            } else {
-            //                if(locSnp.snpPosSet.find(*it) == locSnp.snpPosSet.end()) {
-            //                    hstr.insert(*it + 1, "</mark3>");
-            //                    hstr.insert(*it, "<mark3>");
-            //                } else {
-            //                    hstr.insert(*it + 1, "</mark>");
-            //                    hstr.insert(*it, "<mark>");
-            //                }
-            //            }
         }
         return (ft + hstr + rt);
 

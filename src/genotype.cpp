@@ -212,16 +212,17 @@ LocSnp2::LocSnp2(){
     this->totReads = 0;
     this->maxReads = 0;
     this->totHaploReads = 0;
-    this->totEffectReads = 0;
+    //this->totEffectReads = 0;
     this->ratioHaplo = 0;
     this->genoStr3 = "seqerr";
     this->isIndel = false;
-    this->haploVec.clear();
-    this->genoMap.clear();
+    //this->haploVec.clear();
+    //this->genoMap.clear();
     this->ft = Sequence("");
     this->rt = Sequence("");
     this->ssnpsMap.clear();
     this->baseErrorMap.clear();
+    this->aveErrorRate = 0.000;
     this->seqVarVec.clear();
     this->status = std::make_pair(std::make_pair(false, false), false);
 }
@@ -323,7 +324,13 @@ int LocSnp2::getHaploReads(bool haplo2){
     int num = 0;
     if(totHaploReads == 0) return num;
     if (genoStr3 == "homo") {
-        num =  totHaploReads / 2;
+        if(haplo2){
+            if (seqVarVec.size() > 1){
+                num = seqVarVec.at(1).numReads;
+            }
+        } else {
+            num = totHaploReads;
+        }
     } else {
         if(haplo2){
             num = seqVarVec.at(1).numReads;
@@ -332,6 +339,22 @@ int LocSnp2::getHaploReads(bool haplo2){
         }
     }
     return num;
+}
+
+int LocSnp2::getVarReads(int index){
+    int num = 0;
+    if(index <= seqVarVec.size()){
+        num = seqVarVec.at(index).numReads;
+    }
+    return num;
+}
+
+double LocSnp2::getHaploReadsRatio(bool haplo2){
+    if(haplo2){
+        return getPer(getVarReads(1), getVarReads(0) + getVarReads(1));
+    } else {
+        return getPer(getVarReads(0), getVarReads(0) + getVarReads(1));
+    }
 }
 
 double LocSnp2::getHaploReadsPer(bool haplo2){
@@ -373,6 +396,8 @@ Sex::Sex(){
     this->haploStr = "inconclusive";
     this->baseErrorMapX.clear();
     this->baseErrorMapY.clear();
+    this->aveErrorRateX = 0.0000;
+    this->aveErrorRateY = 0.0000;
     this->mismatchesPF = 2;
     this->mismatchesPR = 2;
     this->mismatchesRX = 2;
