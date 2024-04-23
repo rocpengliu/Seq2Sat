@@ -35,7 +35,8 @@ int main(int argc, char* argv[]){
     cmd.add("outFReads", 0, "If specified, off-target reads will be outputed in a file");
     cmd.add<string>("out1", 'o', "file name to store read1 with on-target sequences", false, "");
     cmd.add<string>("out2", 'O', "file name to store read2 with on-target sequences", false, "");
-    
+    cmd.add("nanopore_default", 0, "If specified, use the default settings (mainly about Q score) of nanopore sequencing");
+
     cmd.add<string>("loc", 0, "loci file containing loci names, 5'primer sequence, reverse complement of 3'primer sequence, 5'flank region, 3'flank region, repeat unit and reference microsatellite repeat array, separated by '\t", false, "");
     cmd.add("revCom", 0, "if your reverse primer sequence in the loc file is not reverse complentary, please specify it");
     cmd.add<int>("minSeqs", 0, "minimum number of reads for a genotype, default: 5", false, 5);
@@ -61,9 +62,9 @@ int main(int argc, char* argv[]){
     cmd.add<double>("maxVarRatio", 0, "ratio of two heter alleles based on variations either in flanking regions or MRA, the ideal is 1, default: 1.5", false, 1.5);
     
     //for snp;
-    cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 15 means the percentage of reads with SNPs to total reads are from 35 - 65 %, must be coupled with hmPer, default: 15", false, 15);
+    cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 15 means the percentage of reads with SNPs to total reads are from 35 - 65 %, must be coupled with hmPer, default: 25", false, 25);
     cmd.add<int>("hmPerH", 0, "allele is considered as homo when its reads against total reads is > 90 % and there are at least 2 true SNPs, must be coupled with htJetter and hmPerL, must be > hmPerL. default: 90", false, 90);
-    cmd.add<int>("hmPerL", 0, "allele is considered as homo when its reads against total reads is > 80 % and there are at most 1 true SNP, must be coupled with htJetter and hmPerH, must be < hmPerH and > htJetter + 50. default: 80", false, 80);
+    cmd.add<int>("hmPerL", 0, "allele is considered as homo when its reads against total reads is > 80 % and there are at most 1 true SNP, must be coupled with htJetter and hmPerH, must be < hmPerH and > htJetter + 50. default: 85", false, 85);
     cmd.add<int>("minSeqsPerSnp", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%)", false, 10);
     cmd.add<int>("minReads4Filter", 0, "minimum reads for filtering read variant. if the maximum reads of haplotype is more than this, the low abundance read variants will be filtered, otherwise will be kept. This is used for the shallow sequencing. default: 50", false, 50);
     cmd.add<int>("maxRows4Align", 0, "maximum rows for alignment table, must be > 2 rows. default: 6", false, 6);
@@ -90,7 +91,7 @@ int main(int argc, char* argv[]){
     // threading
     cmd.add<int>("thread", 'w', "worker thread number, default is 4", false, 4);
 
-    // qother I/O
+    // other I/O
     cmd.add("phred64", '6', "indicate the input is using phred64 scoring (it'll be converted to phred33, so the output will still be phred33)");
     cmd.add<int>("compression", 'z', "compression level for gzip output (1 ~ 9). 1 is fastest, 9 is smallest, default is 4.", false, 4);
     cmd.add("stdin", 0, "input from STDIN. If the STDIN is interleaved paired-end FASTQ, please also add --interleaved_in.");
@@ -136,10 +137,9 @@ int main(int argc, char* argv[]){
     cmd.add<int>("cut_right_window_size", 0, "the window size option of cut_right, default to cut_window_size if not specified", false, 4);
     cmd.add<int>("cut_right_mean_quality", 0, "the mean quality requirement option for cut_right, default to cut_mean_quality if not specified", false, 20);
 
-
     // quality filtering
     cmd.add("disable_quality_filtering", 'Q', "quality filtering is enabled by default. If this option is specified, quality filtering is disabled");
-    cmd.add<int>("qualified_quality_phred", 'q', "the quality value that a base is qualified. Default 20 means phred quality >=Q20 is qualified.", false, 20);
+    cmd.add<int>("qualified_quality_phred", 'q', "the quality value that a base is qualified. Default 20 (for Illumina and 10 for nanopore) means phred quality >=Q20 is qualified.", false, 20);
     cmd.add<int>("unqualified_percent_limit", 'u', "how many percents of bases are allowed to be unqualified (0~100). Default 40 means 40%", false, 40);
     cmd.add<int>("n_base_limit", 'n', "if one read's number of N base is >n_base_limit, then this read/pair is discarded. Default is 5", false, 5);
     cmd.add<int>("average_qual", 'e', "if one read's average quality score <avg_qual, then this read/pair is discarded. Default 0 means no requirement", false, 0);
@@ -171,7 +171,6 @@ int main(int argc, char* argv[]){
     cmd.add<string>("umi_prefix", 0, "if specified, an underline will be used to connect prefix and UMI (i.e. prefix=UMI, UMI=AATTCG, final=UMI_AATTCG). No prefix by default", false, "");
     cmd.add<int>("umi_skip", 0, "if the UMI is in read1/read2, seq2sat can skip several bases following UMI, default is 0", false, 0);
 
-    
     cmd.parse_check(argc, argv);
 
     if(argc == 1) {
@@ -227,6 +226,7 @@ int main(int argc, char* argv[]){
     }
     opt->locFile = cmd.get<string>("loc");
     opt->revCom = cmd.exist("revCom");
+    opt->nanopore_default = cmd.exist("nanopore_default");
     
     //opt->mergerOverlappedPE = cmd.exist("dont_merge_overlapped_PE") ? false : true;
     
@@ -285,21 +285,28 @@ int main(int argc, char* argv[]){
     }
     opt->polyXTrim.minLen = cmd.get<int>("poly_x_min_len");
 
-
     // sliding window cutting by quality
     opt->qualityCut.enabledFront = cmd.exist("cut_front");
     opt->qualityCut.enabledTail = cmd.exist("cut_tail");
     opt->qualityCut.enabledRight = cmd.exist("cut_right");
 
     opt->qualityCut.windowSizeShared = cmd.get<int>("cut_window_size");
-    opt->qualityCut.qualityShared = cmd.get<int>("cut_mean_quality");
+    if(opt->nanopore_default){
+        opt->qualityCut.qualityShared = 10;
+    } else {
+        opt->qualityCut.qualityShared = cmd.get<int>("cut_mean_quality");
+    }
 
     if(cmd.exist("cut_front_window_size"))
         opt->qualityCut.windowSizeFront = cmd.get<int>("cut_front_window_size");
     else
         opt->qualityCut.windowSizeFront = opt->qualityCut.windowSizeShared;
     if(cmd.exist("cut_front_mean_quality"))
-        opt->qualityCut.qualityFront = cmd.get<int>("cut_front_mean_quality");
+        if(opt->nanopore_default){
+            opt->qualityCut.qualityFront = 10;
+        } else {
+            opt->qualityCut.qualityFront = cmd.get<int>("cut_front_mean_quality");
+        }
     else
         opt->qualityCut.qualityFront = opt->qualityCut.qualityShared;
 
@@ -308,7 +315,11 @@ int main(int argc, char* argv[]){
     else
         opt->qualityCut.windowSizeTail = opt->qualityCut.windowSizeShared;
     if(cmd.exist("cut_tail_mean_quality"))
-        opt->qualityCut.qualityTail = cmd.get<int>("cut_tail_mean_quality");
+        if(opt->nanopore_default){
+            opt->qualityCut.qualityTail = 10;
+        } else {
+            opt->qualityCut.qualityTail = cmd.get<int>("cut_tail_mean_quality");
+        }
     else
         opt->qualityCut.qualityTail = opt->qualityCut.qualityShared;
 
@@ -317,7 +328,11 @@ int main(int argc, char* argv[]){
     else
         opt->qualityCut.windowSizeRight = opt->qualityCut.windowSizeShared;
     if(cmd.exist("cut_right_mean_quality"))
-        opt->qualityCut.qualityRight = cmd.get<int>("cut_right_mean_quality");
+        if(opt->nanopore_default){
+            opt->qualityCut.qualityRight = 10;
+        } else {
+            opt->qualityCut.qualityRight = cmd.get<int>("cut_right_mean_quality");
+        }
     else
         opt->qualityCut.qualityRight = opt->qualityCut.qualityShared;
 
@@ -332,7 +347,12 @@ int main(int argc, char* argv[]){
 
     // quality filtering
     opt->qualfilter.enabled = !cmd.exist("disable_quality_filtering");
-    opt->qualfilter.qualifiedQual = num2qual(cmd.get<int>("qualified_quality_phred"));
+    if(opt->nanopore_default){
+        opt->qualfilter.qualifiedQual = num2qual(10);
+    } else {
+         opt->qualfilter.qualifiedQual = num2qual(cmd.get<int>("qualified_quality_phred"));
+    }
+   
     opt->qualfilter.unqualifiedPercentLimit = cmd.get<int>("unqualified_percent_limit");
     opt->qualfilter.avgQualReq = cmd.get<int>("average_qual");
     opt->qualfilter.nBaseLimit = cmd.get<int>("n_base_limit");

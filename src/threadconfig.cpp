@@ -8,8 +8,7 @@ ThreadConfig::ThreadConfig(Options* opt, int threadId, bool paired){
     if(paired){
         mPreStats2 = new Stats(mOptions, true);
         mPostStats2 = new Stats(mOptions, true);
-    }
-    else {
+    } else {
         mPreStats2 = NULL;
         mPostStats2 = NULL;
     }
@@ -36,6 +35,26 @@ ThreadConfig::~ThreadConfig() {
     if(mSexScanner){
         delete mSexScanner;
         mSexScanner = nullptr;
+    }
+    if(mPreStats1){
+        delete mPreStats1;
+        mPreStats1 = NULL;
+    }
+    if(mPostStats1){
+        delete mPostStats1;
+        mPostStats1 = NULL;
+    }
+    if(mPreStats2){
+        delete mPreStats2;
+        mPreStats2 = NULL;
+    }
+    if(mPostStats2){
+        delete mPostStats2;
+        mPostStats2 = NULL;
+    }
+    if(mFilterResult){
+        delete mFilterResult;
+        mFilterResult = NULL;
     }
 }
 

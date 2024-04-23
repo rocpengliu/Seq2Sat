@@ -5,9 +5,7 @@ PairEndProcessor::PairEndProcessor(Options* opt){
     mProduceFinished = false;
     mFinishedThreads = 0;
     mFilter = new Filter(opt);
-    mOutStream1 = NULL;
     mZipFile1 = NULL;
-    mOutStream2 = NULL;
     mZipFile2 = NULL;
     mUmiProcessor = new UmiProcessor(opt);
 
@@ -25,7 +23,11 @@ PairEndProcessor::PairEndProcessor(Options* opt){
 }
 
 PairEndProcessor::~PairEndProcessor() {
-    delete mInsertSizeHist;
+    delete[] mInsertSizeHist;
+    if(mFilter){
+        delete mFilter;
+        mFilter = NULL;
+    }
     if(mDuplicate) {
         delete mDuplicate;
         mDuplicate = NULL;
@@ -114,6 +116,8 @@ bool PairEndProcessor::process(){
     if(failedWriterThread)
         failedWriterThread->join();
 
+    destroyPackRepository();
+    
     if(mOptions->verbose)
         loginfo("start to generate reports\n");
 
@@ -216,30 +220,24 @@ bool PairEndProcessor::process(){
         delete configs[t];
         configs[t] = NULL;
     }
-
     delete finalPreStats1;
     delete finalPostStats1;
     delete finalPreStats2;
     delete finalPostStats2;
     delete finalFilterResult;
-
     if(mOptions->duplicate.enabled) {
         delete[] dupHist;
         delete[] dupMeanGC;
     }
-
     delete[] threads;
     delete[] configs;
-
     if(leftWriterThread)
         delete leftWriterThread;
     if(rightWriterThread)
         delete rightWriterThread;
     if(failedWriterThread)
         delete failedWriterThread;
-
     closeOutput();
-
     return true;
 }
 
@@ -262,7 +260,6 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
     string locus = "";
     string failedOutput;
     int readPassed = 0;
-    int mergedCount = 0;
     for(int p=0;p<pack->count;p++){
         ReadPair* pair = pack->data[p];
         Read* or1 = pair->mLeft;
@@ -291,8 +288,9 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
 //        Read* r1 = mFilter->trimAndCut(or1, mOptions->trim.front1, mOptions->trim.tail1, frontTrimmed1);
 //        Read* r2 = mFilter->trimAndCut(or2, mOptions->trim.front2, mOptions->trim.tail2, frontTrimmed2);
         Read* r1 = mFilter->trimAndCut(or1, 0, mOptions->trim.tail1, frontTrimmed1);
+        //if(r1 = NULL) delete or1; or1 = NULL;
         Read* r2 = mFilter->trimAndCut(or2, 0, mOptions->trim.tail2, frontTrimmed2);
-
+        //if(r2 = NULL) delete or2; or2 = NULL;
         if(r1 != NULL && r2!=NULL) {
             if(mOptions->polyGTrim.enabled)
                 PolyX::trimPolyG(r1, r2, config->getFilterResult(), mOptions->polyGTrim.minLen);
@@ -350,9 +348,6 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
         config->addFilterResult(max(result1, result2), 2);
 
         if( r1 != NULL &&  result1 == PASS_FILTER && r2 != NULL && result2 == PASS_FILTER ) {
-            
-            bool analysisEachRead = true;
-            bool found = false;
             if(mOptions->mergerOverlappedPE){
                 OverlapResult ov = OverlapAnalysis::analyze(r1, r2, mOptions->overlapDiffLimit, mOptions->overlapRequire, mOptions->overlapDiffPercentLimit / 100.0);
                 if(ov.overlapped){
@@ -367,7 +362,7 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                                 locus = rep.second;
                                 goGeno = false;
                             } else {
-                                auto revReads = merged->reverseComplement();
+                                Read* revReads = merged->reverseComplement();
                                 rep = config->getSexScanner()->sexScan(revReads);
                                 if(rep.first){
                                     locus = rep.second;
@@ -375,6 +370,7 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                                 } else {
                                     goGeno = true;
                                 }
+                                delete revReads;
                             }
                         } else {
                             goGeno = true;
@@ -385,14 +381,16 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                                 locus = config->getSsrScanner()->scanVar(merged);
                                 size_t found = locus.find("_failed");
                                 if (found != std::string::npos && found == (locus.length() - 7)) {
-                                    auto revReads = merged->reverseComplement();
+                                    Read* revReads = merged->reverseComplement();
                                     locus = config->getSsrScanner()->scanVar(revReads);
+                                    delete revReads;
                                 }
                             } else {
                                 locus = config->getSnpScanner()->scanVar(merged);
                                 if(locus.empty()){
-                                    auto revReads = merged->reverseComplement();
+                                    Read* revReads = merged->reverseComplement();
                                     locus = config->getSnpScanner()->scanVar(revReads);
+                                    delete revReads;
                                 }
                             }
                         }
@@ -403,15 +401,10 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
                             outstr1 += r1->toString();
                             outstr2 += r2->toString();
                         }
-                        analysisEachRead = false;
                     }
                     
                     delete merged;
                 }
-            }
-
-            if (analysisEachRead) {
-                //config->getVariationScanner()->scanVar(r1, r2);
             }
 
             // stats the read after filtering
@@ -421,17 +414,27 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
             readPassed++;
         }
 
-        delete pair;
+        delete pair; pair = NULL;
         // if no trimming applied, r1 should be identical to or1
-        if(r1 != or1 && r1 != NULL)
+        if(r1 != or1 && r1 != NULL){
             delete r1;
-        // if no trimming applied, r1 should be identical to or1
-        if(r2 != or2 && r2 != NULL)
+            r1 = NULL;
+        } else if(r1 == NULL){
+            delete or1;
+            or1 = NULL;
+        }
+        // if no trimming applied, r2 should be identical to or2
+        if(r2 != or2 && r2 != NULL){
             delete r2;
+            r2 = NULL;
+        } else if(r2 == NULL){
+            delete or2;
+            or2 = NULL;
+        }
     }
 
     //if(mOptions->debug) cCout("consuming reads pack end");
-    
+    mOutputMtx.lock();
     // normal output by left/right writer thread
     if(mRightWriter && mLeftWriter && (!outstr1.empty() || !outstr2.empty())) {
         // write PE
@@ -454,14 +457,10 @@ bool PairEndProcessor::processPairEnd(ReadPairPack* pack, ThreadConfig* config){
         memcpy(fdata, failedOutput.c_str(), failedOutput.size());
         mFailedWriter->input(fdata, failedOutput.size());
     }
-
     mOutputMtx.unlock();
-
     config->markProcessed(pack->count);
-
-    delete pack->data;
+    delete[] pack->data;
     delete pack;
-
     return true;
 }
     
@@ -494,7 +493,7 @@ void PairEndProcessor::initPackRepository() {
 }
 
 void PairEndProcessor::destroyPackRepository() {
-    delete mRepo.packBuffer;
+    delete[] mRepo.packBuffer;
     mRepo.packBuffer = NULL;
 }
 
@@ -517,7 +516,6 @@ void PairEndProcessor::consumePack(ThreadConfig* config){
     mRepo.readPos++;
     mInputMtx.unlock();
     processPairEnd(data, config);
-
 }
 
 void PairEndProcessor::producerTask(){
@@ -542,6 +540,7 @@ void PairEndProcessor::producerTask(){
             pack->data = data;
             pack->count = count;
             producePack(pack);
+            //delete[] data;
             data = NULL;
             if(read) {
                 delete read;
@@ -595,8 +594,16 @@ void PairEndProcessor::producerTask(){
     //lock.unlock();
 
     // if the last data initialized is not used, free it
-    if(data != NULL)
+    if(data != NULL){
+        for(int i = 0; i < PACK_SIZE; ++i){
+            if(data[i]!= NULL){
+                delete data[i];
+                data[i] = NULL;
+            }
+        }
         delete[] data;
+        data = NULL;
+    }
 }
 
 void PairEndProcessor::consumerTask(ThreadConfig* config){

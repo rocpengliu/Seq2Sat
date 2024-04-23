@@ -24,8 +24,6 @@ Stats::Stats(Options* opt, bool isRead2, int guessedCycles, int bufferMargin){
     mQ20Total = 0;
     mQ30Total = 0;
     summarized = false;
-    mKmerMin = 0;
-    mKmerMax = 0;
 
     // extend the buffer to make sure it's long enough
     mBufLen = guessedCycles + bufferMargin;
@@ -52,11 +50,6 @@ Stats::Stats(Options* opt, bool isRead2, int guessedCycles, int bufferMargin){
 
     mCycleTotalQual = new long[mBufLen];
     memset(mCycleTotalQual, 0, sizeof(long)*mBufLen);
-
-    mKmerBufLen = 2<<(KMER_LEN * 2);
-    mKmer = new long[mKmerBufLen];
-    memset(mKmer, 0, sizeof(long)*mKmerBufLen);
-
 }
 
 void Stats::extendBuffer(int newBufLen){
@@ -69,37 +62,37 @@ void Stats::extendBuffer(int newBufLen){
         newBuf = new long[newBufLen];
         memset(newBuf, 0, sizeof(long)*newBufLen);
         memcpy(newBuf, mCycleQ30Bases[i], sizeof(long) * mBufLen);
-        delete mCycleQ30Bases[i];
+        delete[] mCycleQ30Bases[i];
         mCycleQ30Bases[i] = newBuf;
 
         newBuf = new long[newBufLen];
         memset(newBuf, 0, sizeof(long)*newBufLen);
         memcpy(newBuf, mCycleQ20Bases[i], sizeof(long) * mBufLen);
-        delete mCycleQ20Bases[i];
+        delete[] mCycleQ20Bases[i];
         mCycleQ20Bases[i] = newBuf;
 
         newBuf = new long[newBufLen];
         memset(newBuf, 0, sizeof(long)*newBufLen);
         memcpy(newBuf, mCycleBaseContents[i], sizeof(long) * mBufLen);
-        delete mCycleBaseContents[i];
+        delete[] mCycleBaseContents[i];
         mCycleBaseContents[i] = newBuf;
 
         newBuf = new long[newBufLen];
         memset(newBuf, 0, sizeof(long)*newBufLen);
         memcpy(newBuf, mCycleBaseQual[i], sizeof(long) * mBufLen);
-        delete mCycleBaseQual[i];
+        delete[] mCycleBaseQual[i];
         mCycleBaseQual[i] = newBuf;
     }
     newBuf = new long[newBufLen];
     memset(newBuf, 0, sizeof(long)*newBufLen);
     memcpy(newBuf, mCycleTotalBase, sizeof(long)*mBufLen);
-    delete mCycleTotalBase;
+    delete[] mCycleTotalBase;
     mCycleTotalBase = newBuf;
 
     newBuf = new long[newBufLen];
     memset(newBuf, 0, sizeof(long)*newBufLen);
     memcpy(newBuf, mCycleTotalQual, sizeof(long)*mBufLen);
-    delete mCycleTotalQual;
+    delete[] mCycleTotalQual;
     mCycleTotalQual = newBuf;
 
     mBufLen = newBufLen;
@@ -107,31 +100,29 @@ void Stats::extendBuffer(int newBufLen){
 
 Stats::~Stats() {
     for(int i=0; i<8; i++){
-        delete mCycleQ30Bases[i];
+        delete[] mCycleQ30Bases[i];
         mCycleQ30Bases[i] = NULL;
 
-        delete mCycleQ20Bases[i];
+        delete[] mCycleQ20Bases[i];
         mCycleQ20Bases[i] = NULL;
 
-        delete mCycleBaseContents[i];
+        delete[] mCycleBaseContents[i];
         mCycleBaseContents[i] = NULL;
 
-        delete mCycleBaseQual[i];
+        delete[] mCycleBaseQual[i];
         mCycleBaseQual[i] = NULL;
     }
-
-    delete mCycleTotalBase;
-    delete mCycleTotalQual;
+    delete[] mCycleTotalBase;
+    delete[] mCycleTotalQual;
 
     // delete memory of curves
     map<string, double*>::iterator iter;
     for(iter = mQualityCurves.begin(); iter != mQualityCurves.end(); iter++) {
-        delete iter->second;
+        delete[] iter->second;
     }
     for(iter = mContentCurves.begin(); iter != mContentCurves.end(); iter++) {
-        delete iter->second;
+        delete[] iter->second;
     }
-    delete mKmer;
 }
 
 void Stats::summarize(bool forced) {
@@ -199,16 +190,6 @@ void Stats::summarize(bool forced) {
         gcContentCurve[c] = (double)(mCycleBaseContents[gBase][c] + mCycleBaseContents[cBase][c]) / (double)mCycleTotalBase[c];
     }
     mContentCurves["GC"] = gcContentCurve;
-
-    mKmerMin = mKmer[0];
-    mKmerMax = mKmer[0];
-    for(int i=0; i<mKmerBufLen; i++) {
-        if(mKmer[i] > mKmerMax)
-            mKmerMax = mKmer[i];
-        if(mKmer[i] < mKmerMin)
-            mKmerMin = mKmer[i];
-    }
-
     summarized = true;
 }
 
@@ -271,8 +252,6 @@ void Stats::statRead(Read* r) {
                 needFullCompute = true;
                 continue;
             } else {
-                kmer = ((kmer<<2) & 0x3FC ) | val;
-                mKmer[kmer]++;
             }
         } else {
             bool valid = true;
@@ -289,13 +268,10 @@ void Stats::statRead(Read* r) {
                 needFullCompute = true;
                 continue;
             } else {
-                mKmer[kmer]++;
                 needFullCompute = false;
             }
         }
-
     }
-
     mReads++;
 }
 
@@ -739,11 +715,6 @@ Stats* Stats::merge(vector<Stats*>& list) {
         for(int j=0; j<cycles && j<curCycles; j++) {
             s->mCycleTotalBase[j] += list[t]->mCycleTotalBase[j];
             s->mCycleTotalQual[j] += list[t]->mCycleTotalQual[j];
-        }
-
-        // merge kMer
-        for(int i=0; i<s->mKmerBufLen; i++) {
-            s->mKmer[i] += list[t]->mKmer[i];
         }
     }
 

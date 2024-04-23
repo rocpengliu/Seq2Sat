@@ -82,15 +82,12 @@ private:
     Filter* mFilter;
     gzFile mZipFile1;
     gzFile mZipFile2;
-    ofstream* mOutStream1;
-    ofstream* mOutStream2;
     UmiProcessor* mUmiProcessor;
     long* mInsertSizeHist;
     WriterThread* mLeftWriter;
     WriterThread* mRightWriter;
     WriterThread* mFailedWriter;
     Duplicate* mDuplicate;
-    std::mutex logMtx;
 };
 
 

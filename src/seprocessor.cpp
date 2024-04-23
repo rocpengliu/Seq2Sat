@@ -16,7 +16,6 @@ SingleEndProcessor::SingleEndProcessor(Options* opt){
     mProduceFinished = false;
     mFinishedThreads = 0;
     mFilter = new Filter(opt);
-    mOutStream = NULL;
     mZipFile = NULL;
     mUmiProcessor = new UmiProcessor(opt);
     mLeftWriter =  NULL;
@@ -26,18 +25,14 @@ SingleEndProcessor::SingleEndProcessor(Options* opt){
     if(mOptions->duplicate.enabled) {
         mDuplicate = new Duplicate(mOptions);
     }
-    mSsrScanner = new SsrScanner(opt);
-    nnumber = 0;
 }
 
 SingleEndProcessor::~SingleEndProcessor() {
-    delete mFilter;
-    if(mDuplicate) {
-        delete mDuplicate;
-        mDuplicate = NULL;
+    if(mFilter){
+        delete mFilter;
+        mFilter = NULL;
     }
-
-    if (mDuplicate) {
+    if(mDuplicate) {
         delete mDuplicate;
         mDuplicate = NULL;
     }
@@ -45,11 +40,6 @@ SingleEndProcessor::~SingleEndProcessor() {
     if(mUmiProcessor){
         delete mUmiProcessor;
         mUmiProcessor = NULL;
-    }
-
-    if (mSsrScanner) {
-        delete mSsrScanner;
-        mSsrScanner = NULL;
     }
 }
 
@@ -82,10 +72,8 @@ void SingleEndProcessor::initConfig(ThreadConfig* config) {
 
 bool SingleEndProcessor::process(){
     initOutput();
-
     initPackRepository();
     std::thread producer(std::bind(&SingleEndProcessor::producerTask, this));
-
     //TODO: get the correct cycles
     int cycle = 151;
     ThreadConfig** configs = new ThreadConfig*[mOptions->thread];
@@ -119,6 +107,8 @@ bool SingleEndProcessor::process(){
     if (failedWriterThread)
         failedWriterThread->join();
 
+    destroyPackRepository();
+    
     if(mOptions->verbose)
         loginfo("start to generate reports\n");
 
@@ -150,7 +140,6 @@ bool SingleEndProcessor::process(){
             totalGenotypeSsrMapVec.push_back(configs[t]->getSsrScanner()->getGenotypeMap());
         } else if (mOptions->mVarType == snp) {
             totalSnpSeqMapVec.push_back(configs[t]->getSnpScanner()->getSubSeqsMap());
-            //totalSexLocVec.emplace_back(configs[t]->getSnpScanner()->getSexLoc());
         }
     }
     
@@ -161,7 +150,6 @@ bool SingleEndProcessor::process(){
     std::map<std::string, std::map < std::string, Genotype>> allGenotypeMap; //marker, seq, geno
     std::vector<std::map < std::string, std::vector<std::pair < std::string, Genotype>>>> sortedAllGenotypeMapVec;
     std::map<std::string, std::map < std::string, LocSnp>> allSnpsMap;
-    //std::vector<std::map < std::string, std::vector<std::pair < std::string, LocSnp>>>> sortedAllSnpsMapVec;
 
     if (!mOptions->mSex.sexMarker.empty()) {
         SexScanner::merge(totalSexLocVec, mOptions);
@@ -263,11 +251,10 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
         // trim in head and tail, and apply quality cut in sliding window
         //Read* r1 = mFilter->trimAndCut(or1, mOptions->trim.front1, mOptions->trim.tail1, frontTrimmed);
         Read* r1 = mFilter->trimAndCut(or1, 0, 0, frontTrimmed);
-
         if(r1 != NULL) {
             if(mOptions->polyGTrim.enabled)
                 PolyX::trimPolyG(r1, config->getFilterResult(), mOptions->polyGTrim.minLen);
-        }
+        } 
 
         if(r1 != NULL && mOptions->adapter.enabled){
             bool trimmed = false;
@@ -303,8 +290,9 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
                     locus = rep.second;
                     goGeno = false;
                 } else {
-                    auto revReads = r1->reverseComplement();
+                    Read* revReads = r1->reverseComplement();
                     rep = config->getSexScanner()->sexScan(revReads);
+                    delete revReads;
                     if (rep.first) {
                         locus = rep.second;
                         goGeno = false;
@@ -321,14 +309,16 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
                     locus = config->getSsrScanner()->scanVar(r1);
                     size_t found = locus.find("_failed");
                     if (found != std::string::npos && found == (locus.length() - 7)) {
-                        auto revReads = r1->reverseComplement();
+                        Read* revReads = r1->reverseComplement();
                         locus = config->getSsrScanner()->scanVar(revReads);
+                        delete revReads;
                     }
                 } else {
                     locus = config->getSnpScanner()->scanVar(r1);
                     if(locus.empty()){
-                        auto revReads = r1->reverseComplement();
+                        Read* revReads = r1->reverseComplement();
                         locus = config->getSnpScanner()->scanVar(revReads);
+                        delete revReads;
                     }
                 }
             }
@@ -344,10 +334,15 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
             readPassed++;
         }
 
-        delete or1;
+        
         // if no trimming applied, r1 should be identical to or1
-        if(r1 != or1 && r1 != NULL)
+        if(r1 != or1 && r1 != NULL){
             delete r1;
+            r1 = NULL;
+        } else if(r1 == NULL){
+            delete or1;
+            or1 = NULL;
+        }
     }
     // if splitting output, then no lock is need since different threads write different files
     mOutputMtx.lock();
@@ -366,12 +361,12 @@ bool SingleEndProcessor::processSingleEnd(ReadPack* pack, ThreadConfig* config){
         memcpy(fdata, failedOutput.c_str(), failedOutput.size());
         mFailedWriter->input(fdata, failedOutput.size());
     }
-    
+
     mOutputMtx.unlock();
 
     config->markProcessed(pack->count);
 
-    delete pack->data;
+    delete[] pack->data;
     delete pack;
 
     return true;
@@ -385,7 +380,7 @@ void SingleEndProcessor::initPackRepository() {
 }
 
 void SingleEndProcessor::destroyPackRepository() {
-    delete mRepo.packBuffer;
+    delete[] mRepo.packBuffer;
     mRepo.packBuffer = NULL;
 }
 
@@ -483,8 +478,16 @@ void SingleEndProcessor::producerTask(){
         loginfo("all reads loaded, start to monitor thread status");
 
     // if the last data initialized is not used, free it
-    if(data != NULL)
+     if(data != NULL){
+        for(int i = 0; i < PACK_SIZE; ++i){
+            if(data[i]!= NULL){
+                delete data[i];
+                data[i] = NULL;
+            }
+        }
         delete[] data;
+        data = NULL;
+    }
 }
 
 void SingleEndProcessor::consumerTask(ThreadConfig* config){

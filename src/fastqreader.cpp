@@ -21,7 +21,7 @@ FastqReader::FastqReader(string filename, bool hasQuality, bool phred64){
 
 FastqReader::~FastqReader(){
 	close();
-	delete mBuf;
+	delete[] mBuf;
 }
 
 bool FastqReader::hasNoLineBreakAtEnd() {

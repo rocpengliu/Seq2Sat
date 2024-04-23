@@ -19,13 +19,25 @@ CXXFLAGS := -std=c++11 -g -O3 -I${DIR_INC} $(foreach includedir,$(INCLUDE_DIRS),
 LIBS := -lz -lpthread
 LD_FLAGS := $(foreach librarydir,$(LIBRARY_DIRS),-L$(librarydir)) $(LIBS) $(LD_FLAGS)
 
+# Default target
+all: ${BIN_TARGET}
 
 ${BIN_TARGET}:${OBJ}
 	$(CXX) $(OBJ) -o $@ $(LD_FLAGS)
 
+# Debug target
+debug: CXXFLAGS += $(DEBUG_CXXFLAGS)
+debug: ${BIN_TARGET}
+
 ${DIR_OBJ}/%.o:${DIR_SRC}/%.cpp make_obj_dir
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
+make_obj_dir:
+	@if test ! -d $(DIR_OBJ) ; \
+	then \
+		mkdir $(DIR_OBJ) ; \
+	fi
+	
 .PHONY:clean
 clean:
 	@if test -d $(DIR_OBJ) ; \
@@ -35,12 +47,6 @@ clean:
 	@if test -e $(TARGET) ; \
 	then \
 		rm $(TARGET) ; \
-	fi
-
-make_obj_dir:
-	@if test ! -d $(DIR_OBJ) ; \
-	then \
-		mkdir $(DIR_OBJ) ; \
 	fi
 
 install:

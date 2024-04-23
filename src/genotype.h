@@ -193,14 +193,13 @@ public:
 public:
     std::string seq;
     int numReads;
-    bool indel;
+    bool indel;//against ref
     std::set<int> snpSet;//including seq errors;
 };
 
 class LocSnp2{
 public:
     LocSnp2();
-        
 public:
     std::string name;//marker name;
     Sequence fp;
@@ -209,25 +208,22 @@ public:
     std::pair<int, int> trimPos;//  trim front and back for reference and reads
     Sequence ft;//forward trimming region
     Sequence rt;//reverse trimming region;
-    //std::set<int> snpPosSetTrueHaplo;//for haplotype; including ref, true haplotype; not the inconclusive ones; not used
+   
     std::set<int> snpPosSetHaplo;//only for true haplotype snp positions. including ref snps; also include the inconclusive ones; for snp table;
     std::set<int> snpPosSet;//snps poitions including seq errors; for alignment table reference
     std::set<int> refSnpPosSet;//reference target snps
-    //std::set<int> totPosSet;//all the snps pos including ref, combine snpPosSet and refSnpPosSet;
+   
     int totReads;
     int maxReads;
     int totHaploReads;
-    //int totEffectReads;//total reads after filtering, used to calculate error rate;
+    
     double ratioHaplo; //ratio = big one / big one + small one; if 1 is homo,  if < jetter is heter, is <homo > jetter is inconclusive.
-    //std::vector<std::tuple<std::string, std::string, int, double, char, char>> haploVec;//seq, haplotype, num reads, num reads/totlhaploreads, conclusive or not (if CC  against ref AA with other heter is inconclusive; eg CA -> ref CG (A|G is inconclusive)), last is indel;
-    //bool isHaplotype;//inconclusive is false;
+    
     std::string genoStr3;//seqerr (ratio > homo and should regarded as seq errors), inconclusive (ratio between homo and heter), homo or heter;//homo also include CC against ref AA;;
     bool isIndel;
     std::pair<std::pair<bool, bool>, bool> status;//isindel for hp1/ref, isindel for hp2/ref, isindel for hp1/hp2
     //for ref is only homo, heter and inconclusive, for each variants, it could be homo, heter, inconclusive and seqerr (if it homo, but has seq errors)
-    //std::map<std::string, SimSnps> genoMap;//read is the key
-    //std::map<int, SimSnp> snpsMap;//position, snps, only include snps in the haloptypes; also the inconclusive ones;
-    
+
     std::map<int, SSimSnp> ssnpsMap;//position, snps, only include snps in the haloptypes; also the inconclusive ones;
     std::vector<SeqVar> seqVarVec;// comprehensive seq var; if it is homo, get the first one; heter or incon get the first two;
     void print();
@@ -243,6 +239,11 @@ public:
     double getHaploReadsRatio(bool haplot2 = false); // top 2 reads;
     double getHaploReadsPer(bool haplop2 = false);   // against totoal reads;
     double getReadsVarPer(int index);
+    void getBestRatio();  // pos and ratio = num variants with and without that SNP; for assisting the genotyping calling
+    std::pair<int, double> getBaseFreqPair(int pos);
+    std::vector<std::pair<int, double>> ratioVec;//for each snv, the ratio of number of read variants with and without that snv
+    std::string getRatioStr();
+    double ratioVar;
 };
 
 struct MatchTrim {

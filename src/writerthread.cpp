@@ -22,7 +22,8 @@ WriterThread::WriterThread(Options* opt, string filename){
 
 WriterThread::~WriterThread() {
     cleanup();
-    delete mRingBuffer;
+    delete[] mRingBuffer;
+    delete[] mRingBufferSizes;
 }
 
 bool WriterThread::isCompleted() 
@@ -39,10 +40,9 @@ void WriterThread::output(){
     if(mOutputCounter >= mInputCounter) {
         usleep(100);
     }
-    while( mOutputCounter < mInputCounter) 
-    {
+    while( mOutputCounter < mInputCounter) {
         mWriter1->write(mRingBuffer[mOutputCounter], mRingBufferSizes[mOutputCounter]);
-        delete mRingBuffer[mOutputCounter];
+        delete[] mRingBuffer[mOutputCounter];
         mRingBuffer[mOutputCounter] = NULL;
         mOutputCounter++;
     }

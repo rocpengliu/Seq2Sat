@@ -62,13 +62,11 @@ private:
     std::mutex mOutputMtx;
     Filter* mFilter;
     gzFile mZipFile;
-    ofstream* mOutStream;
     UmiProcessor* mUmiProcessor;
     WriterThread* mLeftWriter;
     WriterThread* mFailedWriter;
     Duplicate* mDuplicate;
     SsrScanner* mSsrScanner;
-    int nnumber;
 };
 
 

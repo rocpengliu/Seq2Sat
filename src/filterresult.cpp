@@ -16,10 +16,12 @@ FilterResult::FilterResult(Options* opt, bool paired){
     mCorrectionMatrix = new long[64];
     memset(mCorrectionMatrix, 0, sizeof(long)*64);
     mCorrectedReads = 0;
+    mAdapter1.clear();
+    mAdapter2.clear();
 }
 
 FilterResult::~FilterResult() {
-    delete mCorrectionMatrix;
+    delete[] mCorrectionMatrix;
 }
 
 void FilterResult::addFilterResult(int result, int readNum) {

@@ -72,7 +72,6 @@ private:
     long *mCycleBaseQual[8];
     long *mCycleTotalBase;
     long *mCycleTotalQual;
-    long *mKmer;
 
     map<string, double*> mQualityCurves;
     map<string, double*> mContentCurves;
@@ -87,9 +86,6 @@ private:
     long mQ20Total;
     long mQ30Total;
     bool summarized;
-    long mKmerMax;
-    long mKmerMin;
-    int mKmerBufLen;
     long mLengthSum;
 };
 

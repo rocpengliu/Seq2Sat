@@ -140,7 +140,9 @@ public:
         hasSeqR1 = false;
         hasSeqR2 = false;
         detectAdapterForPE = false;
+        hasFasta = false;
     }
+
 public:
     bool enabled;
     string sequence;
@@ -302,9 +304,9 @@ public:
         minSeqs = 5;
         minSeqsPer = 0.1;
         hmPerH = 0.9;
-        hmPerL = 0.8;
+        hmPerL = 0.85;
         hmPer = 0.0;
-        htJetter = 0.15;
+        htJetter = 0.25;
         minReads4Filter = 50;
         maxRows4Align = 6;
     };
@@ -485,6 +487,7 @@ public:
     bool noErrorPlot;// not to show error plot in html report for sex and snp id;
     bool noSnpPlot; // not to show snp plot in html report;
     bool noPlot;// not to plot any figures;
+    bool nanopore_default;
 };
 
 #endif

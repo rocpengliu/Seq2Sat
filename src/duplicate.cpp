@@ -18,6 +18,7 @@ Duplicate::Duplicate(Options* opt) {
 Duplicate::~Duplicate(){
     delete[] mDups;
     delete[] mCounts;
+    delete[] mGC;
 }
 
 uint64 Duplicate::seq2int(const char* data, int start, int keylen, bool& valid) {
