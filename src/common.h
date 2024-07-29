@@ -6,7 +6,7 @@
 #include <string>
 #include <utility>
 
-#define SEQ2SAT_VER "2.0.0.4"
+#define SEQ2SAT_VER "2.0.0.5"
 #define _DEBUG false
 
 typedef long int64;
