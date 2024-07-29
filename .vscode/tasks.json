@@ -16,7 +16,9 @@
                 "reveal": "always",
                 "panel": "new"
             },
-            "problemMatcher": "$gcc"
+            "problemMatcher": [
+                "$gcc"
+            ]
         }
     ]
 }

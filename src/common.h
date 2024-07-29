@@ -7,7 +7,6 @@
 #include <utility>
 
 #define SEQ2SAT_VER "2.0.0.4"
-
 #define _DEBUG false
 
 typedef long int64;
@@ -75,6 +74,5 @@ const static char* FAILED_TYPES[FILTER_RESULT_TYPES] = {
 	"failed_low_complexity", "", "", "",
 	"", "", "", ""
 };
-
 
 #endif /* COMMON_H */

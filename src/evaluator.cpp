@@ -409,6 +409,169 @@ int Evaluator::seq2int(string& seq, int pos, int keylen, int lastVal) {
     }
 }
 
+ std::string Evaluator::getSexMarker(Options*& opt) {
+     std::string marker = "";
+     long records = 0;
+     std::map<std::string, double> sexEvaMap;
+     if (opt->isPaired()) {
+         FastqReaderPair reader(opt->in1, opt->in2);
+         while (records < 100000) {
+             ReadPair* r = reader.read();
+             if (!r) {
+                 break;
+             }
+             std::map<std::string, double> tsexMap;
+             for (auto& it : opt->sexMap) {
+                 std::string goLR = "";  // left, right, both;
+                 if (r->mLeft->length() > (it.second.primerF.length() + it.second.primerR.length())) {
+                     if (r->mRight->length() > (it.second.primerF.length() + it.second.primerR.length())) {
+                         goLR = "both";
+                     } else {
+                         goLR = "left";
+                     }
+                 } else {
+                     if (r->mRight->length() > (it.second.primerF.length() + it.second.primerR.length())) {
+                         goLR = "right";
+                     }
+                 }
+                 if (goLR.empty()) {
+                     continue;
+                 } else if (goLR == "both") {
+                     auto pf = doSimpleAlignment(opt, it.second.primerF.mStr, r->mLeft);
+                     auto pr = doSimpleAlignment(opt, it.second.primerR.mStr, r->mLeft);
+
+                     auto pfr = doSimpleAlignment(opt, it.second.primerF.reverseComplement().mStr, r->mLeft);
+                     auto prr = doSimpleAlignment(opt, it.second.primerR.reverseComplement().mStr, r->mLeft);
+
+                     if ((pf + pr) < (pfr + prr)) {
+                        if(pf <= opt->mLocVars.locVarOptions.maxMismatchesPSeq && pr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                            tsexMap[it.first] = (pf + pr) / (it.second.primerF.length() + it.second.primerR.length());
+                        }
+                     } else {
+                        if(pfr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq && prr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                            tsexMap[it.first] = (pfr + prr) / (it.second.primerF.length() + it.second.primerR.length());
+                        }
+                     }
+
+                     auto rpf = doSimpleAlignment(opt, it.second.primerF.mStr, r->mRight);
+                     auto rpr = doSimpleAlignment(opt, it.second.primerR.mStr, r->mRight);
+
+                     auto rpfr = doSimpleAlignment(opt, it.second.primerF.reverseComplement().mStr, r->mRight);
+                     auto rprr = doSimpleAlignment(opt, it.second.primerR.reverseComplement().mStr, r->mRight);
+
+                     if ((rpf + rpr) < (rpfr + rprr)) {
+                        if(rpf <= opt->mLocVars.locVarOptions.maxMismatchesPSeq && rpr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                            tsexMap[it.first] = (tsexMap[it.first] + (rpf + rpr) / (it.second.primerF.length() + it.second.primerR.length())) / 2;
+                        }
+                     } else {
+                        if(rpfr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq && rprr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                            tsexMap[it.first] = (tsexMap[it.first] + (rpfr + rprr) / (it.second.primerF.length() + it.second.primerR.length())) / 2;
+                        }
+                     }
+                 } else {
+                     Read* tmpr = nullptr;
+                     if (goLR == "left") {
+                         tmpr = r->mLeft;
+                     } else if (goLR == "right") {
+                         tmpr = r->mRight;
+                     }
+
+                     auto pf = doSimpleAlignment(opt, it.second.primerF.mStr, tmpr);
+                     auto pr = doSimpleAlignment(opt, it.second.primerR.mStr, tmpr);
+
+                     auto pfr = doSimpleAlignment(opt, it.second.primerF.reverseComplement().mStr, tmpr);
+                     auto prr = doSimpleAlignment(opt, it.second.primerR.reverseComplement().mStr, tmpr);
+
+                      if ((pf + pr) < (pfr + prr)) {
+                        if(pf <= opt->mLocVars.locVarOptions.maxMismatchesPSeq && pr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                            tsexMap[it.first] = (pf + pr) / (it.second.primerF.length() + it.second.primerR.length());
+                        }
+                     } else {
+                        if(pfr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq && prr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                            tsexMap[it.first] = (pfr + prr) / (it.second.primerF.length() + it.second.primerR.length());
+                        }
+                     }
+                     //delete tmpr;
+                     tmpr = nullptr;
+                 }
+             }
+             records++;
+             delete r;
+              if (tsexMap.empty()) continue;
+              auto minVK = getMinKeyValue(tsexMap);
+              sexEvaMap[minVK.first] = ((sexEvaMap[minVK.first] + minVK.second) / 2);
+         }
+    } else {
+        FastqReader reader(opt->in1);
+        while (records < 100000) {
+            Read* r = reader.read();
+            if (!r) {
+                break;
+            }
+
+            std::map<std::string, double> tsexMap;
+            for (auto& it : opt->sexMap) {
+                if (r->length() < (it.second.primerF.length() + it.second.primerR.length())) {
+                    continue;
+                }
+                auto pf = doSimpleAlignment(opt, it.second.primerF.mStr, r);
+                auto pr = doSimpleAlignment(opt, it.second.primerR.mStr, r);
+
+                auto pfr = doSimpleAlignment(opt, it.second.primerF.reverseComplement().mStr, r);
+                auto prr = doSimpleAlignment(opt, it.second.primerR.reverseComplement().mStr, r);
+
+                if ((pf + pr) < (pfr + prr)) {
+                    tsexMap[it.first] = (pf + pr) / (it.second.primerF.length() + it.second.primerR.length());
+                } else {
+                    tsexMap[it.first] = (pfr + prr) / (it.second.primerF.length() + it.second.primerR.length());
+                }
+            }
+            delete r;
+            records++;
+            if (tsexMap.empty()) continue;
+            auto minVK = getMinKeyValue(tsexMap);
+            sexEvaMap[minVK.first] = ((sexEvaMap[minVK.first] + minVK.second) / 2);
+        }
+    }
+
+    if (!sexEvaMap.empty()) {
+        marker = getMinKeyValue(sexEvaMap).first;
+    }
+    return marker;
+}
+ int Evaluator::doSimpleAlignment(Options*& opt, const string& query, Read*& r) {
+     const char* tData = r->mSeq.mStr.c_str();
+     const char* qData = query.c_str();
+     EdlibAlignResult result =
+         edlibAlign(qData, query.length(), tData, r->mSeq.length(), 
+         edlibNewAlignConfig(-1, EDLIB_MODE_HW, EDLIB_TASK_PATH, NULL, 0));
+
+     if (result.status == EDLIB_STATUS_OK) {
+         std::set<int> snpsSet;
+         std::set<int> indelSet;
+         for (int i = 0; i < result.alignmentLength; i++) {
+             auto cur = result.alignment[i];
+             if (cur == EDLIB_EDOP_MATCH) {
+             } else if (cur == EDLIB_EDOP_MISMATCH) {
+                 snpsSet.insert(i);
+             } else if (cur == EDLIB_EDOP_INSERT) {
+                 indelSet.insert(i);
+             } else if (cur == EDLIB_EDOP_DELETE) {
+                 indelSet.insert(i);
+             }
+         }
+         edlibFreeAlignResult(result);
+         if (indelSet.empty()) {
+             return snpsSet.size();
+         } else {
+             return query.length();
+         }
+    } else {
+        edlibFreeAlignResult(result);
+        return query.length();
+    }
+}
+
 bool Evaluator::test() {
     Evaluator eval(NULL);
     string s = "ATCGATCGAT";

@@ -4,9 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <utility>
 #include "options.h"
 #include "util.h"
 #include "read.h"
+#include "edlib.h"
 
 using namespace std;
 
@@ -18,6 +20,8 @@ public:
     void evaluateReadNum(long& readNum);
     string evalAdapterAndReadNumDepreciated(long& readNum);
     string evalAdapterAndReadNum(long& readNum, bool isR2);
+    static string getSexMarker(Options*& opt);
+    static int doSimpleAlignment(Options*& opt, const string& target, Read*& r);
     bool isTwoColorSystem();
     void evaluateSeqLen();
     int computeSeqLen(string filename);

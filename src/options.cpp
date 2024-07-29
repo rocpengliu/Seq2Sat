@@ -35,6 +35,7 @@ Options::Options(){
     var = "";
     locFile = "";
     sexFile = "";
+    sexMap.clear();
     sampleTable = "";
     samples.clear();
     minAmpliconEffectiveLen = 6;
@@ -468,7 +469,6 @@ void Options::readLocFile(){
                 tmpLocVar.effectiveLen = tmpLocVar.effectiveSeq.length();
                 tmpLocVar.mraName = getGenotype(tmpLocVar.mra.mStr, tmpLocVar.repuit.mStr, tmpLocVar.repuit2.mStr);
                 tmpLocVar.mraBase = getMraBase(tmpLocVar.mraName);
-                //cCout(tmpLocVar.mraName, 'r');
                 mLocVars.refLocMap[tmpLocVar.name] = tmpLocVar;
             }
             splitVec.clear();
@@ -564,7 +564,7 @@ void Options::readSexLoc(){
     std::vector<std::string> splitVec;
     std::string lineStr;
     splitVec.reserve(5);
-        while (fileIn.getline(line, maxLine)) {
+    while (fileIn.getline(line, maxLine)) {
         readed = strlen(line);
         if (line[readed - 1] == '\n' || line[readed - 1] == '\r') {
             line[readed - 1] = '\0';
@@ -574,18 +574,26 @@ void Options::readSexLoc(){
         }
         lineStr = std::string(line);
         splitStr(lineStr, splitVec);
+        Sex tsex;
         if (splitVec.size() == 5) {
-            mSex.sexMarker = splitVec[0];
-            mSex.primerF = Sequence(splitVec[1]);
-            mSex.primerR = Sequence(splitVec[2]);
-            mSex.refX = Sequence(splitVec[3]);
-            mSex.refY = Sequence(splitVec[4]);
-            mSex.lengthEqual = mSex.refX.length() == mSex.refY.length() ? true : false;
+            tsex.sexMarker = splitVec[0];
+            tsex.primerF = Sequence(splitVec[1]);
+            tsex.primerR = Sequence(splitVec[2]);
+            tsex.refX = Sequence(splitVec[3]);
+            tsex.refY = Sequence(splitVec[4]);
+            tsex.lengthEqual = tsex.refX.length() == tsex.refY.length() ? true : false;
         }
         splitVec.clear();
-    } 
-    
+        if (tsex.sexMarker.empty()) error_exit("sth wrong with your sex loc file");
+        sexMap[tsex.sexMarker] = tsex;
+        
+    }
     fileIn.close();
+    if(sexMap.empty()){
+        error_exit("Sex loci File is invalid: " + sexFile);
+    } else if (sexMap.size() == 1) {
+        mSex = sexMap.begin()->second;
+    }
 }
 
 void Options::parseSampleTable(){

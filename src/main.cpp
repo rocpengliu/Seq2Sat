@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
     cmd.add<double>("maxVarRatio", 0, "ratio of two heter alleles based on variations either in flanking regions or MRA, the ideal is 1, default: 1.5", false, 1.5);
     
     //for snp;
-    cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 15 means the percentage of reads with SNPs to total reads are from 35 - 65 %, must be coupled with hmPer, default: 25", false, 25);
+    cmd.add<int>("htJetter", 0, "jetter rate for heter loci, eg 25 means the percentage of reads with SNPs to total reads are from 25 - 75 %, must be coupled with hmPer, default: 25", false, 25);
     cmd.add<int>("hmPerH", 0, "allele is considered as homo when its reads against total reads is > 90 % and there are at least 2 true SNPs, must be coupled with htJetter and hmPerL, must be > hmPerL. default: 90", false, 90);
     cmd.add<int>("hmPerL", 0, "allele is considered as homo when its reads against total reads is > 80 % and there are at most 1 true SNP, must be coupled with htJetter and hmPerH, must be < hmPerH and > htJetter + 50. default: 85", false, 85);
     cmd.add<int>("minSeqsPerSnp", 0, "minimum percentage (%) reads against largest peak for a genotype, default: 10 (10%)", false, 10);
@@ -470,7 +470,6 @@ int main(int argc, char* argv[]){
                 cerr << endl;
             }
         }
-
         opt->validate();
         if(opt->debug) cCout(opt->prefix + " " + opt->in1 + " " + opt->in2);
         // using evaluator to check if it's two color system
@@ -480,13 +479,24 @@ int main(int argc, char* argv[]){
                 opt->polyGTrim.enabled = true;
             }
         }
-        
         opt->readLocFile();
-        
         if(!opt->sexFile.empty()){
              opt->readSexLoc();
+             if(opt->sexMap.size() > 1){
+                 if (opt->verbose) loginfo("reading sex markers:" + std::to_string(opt->sexMap.size()));
+                 std::string sexMarker = Evaluator::getSexMarker(opt);
+                 if(sexMarker.empty()){
+                     opt->sexFile.clear();
+                     cerr << "No valid sex marker is detected!" << endl;
+                 } else {
+                     opt->mSex = opt->sexMap[sexMarker];
+                     if(opt->verbose) {
+                         cerr << "Sex marker " << sexMarker << " is detected!" << endl;
+                     }
+                 }
+             }
         }
-       
+
         Processor* p = new Processor(opt);
         p->process();
 
