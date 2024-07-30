@@ -521,9 +521,13 @@ int Evaluator::seq2int(string& seq, int pos, int keylen, int lastVal) {
                 auto prr = doSimpleAlignment(opt, it.second.primerR.reverseComplement().mStr, r);
 
                 if ((pf + pr) < (pfr + prr)) {
-                    tsexMap[it.first] = (pf + pr) / (it.second.primerF.length() + it.second.primerR.length());
-                } else {
-                    tsexMap[it.first] = (pfr + prr) / (it.second.primerF.length() + it.second.primerR.length());
+                        if(pf <= opt->mLocVars.locVarOptions.maxMismatchesPSeq && pr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                            tsexMap[it.first] = (pf + pr) / (it.second.primerF.length() + it.second.primerR.length());
+                        }
+                     } else {
+                        if(pfr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq && prr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                            tsexMap[it.first] = (pfr + prr) / (it.second.primerF.length() + it.second.primerR.length());
+                        }
                 }
             }
             delete r;
