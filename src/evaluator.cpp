@@ -123,14 +123,14 @@ string Evaluator::evalAdapterAndReadNum(long& readNum, bool isR2) {
     memset(loadedReads, 0, sizeof(Read*)*READ_LIMIT);
     bool reachedEOF = false;
     bool first = true;
-
     while(records < READ_LIMIT && bases < BASE_LIMIT) {
         Read* r = reader.read();
         if(!r) {
             reachedEOF = true;
             break;
         }
-        if(first) {
+        if (r->length() >= 100000) continue;
+        if (first) {
             reader.getBytes(bytesRead, bytesTotal);
             firstReadPos = bytesRead;
             first = false;
@@ -151,7 +151,6 @@ string Evaluator::evalAdapterAndReadNum(long& readNum, bool isR2) {
         // increase it by 1% since the evaluation is usually a bit lower due to bad quality causes lower compression rate
         readNum = (long) (bytesTotal*1.01 / bytesPerRead);
     }
-
     // we need at least 10000 valid records to evaluate
     if(records < 10000) {
         for(int r=0; r<records; r++) {
@@ -161,7 +160,6 @@ string Evaluator::evalAdapterAndReadNum(long& readNum, bool isR2) {
         delete[] loadedReads;
         return "";
     }
-
     // we have to shift last cycle for evaluation since it is so noisy, especially for Illumina data
     const int shiftTail = max(1, mOptions->trim.tail1);
 
@@ -181,7 +179,6 @@ string Evaluator::evalAdapterAndReadNum(long& readNum, bool isR2) {
             }
         }
     }
-
     // set AAAAAAAAAA = 0;
     counts[0] = 0;
 
@@ -230,7 +227,6 @@ string Evaluator::evalAdapterAndReadNum(long& readNum, bool isR2) {
             }
         }
     }
-
     const int FOLD_THRESHOLD = 20;
     for(int t=0; t<topnum; t++) {
         int key = topkeys[t];
@@ -260,7 +256,6 @@ string Evaluator::evalAdapterAndReadNum(long& readNum, bool isR2) {
             return adapter;
         }
     }
-
     delete[] counts;
     for(int r=0; r<records; r++) {
         delete loadedReads[r];
@@ -289,7 +284,6 @@ string Evaluator::getAdapterWithSeed(int seed, Read** loadedReads, long records,
     }
     bool reachedLeaf = true;
     string forwardPath = forwardTree.getDominantPath(reachedLeaf);
-
     NucleotideTree backwardTree(mOptions);
     // backward search
     for(int i=0; i<records; i++) {
@@ -306,11 +300,9 @@ string Evaluator::getAdapterWithSeed(int seed, Read** loadedReads, long records,
         }
     }
     string backwardPath = backwardTree.getDominantPath(reachedLeaf);
-
     string adapter = reverse(backwardPath) + int2seq(seed, keylen) + forwardPath;
     if(adapter.length()>60)
         adapter.resize(60);
-
     string matchedAdapter = matchKnownAdapter(adapter);
     if(!matchedAdapter.empty()) {
         map<string, string> knownAdapters = getKnownAdapter();
@@ -521,9 +513,13 @@ int Evaluator::seq2int(string& seq, int pos, int keylen, int lastVal) {
                 auto prr = doSimpleAlignment(opt, it.second.primerR.reverseComplement().mStr, r);
 
                 if ((pf + pr) < (pfr + prr)) {
-                    tsexMap[it.first] = (pf + pr) / (it.second.primerF.length() + it.second.primerR.length());
-                } else {
-                    tsexMap[it.first] = (pfr + prr) / (it.second.primerF.length() + it.second.primerR.length());
+                        if(pf <= opt->mLocVars.locVarOptions.maxMismatchesPSeq && pr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                            tsexMap[it.first] = (pf + pr) / (it.second.primerF.length() + it.second.primerR.length());
+                        }
+                     } else {
+                        if(pfr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq && prr <= opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                            tsexMap[it.first] = (pfr + prr) / (it.second.primerF.length() + it.second.primerR.length());
+                        }
                 }
             }
             delete r;
