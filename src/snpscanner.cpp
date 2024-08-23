@@ -804,8 +804,9 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
                     if (locSnpIt->ref.mStr[its] == locSnpIt->seqVarVec.at(0).seq[its]) {
                         locSnpIt->ssnpsMap[its] = SSimSnp(locSnpIt->ref.mStr[its], locSnpIt->ref.mStr[its], 'g');
                     } else {
-                        locSnpIt->ssnpsMap[its] = SSimSnp(locSnpIt->ref.mStr[its], locSnpIt->ref.mStr[its],
-                                                          locSnpIt->refSnpPosSet.find(its) == locSnpIt->refSnpPosSet.end() ? 'o' : 'r');
+                        locSnpIt->ssnpsMap[its] = SSimSnp(locSnpIt->seqVarVec.at(0).seq[its], 
+                                                         (locSnpIt->seqVarVec.size() == 1 ? locSnpIt->seqVarVec.at(0).seq[its] : locSnpIt->seqVarVec.at(1).seq[its]),
+                                                         locSnpIt->refSnpPosSet.find(its) == locSnpIt->refSnpPosSet.end() ? 'o' : 'r');
                     }
                 }
             }
