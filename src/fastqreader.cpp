@@ -32,7 +32,7 @@ void FastqReader::readToBuf() {
 	if(mZipped) {
 		mBufDataLen = gzread(mZipFile, mBuf, FQ_BUF_SIZE);
 		if(mBufDataLen == -1) {
-			cerr << "Error to read gzip file" << endl;
+			std::cerr << "Error to read gzip file" << endl;
 		}
 	} else {
 		mBufDataLen = fread(mBuf, 1, FQ_BUF_SIZE, mFile);
@@ -194,11 +194,11 @@ Read* FastqReader::read(){
 	else {
 		string quality = getLine();
 		if(quality.length() != sequence.length()) {
-			cerr << "ERROR: sequence and quality have different length:" << endl;
-			cerr << name << endl;
-			cerr << sequence << endl;
-			cerr << strand << endl;
-			cerr << quality << endl;
+			std::cerr << "ERROR: sequence and quality have different length:" << endl;
+			std::cerr << name << endl;
+			std::cerr << sequence << endl;
+			std::cerr << strand << endl;
+			std::cerr << quality << endl;
 			return NULL;
 		}
 		return new Read(name, sequence, strand, quality, mPhred64);

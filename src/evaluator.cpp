@@ -306,11 +306,11 @@ string Evaluator::getAdapterWithSeed(int seed, Read** loadedReads, long records,
     string matchedAdapter = matchKnownAdapter(adapter);
     if(!matchedAdapter.empty()) {
         map<string, string> knownAdapters = getKnownAdapter();
-        //cerr << knownAdapters[matchedAdapter] << endl << matchedAdapter << endl;
+        //std::cerr << knownAdapters[matchedAdapter] << endl << matchedAdapter << endl;
         return matchedAdapter;
     } else {
         if(reachedLeaf) {
-            //cerr << adapter << endl;
+            //std::cerr << adapter << endl;
             return adapter;
         } else {
             return "";
@@ -571,6 +571,6 @@ int Evaluator::seq2int(string& seq, int pos, int keylen, int lastVal) {
 bool Evaluator::test() {
     Evaluator eval(NULL);
     string s = "ATCGATCGAT";
-    cerr << eval.int2seq(eval.seq2int(s, 0, 10, -1), 10) << endl;
+    std::cerr << eval.int2seq(eval.seq2int(s, 0, 10, -1), 10) << endl;
     return eval.int2seq(eval.seq2int(s, 0, 10, -1), 10) == s;
 }

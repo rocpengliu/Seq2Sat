@@ -330,10 +330,10 @@ void Stats::print() {
     if(!summarized) {
         summarize();
     }
-    cerr << "total reads: " << mReads << endl;
-    cerr << "total bases: " << mBases << endl;
-    cerr << "Q20 bases: " << mQ20Total << "(" << (mQ20Total*100.0)/mBases << "%)" << endl;
-    cerr << "Q30 bases: " << mQ30Total << "(" << (mQ30Total*100.0)/mBases << "%)" << endl;
+    std::cerr << "total reads: " << mReads << endl;
+    std::cerr << "total bases: " << mBases << endl;
+    std::cerr << "Q20 bases: " << mQ20Total << "(" << (mQ20Total*100.0)/mBases << "%)" << endl;
+    std::cerr << "Q30 bases: " << mQ30Total << "(" << (mQ30Total*100.0)/mBases << "%)" << endl;
 }
 
 void Stats::reportJson(ofstream& ofs, string padding) {

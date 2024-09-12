@@ -83,7 +83,7 @@ void Options::loadFastaAdapters() {
             adapter.seqsInFasta.push_back(iter->second);
         }
         else {
-            cerr << "skip too short adapter sequence in " <<  adapter.fastaFile << " (6bp required): " << iter->second << endl;
+            std::cerr << "skip too short adapter sequence in " <<  adapter.fastaFile << " (6bp required): " << iter->second << endl;
         }
     }
 
@@ -120,7 +120,7 @@ bool Options::validate() {
     // if output to STDOUT, then...
     if(outputToSTDOUT) {
         if(isPaired())
-            cerr << "Enable interleaved output mode for paired-end input." << endl;
+            std::cerr << "Enable interleaved output mode for paired-end input." << endl;
     }
 
     if(in2.empty() && !interleavedInput && !out2.empty()) {
@@ -180,7 +180,7 @@ bool Options::validate() {
     if(thread < 1) {
         thread = 1;
     } else if(thread > 16) {
-        cerr << "WARNING: seq2sat uses up to 16 threads although you specified " << thread << endl;
+        std::cerr << "WARNING: seq2sat uses up to 16 threads although you specified " << thread << endl;
         thread = 16;
     }
 
@@ -263,7 +263,7 @@ bool Options::validate() {
     }
 
     if(correction.enabled && !isPaired()) {
-        cerr << "WARNING: base correction is only appliable for paired end data, ignoring -c/--correction" << endl;
+        std::cerr << "WARNING: base correction is only appliable for paired end data, ignoring -c/--correction" << endl;
         correction.enabled = false;
     }
 
@@ -346,7 +346,7 @@ bool Options::validate() {
     }
     
     if(mLocSnps.mLocSnpOptions.maxRows4Align < 2){
-        cerr << "maxRows4Align " << mLocSnps.mLocSnpOptions.maxRows4Align << " is less than the minimum 2, and it is going to be set to 2!" << endl;
+        std::cerr << "maxRows4Align " << mLocSnps.mLocSnpOptions.maxRows4Align << " is less than the minimum 2, and it is going to be set to 2!" << endl;
         mLocSnps.mLocSnpOptions.maxRows4Align = 2;
     }
     
@@ -525,7 +525,6 @@ void Options::readLocFile(){
                 }
                 posVec.clear();
                 mLocSnps.refLocMap[tmpLocSnp.name] = tmpLocSnp;
-                tmpLocSnp.print();
             } else {
                 error_exit("Your locus " + lineStr + " does not have 7 columns!");
             }
