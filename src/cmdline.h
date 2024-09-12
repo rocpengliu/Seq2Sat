@@ -588,12 +588,12 @@ private:
 
   void check(int argc, bool ok){
     if ((argc==1 && !ok) || exist("help")){
-      std::cerr<<usage();
+      std::cout<<usage();
       exit(0);
     }
 
     if (!ok){
-      std::cerr<<error()<<std::endl<<usage();
+      std::cout<<error()<<std::endl<<usage();
       exit(1);
     }
   }

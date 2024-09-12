@@ -13,8 +13,8 @@ NucleotideNode::~NucleotideNode(){
     }
 }
 void NucleotideNode::dfs() {
-    //cerr << base;
-    //cerr << count;
+    //std::cerr << base;
+    //std::cerr << count;
     printf("%c", base);
     printf("%d", count);
     bool hasChild = false;

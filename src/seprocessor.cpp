@@ -181,19 +181,19 @@ bool SingleEndProcessor::process(){
         dupMeanGC = new double[mOptions->duplicate.histSize];
         memset(dupMeanGC, 0, sizeof(double) * mOptions->duplicate.histSize);
         dupRate = mDuplicate->statAll(dupHist, dupMeanGC, mOptions->duplicate.histSize);
-        cerr << endl;
-        cerr << "Duplication rate (may be overestimated since this is SE data): " << dupRate * 100.0 << "%" << endl;
+        std::cerr << endl;
+        std::cerr << "Duplication rate (may be overestimated since this is SE data): " << dupRate * 100.0 << "%" << endl;
     }
 
     JsonReporter jr(mOptions);
     jr.setDupHist(dupHist, dupMeanGC, dupRate);
     jr.report(sortedAllGenotypeMapVec, finalFilterResult, finalPreStats, finalPostStats);
-    cerr << "Finished Json report" << endl;
+    std::cerr << "Finished Json report" << endl;
     // make HTML report
     HtmlReporter hr(mOptions);
     hr.setDupHist(dupHist, dupMeanGC, dupRate);
     hr.report(sortedAllGenotypeMapVec, finalFilterResult, finalPreStats, finalPostStats);
-    cerr << "Finished Html report" << endl;
+    std::cerr << "Finished Html report" << endl;
 
     // clean up
     for(int t=0; t<mOptions->thread; t++){

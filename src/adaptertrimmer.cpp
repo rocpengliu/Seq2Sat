@@ -25,14 +25,14 @@ bool AdapterTrimmer::trimByOverlapAnalysis(Read* r1, Read* r2, FilterResult* fr,
         string adapter2 = r2->mSeq.mStr.substr(len2, r2->length() - len2);
 
         if(_DEBUG) {
-            cerr << adapter1 << endl;
-            cerr << adapter2 << endl;
-            cerr << "frontTrimmed2: " << frontTrimmed1 << endl;
-            cerr << "frontTrimmed2: " << frontTrimmed2 << endl;
-            cerr << "overlap:" << ov.offset << "," << ov.overlap_len << ", " << ov.diff << endl;
+            std::cerr << adapter1 << endl;
+            std::cerr << adapter2 << endl;
+            std::cerr << "frontTrimmed2: " << frontTrimmed1 << endl;
+            std::cerr << "frontTrimmed2: " << frontTrimmed2 << endl;
+            std::cerr << "overlap:" << ov.offset << "," << ov.overlap_len << ", " << ov.diff << endl;
             r1->print();
             r2->reverseComplement()->print();
-            cerr <<endl;
+            std::cerr <<endl;
         }
         r1->mSeq.mStr = r1->mSeq.mStr.substr(0, len1);
         r1->mQuality = r1->mQuality.substr(0, len1);
@@ -63,7 +63,7 @@ bool AdapterTrimmer::trimByMultiSequences(Read* r, FilterResult* fr, vector<stri
         if(fr)
             fr->addAdapterTrimmed(adapter, isR2, incTrimmedCounter);
         else
-            cerr << adapter << endl;
+            std::cerr << adapter << endl;
     }
 
     return trimmed;
@@ -156,7 +156,7 @@ bool AdapterTrimmer::test() {
     adapterList.push_back("AATTCCGGAATTCCGG");
     trimmed = AdapterTrimmer::trimByMultiSequences(&read, NULL, adapterList);
     if (read.mSeq.mStr != "TTTTAACCCCCCCCCCCCCCCCCCCCCCCCCCCCAATTTTAAAATTTTCCCCGGGG") {
-        cerr << read.mSeq.mStr << endl;
+        std::cerr << read.mSeq.mStr << endl;
         return false;
     }
 

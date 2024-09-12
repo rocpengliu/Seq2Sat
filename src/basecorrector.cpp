@@ -67,7 +67,7 @@ int BaseCorrector::correctByOverlapAnalysis(Read* r1, Read* r2, FilterResult* fr
     if(uncorrected + corrected != ov.diff) {
         static bool warned = false;
         if(!warned){
-            cerr << "WARNING: the algorithm is wrong! uncorrected + corrected != ov.diff" << endl;
+            std::cerr << "WARNING: the algorithm is wrong! uncorrected + corrected != ov.diff" << endl;
             warned = true;
         }
     }

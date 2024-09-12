@@ -16,7 +16,7 @@ mutex logmtx;
 int main(int argc, char* argv[]){
     // display version info if no argument is given
     if(argc == 1) {
-        cerr << "Seq2Sat: an ultra-fast and comprehensive genetic variation identification tool for raw sequencing data." << endl << "version " << SEQ2SAT_VER << endl;
+        std::cerr << "Seq2Sat: an ultra-fast and comprehensive genetic variation identification tool for raw sequencing data." << endl << "version " << SEQ2SAT_VER << endl;
     }
     if (argc == 2 && strcmp(argv[1], "test")==0){
         UnitTest tester;
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
         return 0;
     }
     if (argc == 2 && (strcmp(argv[1], "-v")==0 || strcmp(argv[1], "--version")==0)){
-        cerr << "seq2sat " << SEQ2SAT_VER << endl;
+        std::cerr << "seq2sat " << SEQ2SAT_VER << endl;
         return 0;
     }
     cmdline::parser cmd;
@@ -174,7 +174,7 @@ int main(int argc, char* argv[]){
     cmd.parse_check(argc, argv);
 
     if(argc == 1) {
-        cerr << cmd.usage() <<endl;
+        std::cerr << cmd.usage() <<endl;
         return 0;
     }
 
@@ -342,7 +342,7 @@ int main(int argc, char* argv[]){
             || cmd.exist("cut_front_window_size") || cmd.exist("cut_front_mean_quality") 
             || cmd.exist("cut_tail_window_size") || cmd.exist("cut_tail_mean_quality") 
             || cmd.exist("cut_right_window_size") || cmd.exist("cut_right_mean_quality"))
-            cerr << "WARNING: you specified the options for cutting by quality, but forogt to enable any of cut_front/cut_tail/cut_right. This will have no effect." << endl;
+            std::cerr << "WARNING: you specified the options for cutting by quality, but forogt to enable any of cut_front/cut_tail/cut_right. This will have no effect." << endl;
     }
 
     // quality filtering
@@ -436,9 +436,9 @@ int main(int argc, char* argv[]){
         // using evaluator to guess how many reads in total
         if (opt->shallDetectAdapter(false)) {
             if (!supportEvaluation) {
-                cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
+                std::cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
             } else {
-                cerr << "Detecting adapter sequence for read1..." << endl;
+                std::cerr << "Detecting adapter sequence for read1..." << endl;
                 string adapt = eva.evalAdapterAndReadNum(readNum, false);
                 if (adapt.length() > 60)
                     adapt.resize(0, 60);
@@ -446,17 +446,17 @@ int main(int argc, char* argv[]){
                     opt->adapter.sequence = adapt;
                     opt->adapter.detectedAdapter1 = adapt;
                 } else {
-                    cerr << "No adapter detected for read1" << endl;
+                    std::cerr << "No adapter detected for read1" << endl;
                     opt->adapter.sequence = "";
                 }
-                cerr << endl;
+                std::cerr << endl;
             }
         }
         if (opt->shallDetectAdapter(true)) {
             if (!supportEvaluation) {
-                cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
+                std::cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
             } else {
-                cerr << "Detecting adapter sequence for read2..." << endl;
+                std::cerr << "Detecting adapter sequence for read2..." << endl;
                 string adapt = eva.evalAdapterAndReadNum(readNum, true);
                 if (adapt.length() > 60)
                     adapt.resize(0, 60);
@@ -464,10 +464,10 @@ int main(int argc, char* argv[]){
                     opt->adapter.sequenceR2 = adapt;
                     opt->adapter.detectedAdapter2 = adapt;
                 } else {
-                    cerr << "No adapter detected for read2" << endl;
+                    std::cerr << "No adapter detected for read2" << endl;
                     opt->adapter.sequenceR2 = "";
                 }
-                cerr << endl;
+                std::cerr << endl;
             }
         }
         opt->validate();
@@ -487,11 +487,11 @@ int main(int argc, char* argv[]){
                  std::string sexMarker = Evaluator::getSexMarker(opt);
                  if(sexMarker.empty()){
                      opt->sexFile.clear();
-                     cerr << "No valid sex marker is detected!" << endl;
+                     std::cerr << "No valid sex marker is detected!" << endl;
                  } else {
                      opt->mSex = opt->sexMap[sexMarker];
                      if(opt->verbose) {
-                         cerr << "Sex marker " << sexMarker << " is detected!" << endl;
+                         std::cerr << "Sex marker " << sexMarker << " is detected!" << endl;
                      }
                  }
              }
@@ -507,10 +507,10 @@ int main(int argc, char* argv[]){
 
         time_t t2 = time(NULL);
 
-        cerr << endl << "JSON report: " << opt->jsonFile << endl;
-        cerr << "HTML report: " << opt->htmlFile << endl;
-        cerr << endl << command << endl;
-        cerr << "seq2sat v" << SEQ2SAT_VER << ", time used: " << (t2) - t1 << " seconds" << endl;
+        std::cerr << endl << "JSON report: " << opt->jsonFile << endl;
+        std::cerr << "HTML report: " << opt->htmlFile << endl;
+        std::cerr << endl << command << endl;
+        std::cerr << "seq2sat v" << SEQ2SAT_VER << ", time used: " << (t2) - t1 << " seconds" << endl;
 
     } else {
         opt->parseSampleTable();
@@ -537,9 +537,9 @@ int main(int argc, char* argv[]){
             // using evaluator to guess how many reads in total
             if (opt->shallDetectAdapter(false)) {
                 if (!supportEvaluation) {
-                    //cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
+                    //std::cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
                 } else {
-                    //cerr << "Detecting adapter sequence for read1..." << endl;
+                    //std::cerr << "Detecting adapter sequence for read1..." << endl;
                     string adapt = eva.evalAdapterAndReadNum(readNum, false);
                     if (adapt.length() > 60)
                         adapt.resize(0, 60);
@@ -547,17 +547,17 @@ int main(int argc, char* argv[]){
                         opt->adapter.sequence = adapt;
                         opt->adapter.detectedAdapter1 = adapt;
                     } else {
-                        //cerr << "No adapter detected for read1" << endl;
+                        //std::cerr << "No adapter detected for read1" << endl;
                         opt->adapter.sequence = "";
                     }
-                    cerr << endl;
+                    std::cerr << endl;
                 }
             }
             if (opt->shallDetectAdapter(true)) {
                 if (!supportEvaluation) {
-                    //cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
+                    //std::cerr << "Adapter auto-detection is disabled for STDIN mode" << endl;
                 } else {
-                    //cerr << "Detecting adapter sequence for read2..." << endl;
+                    //std::cerr << "Detecting adapter sequence for read2..." << endl;
                     string adapt = eva.evalAdapterAndReadNum(readNum, true);
                     if (adapt.length() > 60)
                         adapt.resize(0, 60);
@@ -565,10 +565,10 @@ int main(int argc, char* argv[]){
                         opt->adapter.sequenceR2 = adapt;
                         opt->adapter.detectedAdapter2 = adapt;
                     } else {
-                        //cerr << "No adapter detected for read2" << endl;
+                        //std::cerr << "No adapter detected for read2" << endl;
                         opt->adapter.sequenceR2 = "";
                     }
-                    cerr << endl;
+                    std::cerr << endl;
                 }
             }
 
@@ -591,10 +591,10 @@ int main(int argc, char* argv[]){
             
             time_t t3 = time(NULL);
 
-            cerr << endl << "JSON report: " << opt->jsonFile << endl;
-            cerr << "HTML report: " << opt->htmlFile << endl;
-            cerr << endl << command << endl;
-            cerr << "seq2sat v" << SEQ2SAT_VER << ", time used: " << (t3) - t2 << " seconds" << endl;
+            std::cerr << endl << "JSON report: " << opt->jsonFile << endl;
+            std::cerr << "HTML report: " << opt->htmlFile << endl;
+            std::cerr << endl << command << endl;
+            std::cerr << "seq2sat v" << SEQ2SAT_VER << ", time used: " << (t3) - t2 << " seconds" << endl;
         }
 
         //HtmlReporterAll hra(opt);
@@ -606,6 +606,6 @@ int main(int argc, char* argv[]){
         opt = NULL;
     }
     time_t t4 = time(NULL);
-    cerr << "seq2sat v" << SEQ2SAT_VER << ", time used: " << (t4) - t1 << " seconds" << endl;
+    std::cerr << "seq2sat v" << SEQ2SAT_VER << ", time used: " << (t4) - t1 << " seconds" << endl;
     return 0;
 }

@@ -187,7 +187,7 @@ std::string addColor(const T & str, char color = 'd', bool newLine = true) {
 }
 
 inline void error_exit(const string& msg) {
-    cerr << "\033[1;31mERROR: " << msg << "\033[0m" << endl;
+    std::cerr << "\033[1;31mERROR: " << msg << "\033[0m" << endl;
     exit(-1);
 }
 
@@ -352,11 +352,11 @@ inline bool is_directory(const string& path) {
 
 inline void check_file_valid(const string& s) {
     if (!file_exists(s)) {
-        cerr << "ERROR: file '" << s << "' doesn't exist, quit now" << endl;
+        std::cerr << "ERROR: file '" << s << "' doesn't exist, quit now" << endl;
         exit(-1);
     }
     if (is_directory(s)) {
-        cerr << "ERROR: '" << s << "' is a folder, not a file, quit now" << endl;
+        std::cerr << "ERROR: '" << s << "' is a folder, not a file, quit now" << endl;
         exit(-1);
     }
 }
@@ -364,11 +364,11 @@ inline void check_file_valid(const string& s) {
 inline void check_file_writable(const string& s) {
     string dir = dirname(s);
     if (!file_exists(dir)) {
-        cerr << "ERROR: '" << dir << " doesn't exist. Create this folder and run this command again." << endl;
+        std::cerr << "ERROR: '" << dir << " doesn't exist. Create this folder and run this command again." << endl;
         exit(-1);
     }
     if (is_directory(s)) {
-        cerr << "ERROR: '" << s << "' is not a writable file, quit now" << endl;
+        std::cerr << "ERROR: '" << s << "' is not a writable file, quit now" << endl;
         exit(-1);
     }
 }
