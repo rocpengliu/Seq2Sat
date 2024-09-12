@@ -629,7 +629,17 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
                     baseFreqMap[i][it2.first[i]] += it2.second;
                 }
             } else { // has indel;
-                tmpSeqVar.indel = true;
+                if (targetLength == readLength){
+                    std::pair<bool, std::set<int>> elpset = edit_distance2(it2.first, locSnpIt->ref.mStr);
+                    if (elpset.first) {
+                        tmpSeqVar.snpSet = elpset.second;
+                        for (int i = 0; i < it2.first.length(); i++) {
+                                baseFreqMap[i][it2.first[i]] += it2.second;
+                            }
+                    }
+                } else {
+                    tmpSeqVar.indel = true;
+                }
             }
             locSnpIt->seqVarVec.push_back(tmpSeqVar);
         }

@@ -525,7 +525,7 @@ void Options::readLocFile(){
                 }
                 posVec.clear();
                 mLocSnps.refLocMap[tmpLocSnp.name] = tmpLocSnp;
-                //tmpLocSnp.print();
+                tmpLocSnp.print();
             } else {
                 error_exit("Your locus " + lineStr + " does not have 7 columns!");
             }
