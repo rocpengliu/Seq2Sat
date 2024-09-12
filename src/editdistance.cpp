@@ -107,7 +107,6 @@ unsigned int edit_distance(string a, string b) {
 
 std::pair<bool, std::set<int>> edit_distance2(string a, string b) {
     std::pair<bool, std::set<int>> snpsSetPair;
-    
     for (unsigned int i = 0; i < min(a.length(), b.length()); i++) {
         if (a[i] != b[i]){
             snpsSetPair.second.insert(i);
