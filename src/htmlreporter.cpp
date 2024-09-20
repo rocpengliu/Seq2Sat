@@ -63,7 +63,7 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true, 
             std::string haploRatio = "NA";
             std::string fc = "black";
             std::string bc = "transparent";
-
+            bool go = false;
             if (ii == 0) {
                 zygosity = locSnp.genoStr3;
                 fc = "white";
@@ -75,6 +75,9 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true, 
                     hap = locSnp.getHaploStr();
                     snpsStr = locSnp.getSnpStr();
                     bc = "olive";
+                    if (zygosity == "heter" || zygosity == "homo"){
+                        go = true;
+                    }
                 }
             } else if (ii == 1) {
                 if (locSnp.genoStr3 == "homo") {
@@ -96,6 +99,9 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true, 
                         hap = locSnp.getHaploStr(true);
                         snpsStr = locSnp.getSnpStr(true);
                         bc = "olive";
+                        if (zygosity=="heter"){
+                            go = true;
+                        }
                     }
                 }
             } else {
@@ -124,7 +130,7 @@ void HtmlReporter::outputRow(ofstream& ofs, LocSnp2& locSnp, bool align = true, 
                     "<td>" + std::to_string(locSnp.getReadsVarPer(ii)) + "</td>" +
                     "<td>" + std::to_string(locSnp.totReads) + "</td>" +
                     "<td>" + std::to_string(locSnp.seqVarVec.at(ii).seq.length()) + "</td>" +
-                    "<td align='center'>" + highligher(locSnp, false, locSnp.ref.mStr, locSnp.seqVarVec.at(ii).seq, locSnp.seqVarVec.at(ii).snpSet) + 
+                    "<td align='center'>" + highligher(locSnp, false, locSnp.ref.mStr, locSnp.seqVarVec.at(ii).seq, locSnp.seqVarVec.at(ii).snpSet, go) + 
                     "</td>";
             ofs << "</tr>\n";
             i++;
@@ -847,7 +853,7 @@ void HtmlReporter::reportSnpAlignmentTable(ofstream& ofs, std::string & divName,
             "<td>N.A.</td>" <<
             "<td>N.A.</td>" <<
             "<td>" + std::to_string(locSnp.ft.length() + locSnp.ref.mStr.length() + locSnp.rt.length()) + "</td>" <<
-            "<td align='center'>" + highligher(locSnp, true, locSnp.ref.mStr, locSnp.ref.mStr, locSnp.snpPosSet) + "</td>";
+            "<td align='center'>" + highligher(locSnp, true, locSnp.ref.mStr, locSnp.ref.mStr, locSnp.snpPosSet, true) + "</td>";
     ofs << "</tr>\n";
     outputRow(ofs, locSnp, true, mOptions->mLocSnps.mLocSnpOptions.maxRows4Align);
     ofs << "</table>\n";
@@ -1398,7 +1404,7 @@ std::string HtmlReporter::highligher(std::string & str, std::set<int> & snpsSet)
     return hstr;
 }
 
-std::string HtmlReporter::highligher(LocSnp2 & locSnp, bool ref, std::string refStr, std::string tarStr, std::set<int> & posSet) {
+std::string HtmlReporter::highligher(LocSnp2 & locSnp, bool ref, std::string refStr, std::string tarStr, std::set<int> & posSet, bool go=false) {
     if (ref) {
         std::string ft = locSnp.ft.mStr;
         for (int i = ft.length() - 1; i >= 0; i--) {
@@ -1411,7 +1417,6 @@ std::string HtmlReporter::highligher(LocSnp2 & locSnp, bool ref, std::string ref
             rt.insert(i + 1, "</mark4>");
             rt.insert(i, "<mark4>");
         }
-
         std::string hstr = locSnp.ref.mStr;
         for (auto it = locSnp.snpPosSet.rbegin(); it != locSnp.snpPosSet.rend(); it++) {
              if (locSnp.snpPosSetHaplo.find(*it) != locSnp.snpPosSetHaplo.end()) {
@@ -1435,73 +1440,18 @@ std::string HtmlReporter::highligher(LocSnp2 & locSnp, bool ref, std::string ref
         return (ft + hstr + rt);
 
     } else {
-
         std::string ft(locSnp.ft.length(), '*');
         std::string rt(locSnp.rt.length(), '*');
-
-        if (posSet.empty()) {
+        std::set<int> posSet2;
+        posSet2.insert(posSet.begin(), posSet.end());
+        if (go) {
+            posSet2.insert(locSnp.refSnpPosSet.begin(), locSnp.refSnpPosSet.end());
+        }
+        if (posSet2.empty()) {
             return (ft + tarStr + rt);
         } else {
             std::string hstr = tarStr;
-            //            for (int i = (tarStr.length() -1); i >= 0; i--) {
-            //                if (posSet.find(i) == posSet.end()) {
-            //                    
-            //                    switch(tarStr[i]){
-            //                        case 'A':
-            //                            hstr.insert(i + 1, "</fontA>");
-            //                            hstr.insert(i, "<fontA>");
-            //                            break;
-            //                        case 'C':
-            //                            hstr.insert(i + 1, "</fontC>");
-            //                            hstr.insert(i, "<fontC>");
-            //                            break;
-            //                        case 'G':
-            //                            hstr.insert(i + 1, "</fontG>");
-            //                            hstr.insert(i, "<fontG>");
-            //                            break;
-            //                        case 'T':
-            //                            hstr.insert(i + 1, "</fontT>");
-            //                            hstr.insert(i, "<fontT>");
-            //                            break;
-            //                        default:
-            //                            break;
-            //                    }
-            //
-            //                } else {
-            //                    if (refStr[i] != tarStr[i]) {
-            //                        if (locSnp.refSnpPosSet.find(i) == locSnp.refSnpPosSet.end()) {
-            //                            hstr.insert(i + 1, "</mark2>");
-            //                            hstr.insert(i, "<mark2>");
-            //                        } else {
-            //                            hstr.insert(i + 1, "</mark>");
-            //                            hstr.insert(i, "<mark>");
-            //                        }
-            //                    } else {
-            //                        switch (tarStr[i]) {
-            //                            case 'A':
-            //                                hstr.insert(i + 1, "</fontA>");
-            //                                hstr.insert(i, "<fontA>");
-            //                                break;
-            //                            case 'C':
-            //                                hstr.insert(i + 1, "</fontC>");
-            //                                hstr.insert(i, "<fontC>");
-            //                                break;
-            //                            case 'G':
-            //                                hstr.insert(i + 1, "</fontG>");
-            //                                hstr.insert(i, "<fontG>");
-            //                                break;
-            //                            case 'T':
-            //                                hstr.insert(i + 1, "</fontT>");
-            //                                hstr.insert(i, "<fontT>");
-            //                                break;
-            //                            default:
-            //                                break;
-            //                        }
-            //                    }
-            //                }
-            //            }
-
-            for (auto it = posSet.rbegin(); it != posSet.rend(); it++) {
+            for (auto it = posSet2.rbegin(); it != posSet2.rend(); it++) {
                 if (locSnp.snpPosSetHaplo.find(*it) != locSnp.snpPosSetHaplo.end()) {
                     if (locSnp.refSnpPosSet.find(*it) != locSnp.refSnpPosSet.end()) {
                         if(refStr[*it] == tarStr[*it]) {
@@ -1514,6 +1464,16 @@ std::string HtmlReporter::highligher(LocSnp2 & locSnp, bool ref, std::string ref
                     } else {
                         hstr.insert(*it + 1, "</mark2>");
                         hstr.insert(*it, "<mark2>");
+                    }
+                } else if (locSnp.refSnpPosSet.find(*it) != locSnp.refSnpPosSet.end()) {
+                    if(go){
+                        if(refStr[*it] == tarStr[*it]) {
+                            hstr.insert(*it + 1, "</mark3>");
+                            hstr.insert(*it, "<mark3>");
+                        } else {
+                            hstr.insert(*it + 1, "</mark>");
+                            hstr.insert(*it, "<mark>");
+                        }
                     }
                 } else {
                     hstr.insert(*it + 1, "</mark4>");
