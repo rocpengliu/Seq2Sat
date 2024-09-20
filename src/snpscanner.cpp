@@ -631,11 +631,17 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
             } else { // has indel;
                 if (targetLength == readLength){
                     std::pair<bool, std::set<int>> elpset = edit_distance2(it2.first, locSnpIt->ref.mStr);
+                    
                     if (elpset.first) {
-                        tmpSeqVar.snpSet = elpset.second;
-                        for (int i = 0; i < it2.first.length(); i++) {
-                                baseFreqMap[i][it2.first[i]] += it2.second;
-                            }
+                        float percen = static_cast<float>(elpset.second.size()) / readLength;
+                        if (percen > 0.1){
+                            tmpSeqVar.indel = true;
+                        } else {
+                            tmpSeqVar.snpSet = elpset.second;
+                            for (int i = 0; i < it2.first.length(); i++) {
+                                    baseFreqMap[i][it2.first[i]] += it2.second;
+                                }
+                        }
                     }
                 } else {
                     tmpSeqVar.indel = true;
@@ -854,6 +860,7 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
             }
         }
 
+        locSnpIt->snpPosSet.insert(locSnpIt->snpPosSetHaplo.begin(), locSnpIt->snpPosSetHaplo.end());
         //"#Locus\tNumReads\tTotalReads\tReadRatio\tBaseChange\tLength\tSequence\n";
         if (mOptions->verbose) loginfo("Starting to write amplicon table for " + locSnpIt->name + "!");
         for (int i = 0; i < locSnpIt->seqVarVec.size(); i++) {

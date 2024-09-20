@@ -37,7 +37,7 @@ public:
     static string getPercents(long numerator, long denominator);
     static std::string highligher(std::string & str, std::map<int, std::string> & snpsMap);
     static std::string highligher(std::string & str, std::set<int> & snpsSet);
-    static std::string highligher(LocSnp2 & locSnp, bool ref, std::string refStr, std::string tarStr, std::set<int> & posSet);
+    static std::string highligher(LocSnp2 & locSnp, bool ref, std::string refStr, std::string tarStr, std::set<int> & posSet, bool go);
     
 private:
     const string getCurrentSystemTime();

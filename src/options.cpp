@@ -520,7 +520,8 @@ void Options::readLocFile(){
                         pos -= tmpLocSnp.trimPos.first;
                         tmpLocSnp.refSnpPosSet.insert(pos);
                         tmpLocSnp.snpPosSetHaplo.insert(pos);
-                        //tmpLocSnp.totPosSet.insert(pos);
+                        tmpLocSnp.snpPosSet.insert(pos);
+                        // tmpLocSnp.totPosSet.insert(pos);
                     }
                 }
                 posVec.clear();
