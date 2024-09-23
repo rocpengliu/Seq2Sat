@@ -631,7 +631,6 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
             } else { // has indel;
                 if (targetLength == readLength){
                     std::pair<bool, std::set<int>> elpset = edit_distance2(it2.first, locSnpIt->ref.mStr);
-                    
                     if (elpset.first) {
                         float percen = static_cast<float>(elpset.second.size()) / readLength;
                         if (percen > 0.1){
@@ -694,7 +693,12 @@ void SnpScanner::merge2(Options *&mOptions, std::vector<std::map<std::string, st
                 if (locSnpIt->seqVarVec.at(0).seq.length() == locSnpIt->seqVarVec.at(1).seq.length()) {//no indel
                     std::pair<bool, std::set<int>> pset = edit_distance2(locSnpIt->seqVarVec.at(0).seq, locSnpIt->seqVarVec.at(1).seq);
                     if(pset.first){
-                        goSet.insert(pset.second.begin(), pset.second.end());
+                        float percen = static_cast<float>(pset.second.size()) / locSnpIt->seqVarVec.at(1).seq.length();
+                        if (percen > 0.1){
+                            goSet.insert(pset.second.begin(), pset.second.end());
+                        } else {
+                            go = false;
+                        }
                     } else {
                         go = false;  // should not happen;
                     }
