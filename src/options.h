@@ -229,7 +229,7 @@ public:
     format = "NICE";
     findAlignment = false;
     findStartLocation = false;
-    modeCode = EDLIB_MODE_NW;
+    modeCode = EDLIB_MODE_HW;
     alignTask = EDLIB_TASK_DISTANCE;
     maxDeletionRPrimer = 4;
     maxInsertionRPrimer = 4;
