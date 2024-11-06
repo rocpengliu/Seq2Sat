@@ -136,7 +136,7 @@ std::pair<bool, char> SexScanner::sexScan(Read* & r1) {
             return rep;
         }
     }
-    
+
     return rep;
 }
 
@@ -885,7 +885,7 @@ void SexScanner::report(Options *& mOptions) {
 std::pair<bool, std::set<int>> SexScanner::doAlignment2(Options * & mOptions, std::string readName, const char* & qData, int qLength, std::string targetName, const char* & tData, int tLength) {
     EdlibAlignResult result = edlibAlign(qData, qLength, tData, tLength,
             edlibNewAlignConfig(mOptions->mLocVars.locVarOptions.maxScorePrimer,
-            EDLIB_MODE_NW,
+            EDLIB_MODE_HW,
             mOptions->mEdOptions.alignTask,
             NULL, 0));
 
