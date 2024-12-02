@@ -1302,7 +1302,8 @@ void HtmlReporter::reportEachGenotype(ofstream& ofs, std::string marker,
     divName = replace(divName, ":", "_");
     std::string title = marker;
 
-    ofs << "<div class='subsection_title' onclick=showOrHide('" + divName + "')><a name='" + subsection + "'>" + subsection + "<font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
+    ofs << "<div class='subsection_title' onclick=showOrHide('" + divName + "')><a name='" + subsection + "'>" +
+               subsection + "<font color='#88CCFF' > (click to show/hide) </font></a></div>\n";
     //ofs << "<div class='subsection_title'><a title='click to hide/show' onclick=showOrHide('" + divName + "')>" + subsection + "</a></div>\n";
     ofs << "<div id='" + divName + "'>\n";
     ofs << "<div class='sub_section_tips'>Value of each allele size will be shown on mouse over.</div>\n";
@@ -1319,21 +1320,20 @@ void HtmlReporter::reportEachGenotype(ofstream& ofs, std::string marker,
     ofs << "<table class='summary_table'>\n";
     ofs << "<tr style='background:#cccccc'> <td>Marker</td><td>Repeat unit</td><td>MRA base</td><td>MRA size</td><td>Allele size</td><td>N. of Reads</td><td align = 'right'>Forward flanking region</td><td align='center'>MRA</td><td align='left'>Reverse flanking region</td></tr>\n";
     auto it = mOptions->mLocVars.refLocMap.find(marker);
+
     if (it != mOptions->mLocVars.refLocMap.end()) {
         ofs << "<tr style='color:blue'>";
-        ofs << "<td>Reference</td>" <<
-                "<td>" + it->second.repuitAll.mStr + "</td>" <<
-                "<td>" + it->second.mraBase + "</td>" <<
-                "<td>" + std::to_string(it->second.mra.length()) + "</td>" <<
-                "<td>" + std::to_string(it->second.effectiveLen) + "</td>" <<
-                "<td>N.A.</td>" <<
-                "<td align='right'>" + highligher(it->second.ff.mStr, it->second.refSnpsSetffMap[basename(mOptions->prefix)]) + "</td>" << //could use <xmp>
-                "<td align='center'>" + it->second.mraName + "</td>" <<
-                "<td align='left'>" + highligher(it->second.rf.mStr, it->second.refSnpsSetrfMap[basename(mOptions->prefix)]) + "</td>";
+        ofs << "<td>Reference</td>" << "<td>" + it->second.repuitAll.mStr + "</td>"
+            << "<td>" + it->second.mraBase + "</td>" << "<td>" + std::to_string(it->second.mra.length()) + "</td>"
+            << "<td>" + std::to_string(it->second.effectiveLen) + "</td>" << "<td>N.A.</td>"
+            << "<td align='right'>" +
+                   highligher(it->second.ff.mStr, it->second.refSnpsSetffMap[basename(mOptions->prefix)]) + "</td>"
+            << "<td align='center'>" + it->second.mraName + "</td>"
+            << "<td align='left'>" +
+                   highligher(it->second.rf.mStr, it->second.refSnpsSetrfMap[basename(mOptions->prefix)]) + "</td>";
         ofs << "</tr>";
         outputRow(ofs, marker, outGenotypeMra, mOptions);
     }
-
     ofs << "</table>\n";
 
     ofs << "</div>\n";
@@ -1381,7 +1381,7 @@ void HtmlReporter::reportEachGenotype(ofstream& ofs, std::string marker,
 }
 
 std::string HtmlReporter::highligher(std::string & str, std::map<int, std::string> & snpsMap) {
-    if (snpsMap.empty()) {
+    if (snpsMap.empty() || ((*snpsMap.rbegin()).first > (str.length() - 1))) {
         return str;
     }
     std::string hstr = str;
@@ -1393,7 +1393,7 @@ std::string HtmlReporter::highligher(std::string & str, std::map<int, std::strin
 }
 
 std::string HtmlReporter::highligher(std::string & str, std::set<int> & snpsSet) {
-    if (snpsSet.empty()) {
+    if (snpsSet.empty() || (*snpsSet.rbegin() > (str.length() - 1))) {
         return str;
     }
     std::string hstr = str;

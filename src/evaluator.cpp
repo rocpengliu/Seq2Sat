@@ -401,6 +401,192 @@ int Evaluator::seq2int(string& seq, int pos, int keylen, int lastVal) {
     }
 }
 
+std::string Evaluator::getMarkerDirection(Options*& opt) {
+    std::cerr << "starting to assess the marker primer direction" << std::endl;
+    unsigned int records = 0;
+    std::map<std::string, std::map<std::string, int>> mapped_marker_freq;// marker, forward/reverse/both, number of records
+    if (opt->isPaired()) {
+        FastqReaderPair reader(opt->in1, opt->in2);
+        while (records < 10000) {
+             ReadPair* r = reader.read();
+             if (!r) {
+                 break;
+             }
+             std::pair<std::string, std::string> mar_direct; // marker, direction
+             int num_mismatches = 100;
+             if(opt->var == "ssr"){
+                for(auto & it : opt->mLocVars.refLocMap){
+                    if(r->mLeft->mSeq.length() < (it.second.fp.mStr.length() + it.second.rp.mStr.length())){
+                        continue;
+                    }
+                    auto pf = doSimpleAlignment(opt, it.second.fp.mStr, r->mLeft);
+                    if (pf > opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                        continue;
+                    }
+                    if(r->mRight->mSeq.length() < (it.second.fp.mStr.length() + it.second.rp.mStr.length())){
+                        continue;
+                    }
+                    auto prf = doSimpleAlignment(opt, it.second.rp.mStr, r->mRight);
+                    auto prr = doSimpleAlignment(opt, it.second.rp.reverseComplement().mStr, r->mRight);
+                    if(std::max(prf, prr) > opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                        continue;
+                    } else {
+                        if (prf < prr){
+                            if (prf < num_mismatches){
+                                num_mismatches = prf;
+                                mar_direct = std::make_pair(it.second.name, "forward");
+                            }
+                        } else {
+                            if(prr < num_mismatches){
+                                num_mismatches = prr;
+                                mar_direct = std::make_pair(it.second.name, "reverse");
+                            }
+                        }
+                    }
+                }
+             } else {
+                for(auto & it : opt->mLocSnps.refLocMap){
+                    if(r->mLeft->mSeq.length() < (it.second.fp.mStr.length() + it.second.rp.mStr.length())){
+                        continue;
+                    }
+                    auto pf = doSimpleAlignment(opt, it.second.fp.mStr, r->mLeft);
+                    if (pf > opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                        continue;
+                    }
+                    if(r->mRight->mSeq.length() < (it.second.fp.mStr.length() + it.second.rp.mStr.length())){
+                        continue;
+                    }
+                    auto prf = doSimpleAlignment(opt, it.second.rp.mStr, r->mRight);
+                    auto prr = doSimpleAlignment(opt, it.second.rp.reverseComplement().mStr, r->mRight);
+                    if(std::max(prf, prr) > opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                        continue;
+                    } else {
+                        if (prf < prr){
+                            if (prf < num_mismatches){
+                                num_mismatches = prf;
+                                mar_direct = std::make_pair(it.second.name, "forward");
+                            }
+                        } else {
+                            if(prr < num_mismatches){
+                                num_mismatches = prr;
+                                mar_direct = std::make_pair(it.second.name, "reverse");
+                            }
+                        }
+                    }
+                }
+             }
+             records++;
+             delete r;
+         }
+    } else {
+        FastqReader reader(opt->in1);
+        while(records < 10000){
+            Read* r = reader.read();
+            if(!r){
+                break;
+            }
+            std::pair<std::string, std::string> mar_direct; // marker, direction
+            int num_mismatches = 100;
+            if (opt->var == "ssr") {
+                for(auto & it : opt->mLocVars.refLocMap){
+                    std::cout << "marker " << it.first << std::endl;
+                    if(r->mSeq.length() < (it.second.fp.mStr.length() + it.second.rp.mStr.length())){
+                        continue;
+                    }
+                    auto pf = doSimpleAlignment(opt, it.second.fp.mStr, r);
+                    if (pf > opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                        continue;
+                    }
+                    auto prf = doSimpleAlignment(opt, it.second.rp.mStr, r);
+                    auto prr = doSimpleAlignment(opt, it.second.rp.reverseComplement().mStr, r);
+                    if(std::max(prf, prr) > opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                        continue;
+                    } else {
+                        if (prf < prr){
+                            if (prf < num_mismatches){
+                                num_mismatches = prf;
+                                mar_direct = std::make_pair(it.first, "forward");
+                            }
+                        } else {
+                            if(prr < num_mismatches){
+                                num_mismatches = prr;
+                                mar_direct = std::make_pair(it.first, "reverse");
+                            }
+                        }
+                    }
+                }
+            } else {
+                for(auto & it : opt->mLocSnps.refLocMap){
+                    if(r->mSeq.length() < (it.second.fp.mStr.length() + it.second.rp.mStr.length())){
+                        continue;
+                    }
+                    auto pf = doSimpleAlignment(opt, it.second.fp.mStr, r);
+                    if (pf > opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                        continue;
+                    }
+                    auto prf = doSimpleAlignment(opt, it.second.rp.mStr, r);
+                    auto prr = doSimpleAlignment(opt, it.second.rp.reverseComplement().mStr, r);
+
+                    if(std::max(prf, prr) > opt->mLocVars.locVarOptions.maxMismatchesPSeq){
+                        continue;
+                    } else {
+                        if (prf < prr){
+                            if (prf < num_mismatches){
+                                num_mismatches = prf;
+                                mar_direct = std::make_pair(it.second.name, "forward");
+                            }
+                        } else {
+                            if(prr < num_mismatches){
+                                num_mismatches = prr;
+                                mar_direct = std::make_pair(it.second.name, "reverse");
+                            }
+                        }
+                    }
+                }
+            }
+            delete r;
+            records++;
+            
+            if(!mar_direct.first.empty()){
+                mapped_marker_freq[mar_direct.first][mar_direct.second]++;
+            }
+        }
+    }
+    if(mapped_marker_freq.empty()){
+        return "both";
+    }
+    std::map<std::string, int> mar_direction_map;//forward resverse int
+    for (const auto& it : mapped_marker_freq) {
+        for(const auto & itt : it.second){
+            std::cout << it.first << " " << itt.first << " " << itt.second << "\n";
+        }
+        auto forward_it = it.second.find("forward");
+        int forward_n = 0;
+        if (forward_it != it.second.end()) {
+            forward_n = forward_it->second;
+        }
+        auto reverse_it = it.second.find("reverse");
+        int reverse_n = 0;
+        if (reverse_it != it.second.end()) {
+            reverse_n = reverse_it->second;
+        }
+        auto forward_per = getPer(forward_n, reverse_n + forward_n);
+        if (forward_per >= 0.8){
+            mar_direction_map["forward"]++;
+        } else if(forward_per <= 0.2){
+            mar_direction_map["reverse"]++;
+        } else {
+            mar_direction_map["both"]++;
+        }
+    }
+    if(mar_direction_map.empty()){
+        return "both";
+    }
+    auto max_dict = getMaxKeyValue(mar_direction_map);
+    std::cerr << "the marker direction has been assessed: " << max_dict.first << std::endl;
+    return max_dict.first;
+}
+
  std::string Evaluator::getSexMarker(Options*& opt) {
      std::string marker = "";
      long records = 0;

@@ -21,11 +21,11 @@ public:
     string evalAdapterAndReadNumDepreciated(long& readNum);
     string evalAdapterAndReadNum(long& readNum, bool isR2);
     static string getSexMarker(Options*& opt);
+    static std::string getMarkerDirection(Options*& opt);
     static int doSimpleAlignment(Options*& opt, const string& target, Read*& r);
     bool isTwoColorSystem();
     void evaluateSeqLen();
     int computeSeqLen(string filename);
-
     static bool test();
     static string matchKnownAdapter(string seq);
 private:
@@ -34,6 +34,4 @@ private:
     int seq2int(string& seq, int pos, int seqlen, int lastVal = -1);
     string getAdapterWithSeed(int seed, Read** loadedReads, long records, int keylen);
 };
-
-
 #endif

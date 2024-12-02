@@ -425,14 +425,11 @@ int main(int argc, char* argv[]){
         opt->jsonFile = cmd.get<string>("json");
         opt->htmlFile = cmd.get<string>("html");
         opt->reportTitle = cmd.get<string>("report_title");
-        
         Evaluator eva(opt);
         if (supportEvaluation) {
             eva.evaluateSeqLen();
         }
-
         long readNum = 0;
-
         // using evaluator to guess how many reads in total
         if (opt->shallDetectAdapter(false)) {
             if (!supportEvaluation) {
@@ -480,6 +477,8 @@ int main(int argc, char* argv[]){
             }
         }
         opt->readLocFile();
+        //auto mar_direction = eva.getMarkerDirection(opt);
+
         if(!opt->sexFile.empty()){
              opt->readSexLoc();
              if(opt->sexMap.size() > 1){

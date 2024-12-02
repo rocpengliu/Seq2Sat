@@ -1654,7 +1654,7 @@ std::vector<std::map<std::string, std::vector<std::pair<std::string, Genotype>>>
         delete fout;
         fout = NULL;
     }
-    if (mOptions->verbose) loginfo("End writing genotype table!");
+    if (mOptions->verbose) loginfo("writing genotype table completed!");
     
     return sortedAllGenotypeMapVec;
 }
