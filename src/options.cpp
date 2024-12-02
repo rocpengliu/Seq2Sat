@@ -302,8 +302,7 @@ bool Options::validate() {
         }
 
     }
-    
-    
+
     if(mLocSnps.mLocSnpOptions.minSeqsPer > 1 || mLocSnps.mLocSnpOptions.minSeqsPer <= 0) error_exit("--minSeqsPerSnp must be < 100 and > 0");
     if(mLocSnps.mLocSnpOptions.htJetter >= 0 
             && ((0.5 + mLocSnps.mLocSnpOptions.htJetter) < mLocSnps.mLocSnpOptions.hmPerL )
@@ -489,7 +488,7 @@ void Options::readLocFile(){
             lineStr = std::string(line);
             if(lineStr.empty()) continue;
             splitStr(lineStr, splitVec);
-            if(splitVec.size() == 7){
+            if (splitVec.size() == 7) {
                 LocSnp2 tmpLocSnp;
                 tmpLocSnp.name = splitVec[0];
                 tmpLocSnp.fp = splitVec[1];
