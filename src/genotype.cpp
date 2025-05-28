@@ -451,6 +451,10 @@ void LocSnp2::print(){
     msg += ref.mStr + " :" + std::to_string(ref.mStr.length()) + "\n";
     msg += rt.mStr +  " :" + std::to_string(rt.mStr.length()) + "\n";
     msg += rp.mStr +  " :" + std::to_string(rp.mStr.length()) + "\n";
+    for(const auto & it : refSnpPosSet){
+        msg += std::to_string(it) + ";";
+    }
+    msg += "\n";
     cCout(msg, 'r');
 }
 
